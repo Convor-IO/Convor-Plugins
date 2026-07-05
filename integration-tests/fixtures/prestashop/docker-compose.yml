@@ -1,0 +1,40 @@
+# Real PrestaShop 8 install for E2E snippet verification.
+#
+# The prestashop/prestashop:8 image AUTO-INSTALLS on first boot using the
+# PS_INSTALL_* environment variables below (it spins up the shop, runs the
+# installer, then restarts Apache clean). install.sh then DB-directs the
+# Convor module config into ps_configuration + ps_module.
+#
+# Module source (../../prestashop) is bind-mounted into /modules/convor.
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: prestashop
+      MYSQL_DATABASE: prestashop
+    command: --default-authentication-plugin=mysql_native_password
+    tmpfs:
+      - /var/lib/mysql
+  prestashop:
+    image: prestashop/prestashop:8
+    depends_on: [db]
+    ports: ["8082:80"]
+    environment:
+      DB_SERVER: db
+      DB_NAME: prestashop
+      DB_USER: root
+      DB_PASSWD: prestashop
+      PS_INSTALL_AUTO: "1"
+      PS_DOMAIN: "localhost:8082"
+      PS_LANGUAGE: en
+      PS_COUNTRY: GB
+      PS_FOLDER_ADMIN: admin
+      PS_FOLDER_INSTALL: install-dev
+      ADMIN_MAIL: admin@example.com
+      ADMIN_PASSWD: adminadmin
+      # The widget is loaded from the local proxy; allow the storefront to
+      # embed it.
+      PS_HTTPS: "0"
+    volumes:
+      # Bind-mount our real module source read-only.
+      - /tmp/cms-real/prestashop:/var/www/html/modules/convor:ro

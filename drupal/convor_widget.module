@@ -68,14 +68,21 @@ function convor_widget_page_attachments(array &$attachments): void {
     ],
   ];
 
+  // Bubble config cacheability so cached pages invalidate on settings change.
+  //
+  // IMPORTANT: apply the cache metadata BEFORE adding the html_head
+  // attachment. BubbleableMetadata::applyTo() replaces $attachments['#attached']
+  // wholesale with the metadata's own (empty) #attached, so calling it after
+  // the html_head assignment silently discards the script tag. Applying it
+  // first only sets #cache (contexts/tags/max-age), then our html_head entry
+  // is added afterwards and survives.
+  $metadata = BubbleableMetadata::createFromObject($config);
+  $metadata->applyTo($attachments);
+
   $attachments['#attached']['html_head'][] = [
     $script_element,
     'convor_widget',
   ];
-
-  // Bubble config cacheability so cached pages invalidate on settings change.
-  $metadata = BubbleableMetadata::createFromObject($config);
-  $metadata->applyTo($attachments);
 }
 
 /**

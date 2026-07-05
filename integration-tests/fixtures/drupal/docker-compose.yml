@@ -1,0 +1,23 @@
+# Real Drupal 11 install for E2E snippet verification.
+#
+# Boots Drupal + PostgreSQL, then install.sh runs the Drupal installer via
+# Drush (installed inside the container), enables the convor_widget module,
+# and writes its config so the widget snippet renders on every page.
+#
+# Module source (../../drupal) is bind-mounted into modules/custom/convor_widget.
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: drupal
+      POSTGRES_USER: drupal
+      POSTGRES_PASSWORD: drupal
+    tmpfs:
+      - /var/lib/postgresql/data
+  drupal:
+    image: drupal:php8.3-apache
+    depends_on: [db]
+    ports: ["8083:80"]
+    volumes:
+      # Bind-mount our real module source read-only.
+      - /tmp/cms-real/drupal:/var/www/html/modules/custom/convor_widget:ro

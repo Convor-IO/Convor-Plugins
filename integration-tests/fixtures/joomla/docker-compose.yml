@@ -1,0 +1,31 @@
+# Real Joomla 5 install for E2E snippet verification.
+#
+# Boots Joomla + MariaDB, then install.sh runs the Joomla web installer via
+# the CLI and DB-directs the Convor plugin into #__extensions.
+#
+# The plugin source (../../joomla) is bind-mounted read-only into the
+# Joomla plugins directory so the running CMS loads our real code.
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: joomla
+      MARIADB_DATABASE: joomla
+      MARIADB_USER: joomla
+      MARIADB_PASSWORD: joomla
+    tmpfs:
+      - /var/lib/mysql
+  joomla:
+    image: joomla:php8.3-apache
+    depends_on: [db]
+    ports: ["8081:80"]
+    environment:
+      JOOMLA_DB_HOST: db:3306
+      JOOMLA_DB_USER: joomla
+      JOOMLA_DB_PASSWORD: joomla
+      JOOMLA_DB_NAME: joomla
+    # Joomla needs more than the default 128M to bootstrap its full stack
+    # (the language cache alone blows the default limit). Bump it.
+    volumes:
+      # Bind-mount our real plugin source read-only.
+      - /tmp/cms-real/joomla:/var/www/html/plugins/system/convor:ro

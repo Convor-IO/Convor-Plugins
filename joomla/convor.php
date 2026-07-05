@@ -17,7 +17,6 @@ defined('_JEXEC') or die;
 use Joomla\CMS\Application\CMSApplicationInterface;
 use Joomla\CMS\Factory;
 use Joomla\CMS\Plugin\CMSPlugin;
-use Joomla\CMS\WebAsset\WebAssetManager;
 
 /**
  * System plugin that injects the Convor widget script into the document head.
@@ -44,11 +43,19 @@ class PlgSystemConvor extends CMSPlugin
      *  - the active application is the site (front-end) — never in the
      *    administrator backend or on document formats other than HTML.
      *
-     * The script is registered through the Joomla 5 WebAssetManager so that
-     * additional attributes (`data-key`, `async`) are emitted on the tag
-     * cleanly and the asset is de-duplicated by the framework. When the
-     * asset manager cannot add a remote script, we fall back to
-     * `addCustomTag()` so the plugin stays robust across setups.
+     * The tag is emitted via `addCustomTag()`. We deliberately avoid the
+     * WebAssetManager: on Joomla 4.4+ / 5.x the WAM is locked by the time
+     * `onBeforeCompileHead` fires, so `registerScript()`/`useScript()` throw
+     * ("WebAssetManager is locked, you came late") and the tag is silently
+     * dropped. `addCustomTag()` writes to the document head unconditionally
+     * and works regardless of the WAM lock state.
+     *
+     * The active application is resolved via `Factory::getApplication()` rather
+     * than `$this->getApplication()`: when the plugin is loaded through
+     * Joomla's legacy filesystem loader (loadPluginFromFilesystem), the
+     * CMSPlugin base is not handed an application instance and
+     * `$this->getApplication()` returns null. `Factory::getApplication()`
+     * always resolves the application for the current request.
      *
      * @return  void
      *
@@ -69,11 +76,7 @@ class PlgSystemConvor extends CMSPlugin
         }
 
         // Only inject on the front-end site application and for HTML output.
-        try {
-            $app = $this->getApplication();
-        } catch (\Throwable $e) {
-            $app = Factory::getApplication();
-        }
+        $app = Factory::getApplication();
 
         if (!$app instanceof CMSApplicationInterface || !$app->isClient('site')) {
             return;
@@ -106,27 +109,6 @@ class PlgSystemConvor extends CMSPlugin
         $escapedUrl  = htmlspecialchars($scriptUrl, \ENT_QUOTES, 'UTF-8');
         $escapedSlug = htmlspecialchars($orgSlug, \ENT_QUOTES, 'UTF-8');
 
-        $webAsset = $document->getWebAssetManager();
-
-        if ($webAsset instanceof WebAssetManager) {
-            // Register a one-off asset so we can attach custom attributes
-            // (data-key + async) and let the framework de-duplicate it.
-            try {
-                $webAsset->registerScript(
-                    'plg_system_convor.widget',
-                    $scriptUrl,
-                    [],
-                    ['defer' => false, 'async' => true, 'data-key' => $orgSlug],
-                );
-                $webAsset->useScript('plg_system_convor.widget');
-
-                return;
-            } catch (\Throwable $e) {
-                // Fall through to the addCustomTag() fallback below.
-            }
-        }
-
-        // Fallback: emit the raw tag via addCustomTag().
         $document->addCustomTag(
             '<script src="' . $escapedUrl . '" data-key="' . $escapedSlug . '" async></script>'
         );
