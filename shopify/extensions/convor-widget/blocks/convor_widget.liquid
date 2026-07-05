@@ -1,0 +1,76 @@
+{%- comment -%}
+  Convor — App Embed block.
+
+  Renders the Convor live-chat widget loader into the storefront <body>.
+
+  Config resolution (in priority order):
+    1. Block setting "Convor org slug" (this theme's App Embed settings)
+       — lets a merchant override per-theme if needed.
+    2. Shop metafield `convor.widget` — JSON `{ slug, apiBase }` written by
+       the embedded Convor settings app. This is the primary source of truth;
+       the block setting exists only as an escape hatch.
+
+  We do NOT render inline JS — storefront CSP blocks it. The widget loader
+  itself is an external file from the Convor CDN, which is what makes this
+  App Embed pattern CSP-clean.
+
+  Reference: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions/configuration
+{%- endcomment -%}
+
+{%- liquid
+  assign default_api_base = "https://cdn.convor.io"
+
+  # 1. Block setting (override)
+  assign block_slug = block.settings.convor_slug | default: "" | strip
+
+  # 2. Shop metafield fallback (primary source of truth)
+  assign meta_value = shop.metafields.convor.widget.value
+
+  if block_slug != blank
+    assign slug = block_slug
+  else
+    assign slug = meta_value.slug | default: "" | strip
+  endif
+
+  assign api_base = meta_value.api_base | default: default_api_base | strip
+  if api_base == blank
+    assign api_base = default_api_base
+  endif
+
+  assign api_base = api_base | strip
+-%}
+
+{%- if slug != blank -%}
+  <script src="{{ api_base }}/widget.js" data-key="{{ slug }}" async></script>
+{%- else -%}
+  {%- comment -%}
+    No slug configured. Emit an HTML comment so a merchant inspecting the
+    page sees a hint rather than a silently-missing widget. We intentionally
+    do not surface a visible banner to shoppers.
+  {%- endcomment -%}
+  <!-- Convor: widget not configured. Open the Convor app in Shopify admin
+       and enter your org slug, then enable this App Embed block. -->
+{%- endif -%}
+
+{% schema %}
+{
+  "name": "Convor",
+  "target": "body",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Convor org slug"
+    },
+    {
+      "type": "paragraph",
+      "content": "By default this block reads your org slug from the Convor app settings. Set it here only to override the slug for this specific theme."
+    },
+    {
+      "type": "text",
+      "id": "convor_slug",
+      "label": "Convor org slug (override)",
+      "info": "Lowercase letters, numbers, and dashes. Example: acme-store. Leave blank to use the value saved in the Convor app."
+    }
+  ]
+}
+{% endschema %}

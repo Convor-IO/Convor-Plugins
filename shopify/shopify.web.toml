@@ -1,0 +1,19 @@
+# Shopify web component config for the Remix app.
+# This describes the single Remix server that serves both the embedded app
+# (frontend) and the OAuth/webhook endpoints (backend).
+# Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
+
+type = "backend"
+
+name = "convor-remix"
+
+roles = ["frontend", "backend"]
+
+webhooks_path = "/webhooks/app/uninstalled"
+
+# This repo standardizes on pnpm, so the commands are hardcoded rather than
+# templated through a shopify.web.toml.liquid file.
+[commands]
+predev = "pnpm exec prisma generate"
+dev = "pnpm exec prisma migrate deploy && pnpm exec remix vite:dev"
+build = "pnpm exec remix vite:build"

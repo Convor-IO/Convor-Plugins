@@ -1,0 +1,36 @@
+// This is your Prisma schema file.
+// Learn more: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// SQLite for local dev / small deploys. Swap to postgres in production
+// (DATABASE_URL + provider = "postgresql") without touching the model.
+datasource db {
+  provider = "sqlite"
+  url      = "file:dev.sqlite"
+}
+
+// The standard @shopify/shopify-app-session-storage-prisma Session model.
+// Required fields/column names must not change — the session storage adapter
+// queries them by name.
+model Session {
+  id                  String    @id
+  shop                String
+  state               String
+  isOnline            Boolean   @default(false)
+  scope               String?
+  expires             DateTime?
+  accessToken         String
+  userId              BigInt?
+  firstName           String?
+  lastName            String?
+  email               String?
+  accountOwner        Boolean   @default(false)
+  locale              String?
+  collaborator        Boolean?  @default(false)
+  emailVerified       Boolean?  @default(false)
+  refreshToken        String?
+  refreshTokenExpires DateTime?
+}

@@ -1,0 +1,20 @@
+node_modules/
+build/
+dist/
+.cache/
+*.log
+.env
+.env.local
+
+# Prisma
+prisma/dev.sqlite
+prisma/dev.sqlite-journal
+prisma/migrations/dev/
+
+# Shopify CLI writes these; do not commit.
+.shopify/
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/

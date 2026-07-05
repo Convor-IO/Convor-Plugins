@@ -1,0 +1,17 @@
+# Theme App Extension for the Convor widget.
+# Deploys an App Embed block that injects the Convor widget loader into the
+# storefront <body>. This replaces the deprecated ScriptTag API.
+# Learn more: https://shopify.dev/docs/apps/build/online-store/theme-app-extensions
+
+type = "theme"
+handle = "convor-widget"
+name = "Convor Widget"
+description = "Injects the Convor live-chat widget into your storefront."
+
+# Expose the metafield read by the block so the merchant can also surface it
+# in Liquid if they wish. The primary config source is the shop metafield
+# (namespace "convor", key "widget") written by the embedded settings app.
+[capabilities]
+# No special capabilities required — we only read a shop metafield and
+# render an external <script>. No network access to the storefront is
+# needed beyond what the block itself emits.
