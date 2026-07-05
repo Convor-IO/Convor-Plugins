@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<extension type="plugin" group="system" method="upgrade">
+    <name>plg_system_convor</name>
+    <author>Convor</author>
+    <authorEmail>hello@convor.io</authorEmail>
+    <authorUrl>https://convor.io</authorUrl>
+    <creationDate>2026-07</creationDate>
+    <copyright>Copyright (C) 2026 Convor. All rights reserved.</copyright>
+    <license>GNU General Public License version 2 or later; see LICENSE.txt</license>
+    <version>1.0.0</version>
+    <description>PLG_SYSTEM_CONVOR_XML_DESCRIPTION</description>
+
+    <files>
+        <filename plugin="convor">convor.php</filename>
+    </files>
+
+    <languages folder="language">
+        <language tag="en-GB">en-GB/en-GB.plg_system_convor.ini</language>
+        <language tag="en-GB">en-GB/en-GB.plg_system_convor.sys.ini</language>
+    </languages>
+
+    <config>
+        <fields name="params">
+            <fieldset name="basic">
+                <field
+                    name="enabled"
+                    type="radio"
+                    label="PLG_SYSTEM_CONVOR_FIELD_ENABLED_LABEL"
+                    description="PLG_SYSTEM_CONVOR_FIELD_ENABLED_DESC"
+                    layout="joomla.form.field.radio.switcher"
+                    default="0"
+                    class="btn-group"
+                    >
+                    <option value="0">JNO</option>
+                    <option value="1">JYES</option>
+                </field>
+
+                <field
+                    name="org_slug"
+                    type="text"
+                    label="PLG_SYSTEM_CONVOR_FIELD_ORG_SLUG_LABEL"
+                    description="PLG_SYSTEM_CONVOR_FIELD_ORG_SLUG_DESC"
+                    required="true"
+                    filter="string"
+                    maxlength="128"
+                    hint="PLG_SYSTEM_CONVOR_FIELD_ORG_SLUG_HINT"
+                />
+
+                <field
+                    name="api_base"
+                    type="url"
+                    label="PLG_SYSTEM_CONVOR_FIELD_API_BASE_LABEL"
+                    description="PLG_SYSTEM_CONVOR_FIELD_API_BASE_DESC"
+                    default="https://cdn.convor.io"
+                    filter="url"
+                    maxlength="255"
+                    hint="https://cdn.convor.io"
+                />
+            </fieldset>
+        </fields>
+    </config>
+</extension>
