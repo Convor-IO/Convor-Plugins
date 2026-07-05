@@ -13,18 +13,17 @@
  *   cd saas/apps/widget && pnpm build
  *   node plugins/integration-tests/fixtures/widget-proxy.js
  */
-const {createServer} = require("node:http");
-const {createReadStream, statSync} = require("node:fs");
-const {extname, join, normalize} = require("node:path");
-const {createProxyServer} = require("http-proxy");
+const { createServer } = require("node:http");
+const { createReadStream, statSync } = require("node:fs");
+const { extname, join, normalize } = require("node:path");
+const { createProxyServer } = require("http-proxy");
 
 const WIDGET_DIST =
-  process.env.WIDGET_DIST ??
-  join(__dirname, "../../../saas/apps/widget/dist");
+  process.env.WIDGET_DIST ?? join(__dirname, "../../../saas/apps/widget/dist");
 const PORT = Number(process.env.WIDGET_PORT ?? 5173);
 const API_TARGET = process.env.API_TARGET ?? "http://localhost:3000";
 
-const proxy = createProxyServer({target: API_TARGET, changeOrigin: true});
+const proxy = createProxyServer({ target: API_TARGET, changeOrigin: true });
 proxy.on("error", (err, _req, res) => {
   console.error("[proxy] error:", err.message);
   if (res && !res.headersSent) {

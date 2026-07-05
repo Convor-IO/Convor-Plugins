@@ -25,8 +25,7 @@ const WP_URL = process.env.WP_URL ?? "http://localhost:8080";
 // The apiBase configured in WP's convor_settings option. The WP container
 // reaches the host's widget dev server via host.docker.internal; the browser
 // (running on the host) sees the same URL embedded in the page.
-const WIDGET_API_BASE =
-  process.env.WIDGET_API_BASE ?? "http://localhost:5173";
+const WIDGET_API_BASE = process.env.WIDGET_API_BASE ?? "http://localhost:5173";
 // The org slug configured in convor_settings.org_slug. Matches the seeded
 // org in the SaaS test DB (apps/server/src/test-seed.ts → TEST_ORG_SLUG).
 const ORG_SLUG = process.env.ORG_SLUG ?? "test-org";
