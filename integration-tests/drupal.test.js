@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * Drupal integration test.
  *
@@ -10,45 +8,58 @@
  * emitted HTML matches the canonical Convor widget snippet.
  */
 
-const path = require('path');
-const { assertSnippetMatches } = require('./assert-snippet');
-const { startPhpServer, fetchText, checkApiBaseReachable } = require('./_helpers');
+const path = require("node:path");
+const { assertSnippetMatches } = require("./assert-snippet");
+const {
+  startPhpServer,
+  fetchText,
+  checkApiBaseReachable,
+} = require("./_helpers");
 
 const PORT = 8103;
-const API_BASE = 'http://localhost:5173';
-const SLUG = 'acme';
+const API_BASE = "http://localhost:5173";
+const SLUG = "acme";
 
 async function main() {
-	const server = await startPhpServer({
-		port: PORT,
-		harness: path.join(__dirname, '_drupal-harness.php'),
-		docroot: __dirname,
-		env: { CONVOR_ORG_SLUG: SLUG, CONVOR_API_BASE: API_BASE, CONVOR_ENABLED: '1' },
-	});
+  const server = await startPhpServer({
+    port: PORT,
+    harness: path.join(__dirname, "_drupal-harness.php"),
+    docroot: __dirname,
+    env: {
+      CONVOR_ORG_SLUG: SLUG,
+      CONVOR_API_BASE: API_BASE,
+      CONVOR_ENABLED: "1",
+    },
+  });
 
-	try {
-		const { status, text } = await fetchText(`http://127.0.0.1:${PORT}/`);
-		if (status !== 200) {
-			throw new Error(`HTTP ${status} from harness`);
-		}
+  try {
+    const { status, text } = await fetchText(`http://127.0.0.1:${PORT}/`);
+    if (status !== 200) {
+      throw new Error(`HTTP ${status} from harness`);
+    }
 
-		console.log('--- Drupal rendered output ---');
-		console.log(JSON.stringify(text));
-		console.log('------------------------------');
+    console.log("--- Drupal rendered output ---");
+    console.log(JSON.stringify(text));
+    console.log("------------------------------");
 
-		const matched = assertSnippetMatches(text, { apiBase: API_BASE, slug: SLUG });
-		console.log('PASS: drupal snippet matches canonical form');
-		console.log('Matched tag:', matched);
+    const matched = assertSnippetMatches(text, {
+      apiBase: API_BASE,
+      slug: SLUG,
+    });
+    console.log("PASS: drupal snippet matches canonical form");
+    console.log("Matched tag:", matched);
 
-		const reach = await checkApiBaseReachable(API_BASE);
-		console.log(`apiBase reachability: ${reach.reachable ? 'OK' : 'SKIPPED'} — ${reach.note}`);
-	} finally {
-		server.kill();
-	}
+    const reach = await checkApiBaseReachable(API_BASE);
+    console.log(
+      `apiBase reachability: ${reach.reachable ? "OK" : "SKIPPED"} — ${reach.note}`,
+    );
+  } finally {
+    server.kill();
+  }
 }
 
 main().catch((err) => {
-	console.error('FAIL: drupal test errored');
-	console.error(err && err.stack ? err.stack : err);
-	process.exit(1);
+  console.error("FAIL: drupal test errored");
+  console.error(err?.stack ? err.stack : err);
+  process.exit(1);
 });

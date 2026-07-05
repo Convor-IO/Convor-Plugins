@@ -3,9 +3,14 @@
   ~ Convor Widget Content-Security-Policy whitelist.
   ~
   ~ Magento 2.4+ enforces a strict CSP by default. The widget loads an
-  ~ external script from cdn.convor.io, opens an iframe, and makes REST /
-  ~ WebSocket calls to the Convor API. The hosts below are whitelisted so
-  ~ the widget functions without triggering CSP violations.
+  ~ external script from cdn.convor.io, opens an iframe, makes REST calls
+  ~ to the Convor API, and opens a Centrifugo WebSocket for realtime
+  ~ message delivery. The hosts below are whitelisted so the widget
+  ~ functions without triggering CSP violations.
+  ~
+  ~ The WebSocket host is dynamic (served per-org via remote config), so
+  ~ we allow wss://*.convor.io in connect-src to cover the realtime host
+  ~ regardless of which subdomain an org is routed to.
   -->
 <csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp/etc/csp_whitelist.xsd">
@@ -25,15 +30,21 @@
             </values>
         </policy>
 
-        <!-- REST API calls (visitor token, widget config, message history). -->
+        <!--
+          ~ REST API calls (visitor token, widget config, message history)
+          ~ AND the Centrifugo WebSocket (wss://) for realtime delivery.
+          ~ connect-src governs fetch(), XHR, and WebSocket alike.
+        -->
         <policy id="connect-src">
             <values>
                 <value id="convor-api" type="host">https://api.convor.io</value>
                 <value id="convor-cdn-connect" type="host">https://cdn.convor.io</value>
+                <value id="convor-api-ws" type="host">wss://api.convor.io</value>
+                <value id="convor-realtime" type="host">wss://*.convor.io</value>
             </values>
         </policy>
 
-        <!-- WebSocket (Centrifugo) for live message delivery. ws:// and wss://. -->
+        <!-- Operator avatars, company logo, and other widget imagery. -->
         <policy id="img-src">
             <values>
                 <value id="convor-cdn-img" type="host">https://cdn.convor.io</value>
