@@ -1,0 +1,61 @@
+{
+  "name": "@convor/widget-react",
+  "version": "0.1.0",
+  "description": "React wrapper for the Convor live-chat widget.",
+  "license": "MIT",
+  "author": "Convor",
+  "homepage": "https://convor.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Convor-IO/Convor-Plugins.git",
+    "directory": "packages/widget-react"
+  },
+  "bugs": {
+    "url": "https://github.com/Convor-IO/Convor-Plugins/issues"
+  },
+  "keywords": [
+    "convor",
+    "live-chat",
+    "widget",
+    "chat",
+    "react",
+    "react-component"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "@convor/widget-sdk": "*",
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@convor/widget-sdk": "workspace:*",
+    "@testing-library/react": "^16.1.0",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "happy-dom": "^15.11.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.8"
+  }
+}
