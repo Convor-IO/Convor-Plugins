@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Convor — Settings</title>
+    <style>
+      :root {
+        --bg: #ffffff;
+        --surface: #f5f7f6;
+        --ink: #0e1514;
+        --muted: #5c6868;
+        --line: #e3e8e7;
+        --accent: #00a37a;
+        --accent-ink: #007a5c;
+        --warn: #b9651a;
+        --error: #c0392b;
+        --radius: 8px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--surface);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui,
+          sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+
+      .page {
+        max-width: 620px;
+        margin: 40px auto;
+        padding: 0 20px 64px;
+      }
+
+      header.page-head {
+        margin-bottom: 24px;
+      }
+      .wordmark {
+        font-weight: 700;
+        font-size: 18px;
+        letter-spacing: -0.01em;
+      }
+      .subtitle {
+        color: var(--muted);
+        font-size: 13.5px;
+        margin: 4px 0 0;
+      }
+
+      form {
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 24px;
+      }
+
+      fieldset {
+        border: none;
+        margin: 0 0 20px;
+        padding: 0;
+      }
+      fieldset:last-of-type {
+        margin-bottom: 0;
+      }
+
+      legend {
+        display: block;
+        font-weight: 650;
+        font-size: 13.5px;
+        margin-bottom: 6px;
+        padding: 0;
+      }
+
+      .hint {
+        color: var(--muted);
+        font-size: 12.5px;
+        margin: 0 0 8px;
+      }
+
+      input[type="text"],
+      input[type="url"],
+      textarea {
+        width: 100%;
+        font: inherit;
+        color: var(--ink);
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 9px 11px;
+        transition: border-color 0.12s ease, box-shadow 0.12s ease;
+      }
+      input:focus,
+      textarea:focus {
+        outline: none;
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(0, 163, 122, 0.15);
+      }
+      textarea {
+        resize: vertical;
+        min-height: 96px;
+        font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+          monospace;
+        font-size: 12.5px;
+      }
+
+      .checkbox-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 12px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+      .checkbox-row input {
+        margin-top: 3px;
+        width: 16px;
+        height: 16px;
+        accent-color: var(--accent);
+      }
+      .checkbox-row label {
+        cursor: pointer;
+      }
+      .checkbox-row label strong {
+        display: block;
+        font-weight: 600;
+      }
+      .checkbox-row label small {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid var(--line);
+      }
+
+      button {
+        font: inherit;
+        cursor: pointer;
+      }
+      .primary {
+        background: var(--accent);
+        color: #fff;
+        border: 1px solid var(--accent);
+        border-radius: var(--radius);
+        padding: 9px 18px;
+        font-weight: 600;
+        transition: background 0.12s ease;
+      }
+      .primary:hover {
+        background: var(--accent-ink);
+        border-color: var(--accent-ink);
+      }
+      .ghost {
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-size: 13px;
+        padding: 9px 6px;
+      }
+      .ghost:hover {
+        color: var(--error);
+      }
+
+      .status {
+        margin-left: auto;
+        font-size: 12.5px;
+        color: var(--muted);
+        min-height: 1em;
+      }
+      .status.ok {
+        color: var(--accent-ink);
+      }
+      .status.error {
+        color: var(--error);
+      }
+
+      code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.92em;
+        background: var(--surface);
+        padding: 1px 5px;
+        border-radius: 4px;
+        border: 1px solid var(--line);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="page-head">
+        <div class="wordmark">Convor</div>
+        <p class="subtitle">
+          Inject the Convor live-chat widget into pages you're viewing. For
+          sites that can't add the embed snippet themselves.
+        </p>
+      </header>
+
+      <form id="form" novalidate>
+        <fieldset>
+          <legend>Organization slug</legend>
+          <p class="hint">
+            The public slug from your Convor dashboard (Settings → Widget).
+            Required — nothing injects without it.
+          </p>
+          <input
+            id="orgSlug"
+            name="orgSlug"
+            type="text"
+            placeholder="your-org-slug"
+            autocomplete="off"
+            spellcheck="false"
+            required
+          />
+        </fieldset>
+
+        <fieldset>
+          <legend>API base</legend>
+          <p class="hint">
+            Where <code>widget.js</code> is served. Leave as default unless
+            you're on a self-hosted or staging CDN.
+          </p>
+          <input
+            id="apiBase"
+            name="apiBase"
+            type="url"
+            placeholder="https://cdn.convor.io"
+            spellcheck="false"
+          />
+        </fieldset>
+
+        <fieldset>
+          <div class="checkbox-row">
+            <input id="autoInject" type="checkbox" />
+            <label for="autoInject">
+              <strong>Auto-inject on allowed sites</strong>
+              <small>
+                Inject automatically on the hosts listed below. Off by default
+                — most people use the popup's "Inject now".
+              </small>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Allowed sites</legend>
+          <p class="hint">
+            One host per line. Bare hosts (<code>example.com</code>) match
+            themselves and subdomains; <code>*.acme.io</code> matches any
+            subdomain. Lines starting with <code>#</code> are ignored. Auto-inject
+            only fires on hosts listed here.
+          </p>
+          <textarea
+            id="allowedSites"
+            name="allowedSites"
+            spellcheck="false"
+            placeholder="example.com&#10;*.acme.io&#10;# internal dashboard: app.internal.tools"
+          ></textarea>
+        </fieldset>
+
+        <div class="actions">
+          <button id="save" class="primary" type="submit">Save</button>
+          <button id="reset" class="ghost" type="button">Reset to defaults</button>
+          <span id="status" class="status"></span>
+        </div>
+      </form>
+    </div>
+
+    <script src="dist/options.js"></script>
+  </body>
+</html>

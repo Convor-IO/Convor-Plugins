@@ -1,0 +1,26 @@
+{
+  "name": "@convor/browser-extension",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser extension that injects the Convor live-chat widget into any page. Chrome MV3 + Firefox.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "icons": "python3 scripts/generate-icons.py"
+  },
+  "dependencies": {
+    "webextension-polyfill": "^0.12.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/chrome": "^0.0.287",
+    "@types/webextension-polyfill": "^0.12.1",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.0"
+  }
+}
