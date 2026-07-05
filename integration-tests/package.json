@@ -19,6 +19,7 @@
     "test": "node run-all.js"
   },
   "dependencies": {
+    "http-proxy": "^1.18.1",
     "jsdom": "^25.0.1"
   }
 }

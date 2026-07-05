@@ -48,10 +48,14 @@ class Convor_Embed {
 			? $config['apiBase']
 			: $defaults['apiBase'];
 		$key = isset( $config['key'] ) && is_string( $config['key'] ) ? $config['key'] : '';
+		$widget_url = isset( $config['widgetUrl'] ) && is_string( $config['widgetUrl'] ) && '' !== $config['widgetUrl']
+			? (string) $config['widgetUrl']
+			: '';
 
 		return array(
-			'key'     => $key,
-			'apiBase' => rtrim( $api_base, '/' ),
+			'key'       => $key,
+			'apiBase'   => rtrim( $api_base, '/' ),
+			'widgetUrl' => $widget_url,
 		);
 	}
 
@@ -90,10 +94,26 @@ class Convor_Embed {
 			return;
 		}
 
-		printf(
-			"\n<!-- Convor Live Chat -->\n<script src=\"%s\" data-key=\"%s\" async></script>\n",
-			esc_url( $src ),
-			esc_attr( $config['key'] )
-		);
+		// Optional iframe URL override. Defaults to the loader's built-in
+		// (cdn.convor.io/widget-iframe.html) when unset; the filter can set
+		// it for self-hosted iframe deployments or local testing.
+		$widget_url = isset( $config['widgetUrl'] ) && is_string( $config['widgetUrl'] ) && '' !== $config['widgetUrl']
+			? (string) $config['widgetUrl']
+			: '';
+
+		if ( '' !== $widget_url ) {
+			printf(
+				"\n<!-- Convor Live Chat -->\n<script src=\"%s\" data-key=\"%s\" data-widget-url=\"%s\" async></script>\n",
+				esc_url( $src ),
+				esc_attr( $config['key'] ),
+				esc_url( $widget_url )
+			);
+		} else {
+			printf(
+				"\n<!-- Convor Live Chat -->\n<script src=\"%s\" data-key=\"%s\" async></script>\n",
+				esc_url( $src ),
+				esc_attr( $config['key'] )
+			);
+		}
 	}
 }

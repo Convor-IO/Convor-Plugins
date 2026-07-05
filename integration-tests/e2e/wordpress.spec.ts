@@ -26,7 +26,10 @@ const WP_URL = process.env.WP_URL ?? "http://localhost:8080";
 // reaches the host's widget dev server via host.docker.internal; the browser
 // (running on the host) sees the same URL embedded in the page.
 const WIDGET_API_BASE =
-  process.env.WIDGET_API_BASE ?? "http://host.docker.internal:5173";
+  process.env.WIDGET_API_BASE ?? "http://localhost:5173";
+// The org slug configured in convor_settings.org_slug. Matches the seeded
+// org in the SaaS test DB (apps/server/src/test-seed.ts → TEST_ORG_SLUG).
+const ORG_SLUG = process.env.ORG_SLUG ?? "test-org";
 
 test("real WordPress: widget <script> loads and the trigger button mounts", async ({
   page,
@@ -41,7 +44,9 @@ test("real WordPress: widget <script> loads and the trigger button mounts", asyn
   await page.goto(WP_URL);
 
   // 1. The canonical script tag is present in the rendered HTML.
-  const scriptTag = page.locator(`script[src*="/widget.js"][data-key="acme"]`);
+  const scriptTag = page.locator(
+    `script[src*="/widget.js"][data-key="${ORG_SLUG}"]`,
+  );
   await expect(scriptTag).toHaveCount(1);
   await expect(scriptTag).toHaveAttribute(
     "src",
