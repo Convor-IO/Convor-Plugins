@@ -1,13 +1,22 @@
 {
   "name": "convor-integration-tests",
   "private": true,
-  "description": "Integration tests for the Convor BigCommerce + Ecwid widget plugins: snippet-builder unit tests + Fastify boot smoke tests.",
+  "description": "Integration tests proving each Convor plugin (Magento, OpenCart, WordPress, PrestaShop, Drupal, Joomla, BigCommerce, Ecwid, GTM, browser extension, website builders) emits the canonical widget snippet.",
   "license": "MIT",
   "type": "commonjs",
   "scripts": {
+    "test:wordpress": "node wordpress.test.js",
+    "test:prestashop": "node prestashop.test.js",
+    "test:drupal": "node drupal.test.js",
+    "test:joomla": "node joomla.test.js",
+    "test:magento": "node magento.test.js",
+    "test:opencart": "node opencart.test.js",
     "test:bigcommerce": "node bigcommerce.test.js",
     "test:ecwid": "node ecwid.test.js",
-    "test": "node bigcommerce.test.js && node ecwid.test.js"
+    "test:gtm": "node gtm.test.js",
+    "test:browser-extension": "node browser-extension.test.js",
+    "test:builders": "node builders.test.js",
+    "test": "node run-all.js"
   },
   "dependencies": {
     "jsdom": "^25.0.1"

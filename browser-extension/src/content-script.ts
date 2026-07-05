@@ -44,7 +44,13 @@ export function injectConvorWidget(apiBase: string, slug: string): boolean {
   }
   const script = document.createElement("script");
   script.src = src;
-  script.async = true;
+  // Set the async attribute explicitly so the injected tag matches the
+  // canonical Convor snippet (`<script ... async>`) and survives
+  // serialization. (Dynamically-created scripts are async-by-default per
+  // the HTML spec, so `script.async = true` alone is functionally correct —
+  // but the explicit attribute is self-documenting and the form every other
+  // plugin emits.)
+  script.setAttribute("async", "");
   script.setAttribute("data-key", slug);
   script.setAttribute("data-convor", "extension");
   (document.head || document.documentElement).appendChild(script);

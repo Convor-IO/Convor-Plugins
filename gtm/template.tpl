@@ -6,6 +6,7 @@ https://developers.google.com/tag-manager/gallery-tos (or such other URL as
 Google may provide), as modified from time to time.
 
 
+
 ___INFO___
 
 {
@@ -142,54 +143,58 @@ ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 //     <script src="https://cdn.convor.io/widget.js"
 //             data-key="ORG_SLUG" async></script>
 //
-// GTM's `injectScript(url, onSuccess, onFailure)` can only load a script from a
-// URL — it cannot attach `data-*` attributes to the injected <script> tag. To
-// deliver the org slug to the widget we use BOTH of these mechanisms (so the
-// template works whichever the widget reads first):
+// The widget loader (embed.ts → resolveConfig) reads the org slug from
+// EXACTLY one place on the host page: the data-key / data-org attribute on
+// its own <script> tag (or an explicit ConvorWidget.init({ key }) call). It
+// does NOT read ?key= query params, and it does NOT read a window.ConvorConfig
+// global — so a template that relies on those will load widget.js but the
+// widget will throw `"key" is required` and never mount.
 //
-//   1. Publish a global config object on `window.ConvorConfig` BEFORE the
-//      script loads, via `setInWindow`. The widget reads
-//      `window.ConvorConfig.key` at startup.
-//   2. Append `?key=ORG_SLUG` to the script URL as a fallback the widget can
-//      read from its own <script> element's src.
+// GTM's sandboxed `injectScript(url, onSuccess, onFailure)` can load a script
+// from a URL but CANNOT attach data-* attributes to the injected <script>.
+// So we use the widget's other supported entry point: after the script loads
+// (onSuccess), we call its public API `window.ConvorWidget.init({ key, ... })`
+// via `callInWindow`. That is the same code path the widget's own auto-init
+// takes when data-key IS present, so behaviour is identical to the canonical
+// snippet.
 //
-// Optional appearance overrides (primaryColor / position / theme) are added to
-// the same config object; when left blank the widget falls back to the values
-// managed in the Convor dashboard.
+// Optional appearance overrides (primaryColor / position / theme) are passed
+// straight through to init(); when left blank the widget fetches the values
+// configured in the Convor dashboard.
 
-const setInWindow = require('setInWindow');
 const injectScript = require('injectScript');
+const callInWindow = require('callInWindow');
+const copyFromWindow = require('copyFromWindow');
 const log = require('logToConsole');
-const makeInteger = require('makeInteger');
 const getType = require('getType');
 
 // ---- Helpers ---------------------------------------------------------------
 
-// MakeString is not guaranteed; trim/normalize defensively against GTM fields
-// that may resolve to other types (e.g. a variable returning a number).
+// GTM template fields are not guaranteed to be strings (a variable may
+// resolve to a number / undefined). Normalise defensively.
 const toStr = (val) => (getType(val) === 'string' ? val : val == null ? '' : '' + val);
 
-// Build the appearance-override object. Only include keys that are actually
-// set; absent keys mean "use the dashboard value".
-const buildAppearance = () => {
-  const appearance = {};
+// Build the init() options object. `key` is always present; the appearance
+// keys are only included when actually set, so the widget falls back to the
+// dashboard value for any that are omitted.
+const buildInitOptions = (orgSlug) => {
+  const opts = { key: orgSlug };
   if (toStr(data.primaryColor).trim()) {
-    appearance.primaryColor = toStr(data.primaryColor).trim();
+    opts.primaryColor = toStr(data.primaryColor).trim();
   }
   if (toStr(data.position).trim()) {
-    appearance.position = toStr(data.position).trim();
+    opts.position = toStr(data.position).trim();
   }
   if (toStr(data.theme).trim()) {
-    appearance.theme = toStr(data.theme).trim();
+    opts.theme = toStr(data.theme).trim();
   }
-  return appearance;
+  return opts;
 };
 
 // ---- main code() -----------------------------------------------------------
 //
 // GTM runs whatever top-level statements this section contains. We wrap the
-// logic in a `code()` function (as the Convor template contract expects) and
-// invoke it once at the bottom.
+// logic in a `code()` function and invoke it once at the bottom.
 
 const code = () => {
   const orgSlug = toStr(data.orgSlug).trim();
@@ -204,35 +209,42 @@ const code = () => {
     return;
   }
 
-  // 1) Publish the global config object the widget reads at load time.
-  const config = { key: orgSlug };
-  const appearance = buildAppearance();
-  if (appearance.primaryColor || appearance.position || appearance.theme) {
-    config.appearance = appearance;
+  // Clean canonical URL — NO ?key= query param (the widget ignores it, and a
+  // bare URL lets GTM dedupe against any canonical snippet already on the
+  // page so we don't double-load widget.js).
+  const src = apiBase + '/widget.js';
+
+  // If the merchant's page already initialised ConvorWidget (e.g. they have
+  // the canonical snippet AND this tag), don't fight it — report success and
+  // leave the existing instance alone.
+  const alreadyLoaded = copyFromWindow('ConvorWidget');
+  if (alreadyLoaded && getType(alreadyLoaded.init) === 'function') {
+    log('Convor: window.ConvorWidget already present on the page — skipping inject.');
+    data.gtmOnSuccess();
+    return;
   }
-  setInWindow('ConvorConfig', config);
 
-  // 2) Build the script URL. The slug is also carried as `?key=` so the widget
-  //    can read it from its own <script src> if it prefers that over the global.
-  const src = apiBase + '/widget.js?key=' + encodeURIComponent(orgSlug);
-
-  // Called if the widget script fails to download / parse.
   const onFailure = () => {
     log('Convor: widget script failed to load from ' + src);
     data.gtmOnFailure();
   };
 
-  // Called once the widget script has loaded successfully.
+  // Once widget.js has loaded it registers window.ConvorWidget. We then call
+  // its public init({ key, ... }) — the supported equivalent of data-key.
   const onSuccess = () => {
+    const ConvorWidget = copyFromWindow('ConvorWidget');
+    if (!ConvorWidget || getType(ConvorWidget.init) !== 'function') {
+      log('Convor: widget.js loaded but window.ConvorWidget.init is missing — '
+          + 'the script may have failed to parse. Tag will not fire init.');
+      data.gtmOnFailure();
+      return;
+    }
+    callInWindow('ConvorWidget.init', buildInitOptions(orgSlug));
     data.gtmOnSuccess();
   };
 
   // Inject the widget script asynchronously. GTM deduplicates by URL.
-  injectScript(src, onSuccess, onFailure);
-
-  // (Referenced so GTM's sandbox keeps makeInteger available for future use
-  // — e.g. throttling/retry — without a dead-require lint in the editor.)
-  makeInteger(0);
+  injectScript(src, onSuccess, onFailure, 'async');
 };
 
 // Run it.
@@ -293,10 +305,25 @@ ___WEB_PERMISSIONS___
                   { "type": 1, "string": "execute" }
                 ],
                 "mapValue": [
-                  { "type": 1, "string": "ConvorConfig" },
+                  { "type": 1, "string": "ConvorWidget" },
                   { "type": 8, "boolean": true },
-                  { "type": 8, "boolean": true },
+                  { "type": 8, "boolean": false },
                   { "type": 8, "boolean": false }
+                ]
+              },
+              {
+                "type": 3,
+                "mapKey": [
+                  { "type": 1, "string": "key" },
+                  { "type": 1, "string": "read" },
+                  { "type": 1, "string": "write" },
+                  { "type": 1, "string": "execute" }
+                ],
+                "mapValue": [
+                  { "type": 1, "string": "ConvorWidget.init" },
+                  { "type": 8, "boolean": false },
+                  { "type": 8, "boolean": false },
+                  { "type": 8, "boolean": true }
                 ]
               }
             ]
@@ -342,15 +369,19 @@ ___NOTES___
 
 Convor live-chat widget — GTM custom tag template.
 
-Injects `<script src="https://cdn.convor.io/widget.js" data-key="SLUG" async>`
-semantically. Because GTM's `injectScript` API cannot attach `data-*`
-attributes to the injected tag, this template delivers the org slug to the
-widget via (a) a `window.ConvorConfig = { key: SLUG }` global published before
-load, and (b) a `?key=SLUG` query parameter on the script URL. The widget
-honors either source.
+Semantically injects `<script src="https://cdn.convor.io/widget.js"
+data-key="SLUG" async>`. GTM's sandboxed `injectScript` API cannot attach
+data-* attributes to the injected tag, and the widget loader reads the org
+slug ONLY from the data-key attribute (or an explicit ConvorWidget.init call)
+— it does NOT honor ?key= query params or a window.ConvorConfig global. So
+this template loads widget.js with a clean URL and then calls the widget's
+public `window.ConvorWidget.init({ key, ... })` API from the script's
+onSuccess callback (via callInWindow). That is the same code path the widget's
+own auto-init takes when data-key IS present, so end-user behaviour matches
+the canonical snippet exactly.
 
-Optional appearance overrides (primaryColor / position / theme) are added to
-`ConvorConfig.appearance`; when omitted, the widget uses whatever is configured
-in the Convor dashboard (Settings → Widget).
+Optional appearance overrides (primaryColor / position / theme) are passed
+straight to init(); when omitted, the widget uses the values configured in the
+Convor dashboard (Settings → Widget).
 
 Created 2026-07-05.

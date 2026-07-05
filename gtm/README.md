@@ -29,21 +29,29 @@ stays minimal.
 
 ### How the slug reaches the widget
 
+The widget loader reads the org slug from **only one place** on the host page:
+the `data-key` attribute on its own `<script>` tag (or an explicit
+`ConvorWidget.init({ key })` call). It does **not** read `?key=` query params
+or a `window.ConvorConfig` global.
+
 GTM's sandboxed `injectScript()` API can load a script from a URL but **cannot
-attach `data-*` attributes** to the injected `<script>` tag. So this template
-delivers the org slug to the widget through **both** of these channels (the widget
-honors whichever it reads first):
+attach `data-*` attributes** to the injected `<script>` tag. So instead of
+relying on a query string or global (which the widget would ignore), this
+template:
 
-1. **Global config object.** Before loading the widget, the tag sets
-   `window.ConvorConfig = { key: "<org-slug>" }` via GTM's `setInWindow` API.
-   The widget reads `window.ConvorConfig.key` at startup.
-2. **Query parameter.** The slug is also appended to the script URL as
-   `?key=<org-slug>` (`https://cdn.convor.io/widget.js?key=<slug>`), which the
-   widget can read from its own `<script src>`.
+1. Loads `widget.js` from a clean URL via `injectScript()` — no `?key=`
+   (so GTM can also dedupe against any canonical snippet already on the page).
+2. Once the script has loaded and registered `window.ConvorWidget`, calls its
+   public **`ConvorWidget.init({ key, ... })`** API from the `onSuccess`
+   callback (via GTM's `callInWindow`).
 
-Optional appearance overrides (`primaryColor`, `position`, `theme`) are added to
-`window.ConvorConfig.appearance`. Leave them blank to use the values configured in
-the Convor dashboard.
+That `init({ key })` call is the same code path the widget's own auto-init
+takes when `data-key` *is* present, so the end-user experience is identical to
+pasting the canonical snippet.
+
+Optional appearance overrides (`primaryColor`, `position`, `theme`) are passed
+straight to `init()`. Leave them blank to use the values configured in the
+Convor dashboard.
 
 ## Import the template
 
@@ -57,8 +65,9 @@ the Convor dashboard.
    list as **Convor Widget**.
 
 > Permissions are pre-configured: the template may inject scripts from
-> `https://cdn.convor.io/*` (and `https://*.convor.io/*`) and read/write the
-> `window.ConvorConfig` global. No other permissions are requested.
+> `https://cdn.convor.io/*` (and `https://*.convor.io/*`) and read the
+> `window.ConvorWidget` global + execute `ConvorWidget.init`. No other
+> permissions are requested.
 
 ## Create a tag from the template
 
@@ -79,8 +88,8 @@ the Convor dashboard.
 
 1. Click **Preview** (top-right). GTM opens Tag Assistant in a new tab.
 2. Load a page on your site. In Tag Assistant, confirm the **Convor Widget** tag
-   shows **Tag Fired**, and that `https://cdn.convor.io/widget.js?key=…` appears
-   in the page's network requests. The chat bubble should appear.
+   shows **Tag Fired**, and that `https://cdn.convor.io/widget.js` appears in the
+   page's network requests. The chat bubble should appear.
 3. If it didn't fire: check the trigger, confirm the slug matches the dashboard,
    and verify the site's domain is in the widget's *allowed domains* list.
 4. Back in GTM, click **Submit** → **Publish** to push the tag live.
@@ -89,7 +98,9 @@ the Convor dashboard.
 
 - **Widget doesn't appear.** Confirm the tag fired in Preview mode, the slug is
   correct, and your site's domain is listed under *Allowed domains* in the Convor
-  dashboard.
+  dashboard. Check the browser console for `[ConvorWidget] "key" is required` —
+  if you see it, the `ConvorWidget.init({ key })` call did not run (most likely
+  the tag's org-slug field is blank or the script failed to load).
 - **`injectScript` blocked by permissions.** This happens if you changed the
   *Widget script base URL* to a host not in the allowlist. Open the template in
   the Template Editor → **Permissions** → add your host to *Injects Scripts*.
