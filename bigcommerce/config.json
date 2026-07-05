@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.bigcommerce.com/app/config/v1",
+  "name": "Convor Live Chat",
+  "version": "1.0.0",
+  "description": "Add the Convor live-chat widget to your BigCommerce storefront in under a minute.",
+  "icon_url": "https://cdn.convor.io/bigcommerce/icon.png",
+  "auth_callback_url": "https://CONVOR_APP_BASE_URL/auth",
+  "load_callback_url": "https://CONVOR_APP_BASE_URL/load",
+  "uninstall_callback_url": "https://CONVOR_APP_BASE_URL/uninstall",
+  "oauth_client_id": "REPLACE_WITH_BC_CLIENT_ID",
+  "scopes": ["store_v2_content", "store_v2_information"],
+  "webhooks": [
+    {
+      "scope": "store",
+      "destination": "https://CONVOR_APP_BASE_URL/uninstall",
+      "event": "store/uninstalled"
+    }
+  ]
+}
