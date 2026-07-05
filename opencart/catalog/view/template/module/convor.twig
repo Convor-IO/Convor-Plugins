@@ -1,0 +1,14 @@
+{#
+  Standalone Convor widget script tag template.
+
+  The default storefront integration builds this tag in PHP
+  (Catalog\Controller\Module\Convor::injectScript) and appends it to the
+  rendered header, because the standard header.twig `scripts` loop can only
+  emit `<script src="...">` and cannot carry the `data-key` / `async`
+  attributes the Convor loader needs.
+
+  This template is shipped as a reference / override point: render it via
+  `$this->load->view('module/convor', $data)` from a custom event handler if
+  you want to edit the markup directly instead of using the PHP string.
+#}
+<script src="{{ api_base }}/widget.js" data-key="{{ org_slug }}" async></script>
