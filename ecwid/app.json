@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft-2020-12/schema",
+  "title": "Convor — Ecwid app registration manifest",
+  "description": "Reference of the values to register in the Ecwid developer portal (https://developers.ecwid.com/register). Ecwid does not consume this file at install time; it documents the app config so the storefront customizer, OAuth redirect, and scopes are reproducible.",
+  "type": "object",
+  "properties": {
+    "appId": {
+      "type": "string",
+      "description": "Issued by Ecwid on registration. Also the public-storage appId used by Ecwid.getAppPublicConfig(appId) in storefront.js."
+    },
+    "appType": {
+      "const": "external",
+      "description": "External (server-side) app: handles OAuth itself, stores tokens server-side."
+    },
+    "scopes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Access scopes requested from the merchant.",
+      "default": ["read_store_profile", "customize_storefront"]
+    },
+    "redirectUri": {
+      "type": "string",
+      "description": "Must match ECWID_REDIRECT_URL. The OAuth return URL where the temporary code is delivered."
+    },
+    "storefrontCustomization": {
+      "type": "object",
+      "description": "Registered with Ecwid support: a single HTTPS .js URL auto-loaded on every storefront page when the app is installed. The script reads per-store config and injects the Convor widget.",
+      "properties": {
+        "jsUrl": { "type": "string" },
+        "scope": { "const": "customize_storefront" }
+      },
+      "required": ["jsUrl", "scope"]
+    },
+    "iframeSettingsUrl": {
+      "type": "string",
+      "description": "The /app page rendered inside the Ecwid Control Panel iframe."
+    }
+  },
+  "required": [
+    "appId",
+    "appType",
+    "scopes",
+    "redirectUri",
+    "storefrontCustomization",
+    "iframeSettingsUrl"
+  ]
+}

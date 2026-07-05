@@ -1,0 +1,9 @@
+node_modules/
+dist/
+*.log
+.env
+.env.local
+data/
+
+# This app is managed alongside the pnpm workspace; no npm lockfile
+package-lock.json
