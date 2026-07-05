@@ -1,0 +1,48 @@
+.convor-settings h1 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.25rem;
+}
+
+.convor-settings .convor-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 6px;
+  background: #4f46e5;
+  color: #fff;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.convor-settings .convor-lead {
+  color: #50575e;
+  margin-top: 0;
+  font-size: 0.95rem;
+}
+
+.convor-settings .convor-input.code {
+  font-family: Menlo, Consolas, monospace;
+}
+
+.convor-settings .convor-card {
+  margin-top: 2rem;
+  padding: 1rem 1.25rem;
+  background: #fff;
+  border: 1px solid #dcdcde;
+  border-radius: 6px;
+  max-width: 720px;
+}
+
+.convor-settings .convor-card h2 {
+  margin-top: 0.25rem;
+  font-size: 1rem;
+}
+
+.convor-settings .convor-card p {
+  color: #50575e;
+  font-size: 0.9rem;
+}
