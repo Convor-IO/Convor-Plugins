@@ -1,0 +1,9 @@
+{
+  "$schema": "https://docs.wix.com/wix-app/dashboard-page/config.schema.json",
+  "id": "convor-settings",
+  "name": "Convor",
+  "description": "Configure your Convor live-chat widget.",
+  "entry": "Settings.tsx",
+  "showInDashboard": true,
+  "showInDashboardIcons": true
+}

@@ -1,0 +1,18 @@
+# Dependencies
+node_modules/
+
+# Wix CLI local state
+.wix/
+
+# Build artifacts
+dist/
+build/
+
+# Env (the real secrets never get committed)
+.env
+.env.local
+
+# OS/editor
+.DS_Store
+.idea/
+.vscode/

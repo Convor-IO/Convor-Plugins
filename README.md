@@ -12,6 +12,7 @@ slug, done.
 |---|---|---|---|
 | [`wordpress/`](./wordpress) | WordPress.org + WooCommerce | WordPress Plugin Directory | WIP |
 | [`shopify/`](./shopify) | Shopify | Shopify App Store | WIP |
+| [`wix/`](./wix) | Wix | Wix App Market | WIP |
 | [`sdk/`](./sdk) | Any JS app | npm `@convor/widget-sdk` | WIP |
 | [`sdk-react/`](./sdk-react) | React / Next.js | npm `@convor/widget-react` | WIP |
 

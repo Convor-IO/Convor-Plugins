@@ -1,0 +1,50 @@
+<!-- Convor live-chat widget loader.
+
+     This fragment is injected into the site DOM by the Wix Embedded Script
+     extension. It renders the canonical Convor snippet:
+
+         <script src="https://cdn.convor.io/widget.js"
+                 data-key="<org-slug>" async></script>
+
+     `{{slug}}` is a Wix dynamic parameter. When the merchant enters their
+     Convor org slug on the Convor dashboard page (settings-panel/) and clicks
+     Save, the backend calls the Wix Embedded Scripts API
+     (embeddedScripts.embedScript) which substitutes the live value into this
+     fragment and serves it on every published page.
+
+     If no slug is configured yet we emit an HTML comment so a merchant
+     inspecting the page sees a hint instead of a silently-missing widget. The
+     widget itself is an external file from the Convor CDN — no inline JS, so
+     site CSP stays clean.
+
+     Docs: https://dev.wix.com/docs/build-apps/develop-your-app/develop-a-self-managed-app/supported-extensions/site-extensions/embedded-scripts/add-a-self-managed-embedded-script-extension
+-->
+<script>
+  (function () {
+    var slug = "{{slug}}";
+    // Wix URL-encodes parameter values; decode defensively so a slug with a
+    // reserved character round-trips correctly.
+    try {
+      slug = decodeURIComponent(slug);
+    } catch (e) {
+      /* malformed — fall through with the raw value */
+    }
+    slug = (slug || "").trim();
+
+    if (!slug) {
+      // No slug configured. Comment goes into the rendered DOM so the
+      // merchant can spot it; shoppers never see it.
+      document.write(
+        "<!-- Convor: widget not configured. Open the Convor app in your " +
+          "Wix dashboard and enter your org slug. -->",
+      );
+      return;
+    }
+
+    var s = document.createElement("script");
+    s.src = "https://cdn.convor.io/widget.js";
+    s.setAttribute("data-key", slug);
+    s.async = true;
+    document.body.appendChild(s);
+  })();
+</script>

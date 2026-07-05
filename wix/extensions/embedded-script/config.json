@@ -1,0 +1,22 @@
+{
+  "$schema": "https://docs.wix.com/wix-app/embedded-script/config.schema.json",
+  "id": "convor-widget-loader",
+  "name": "Convor Widget",
+  "description": "Injects the Convor live-chat widget loader into your site.",
+  "scriptType": "ESSENTIAL",
+  "placement": "BODY_END",
+  "parameters": [
+    {
+      "key": "slug",
+      "description": "Your Convor org slug (lowercase letters, numbers, and dashes).",
+      "placeholders": [
+        {
+          "key": "slug",
+          "description": "Your Convor org slug, e.g. 'acme-store'.",
+          "defaultValue": ""
+        }
+      ]
+    }
+  ],
+  "tag": "Convor"
+}
