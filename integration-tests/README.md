@@ -77,17 +77,67 @@ WIDGET_API_BASE=http://localhost:5173 pnpm exec playwright test \
 
 These need infrastructure that's out of scope for local CI:
 
-- **Full chat flow** (open bubble → send message → realtime delivery).
-  Requires the entire SaaS stack (server + Postgres + Centrifugo) running
-  with a seeded org matching the slug. The iframe loads but its content is
-  backend-dependent.
 - **Real Shopify / BigCommerce / Ecwid OAuth install flows.** The JS apps
   boot and their snippet builders are unit-tested, but the platform OAuth
   + signed-payload verification paths aren't exercised against real backends.
-- **Real Magento / Drupal / Joomla / PrestaShop / OpenCart installs.**
-  Layer 1 proves the hook emits the snippet via PHP shims; a full CMS boot
-  would catch hook-registration edge cases the shims can't. Magento in
-  particular is heavy (~1.5GB image, multi-minute boot) and was deferred.
 - **`cdn.convor.io` doesn't exist yet.** Every plugin defaults to it; nothing
   works end-to-end in production until that CDN stands up. Local tests use
   the built widget on `localhost:5173` instead.
+
+## Layer 3: real CMS install fixtures (`fixtures/`)
+
+Each PHP platform has a Docker fixture that boots a real CMS install with
+the plugin bind-mounted from source. Verified by booting the full stack and
+grepping the rendered storefront HTML for the canonical snippet.
+
+| Fixture | CMS | Port | Status |
+|---|---|---|---|
+| `fixtures/wordpress/` | WordPress 6.x + MariaDB | :8080 | ✅ snippet renders + full chat flow (Playwright E2E) |
+| `fixtures/joomla/` | Joomla 5 + MariaDB | :8081 | ✅ snippet renders |
+| `fixtures/prestashop/` | PrestaShop 8 + MySQL | :8082 | ✅ snippet renders |
+| `fixtures/drupal/` | Drupal 11 + Postgres | :8083 | ✅ snippet renders |
+| `fixtures/opencart/` | OpenCart 4 + MariaDB | :8084 | ✅ snippet renders |
+| `fixtures/magento/` | Magento 2.4.9 + MariaDB + OpenSearch | :8085 | ✅ snippet renders |
+
+Each fixture has its own `docker-compose.yml` + `install.sh`/`activate.sh`.
+Booting all 6 at once requires the local widget stack up:
+
+```bash
+# 1. SaaS test infra (Postgres + Redis + Centrifugo)
+cd saas && docker compose -f docker/docker-compose.test.yml up -d
+
+# 2. Push schema + boot the server
+cd packages/db && DATABASE_URL='postgresql://convor:convor@localhost:10010/convor_test' pnpm db:push
+cd apps/server && cp .env.test .env && node --env-file=.env --import tsx/esm src/index.ts
+
+# 3. Build the widget + start the proxy (serves widget dist + proxies /api to :3000)
+cd apps/widget && pnpm build
+cd plugins/integration-tests/fixtures && node widget-proxy.js
+
+# 4. Boot a CMS fixture (e.g. WordPress)
+cd fixtures/wordpress && docker compose up -d && ./activate.sh
+
+# 5. Verify
+curl -s http://localhost:8080/ | grep widget.js   # → the canonical snippet
+```
+
+### Real bugs found via the CMS fixtures
+
+These all passed the Layer-1 shim tests but failed on real CMS boots:
+
+- **Joomla**: `$this->getApplication()` returns null in legacy-loaded
+  plugins (the CMSPlugin base isn't injected). Fixed to `Factory::getApplication()`.
+  Separately, `WebAssetManager` is locked by `onBeforeCompileHead` time, so
+  `registerScript()` throws and the tag is dropped. Fixed to use `addCustomTag()`.
+- **Drupal**: `BubbleableMetadata::applyTo()` was called *after* adding the
+  `html_head` attachment, wholesale-replacing `#attached` and discarding the
+  script tag. Fixed the call order.
+- **Magento**: `default_head_blocks.xml` placed `<block>` directly under
+  `<head>`, which Magento's `page_configuration.xsd` forbids — the block
+  was silently dropped. Fixed to use `<referenceBlock name="head.additional">`.
+- **Magento CSP**: the WebSocket policy was attached to `img-src` (governs
+  images) instead of `connect-src` (governs WS), so production realtime
+  would have been CSP-blocked. Fixed earlier in the integration pass.
+- **WordPress**: `get_config()` stripped the `widgetUrl` filter value, so
+  the `data-widget-url` attribute (needed for local testing + self-hosted
+  iframe deployments) was never emitted. Fixed to pass it through.
