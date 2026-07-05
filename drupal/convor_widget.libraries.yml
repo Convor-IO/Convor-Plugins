@@ -1,0 +1,7 @@
+# The widget <script> tag is injected directly via #attached html_head in
+# convor_widget_page_attachments() (see convor_widget.module), so this file
+# does not define a JS asset. It is kept for documentation/future use and to
+# expose a stable library version downstream tools can reference.
+#
+# @see convor_widget_page_attachments()
+version: 1.0.0

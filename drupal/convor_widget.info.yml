@@ -1,0 +1,8 @@
+name: Convor Widget
+type: module
+description: 'Embeds the Convor live-chat widget on every page. Configure your organization slug and the widget script is injected into the page <head>.'
+package: Convor
+core_version_requirement: ^11
+configure: convor_widget.settings
+dependencies:
+  - drupal:system

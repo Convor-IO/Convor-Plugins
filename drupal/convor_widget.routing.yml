@@ -1,0 +1,7 @@
+convor_widget.settings:
+  path: '/admin/config/services/convor-widget'
+  defaults:
+    _form: '\Drupal\convor_widget\Form\SettingsForm'
+    _title: 'Convor widget'
+  requirements:
+    _permission: 'administer convor widget'

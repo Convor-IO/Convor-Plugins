@@ -1,0 +1,13 @@
+convor_widget.settings:
+  type: config_object
+  label: 'Convor widget settings'
+  mapping:
+    enabled:
+      type: boolean
+      label: 'Whether the widget script is injected on the site'
+    org_slug:
+      type: string
+      label: 'Organization slug emitted as data-key on the widget script tag'
+    api_base:
+      type: string
+      label: 'Absolute URL of the CDN/API serving widget.js'

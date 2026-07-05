@@ -1,0 +1,99 @@
+<?php
+
+/**
+ * @file
+ * Embeds the Convor live-chat widget via an html_head <script> attachment.
+ */
+
+declare(strict_types=1);
+
+use Drupal\Core\Render\BubbleableMetadata;
+use Drupal\Core\Url;
+
+/**
+ * Default CDN/API base the widget script is loaded from.
+ */
+define('CONVOR_WIDGET_DEFAULT_API_BASE', 'https://cdn.convor.io');
+
+/**
+ * Implements hook_page_attachments().
+ *
+ * Injects the Convor widget <script> tag into the page <head> when the module
+ * is enabled and an organization slug has been configured.
+ *
+ * Why html_head instead of an attached JS library + drupalSettings?
+ * The widget tag carries a dynamic, per-organization data-key attribute and
+ * must load from <apiBase>/widget.js. Rather than ship a separate loader asset
+ * that reads drupalSettings and synthesizes the tag at runtime (an extra
+ * round-trip through the asset pipeline), we emit the literal tag directly via
+ * #attached['html_head']. The Renderer turns the render array into a fully
+ * escaped <script> element with no raw HTML echoing. This is the simplest,
+ * cache-safe approach and matches how the Convor widget is embedded on every
+ * other platform (a single <script> tag in the document head).
+ *
+ * Cacheability: the attached tag depends only on convor_widget.settings, so we
+ * bubble its cache metadata into the page attachments. html_head tags added
+ * here are rendered on every page response and are compatible with page cache
+ * because their output is determined entirely by configuration.
+ */
+function convor_widget_page_attachments(array &$attachments): void {
+  $config = \Drupal::config('convor_widget.settings');
+
+  // No-op when disabled or unconfigured; nothing to attach or bubble.
+  if (!(bool) $config->get('enabled')) {
+    return;
+  }
+
+  $org_slug = trim((string) $config->get('org_slug'));
+  if ($org_slug === '') {
+    return;
+  }
+
+  $api_base = trim((string) $config->get('api_base'));
+  if ($api_base === '') {
+    $api_base = CONVOR_WIDGET_DEFAULT_API_BASE;
+  }
+
+  $src = rtrim($api_base, '/') . '/widget.js';
+
+  // Render array for the <script> tag. The Renderer escapes attribute values,
+  // so we hand it raw config data — never echo it ourselves.
+  $script_element = [
+    '#type' => 'html_tag',
+    '#tag' => 'script',
+    '#attributes' => [
+      'src' => $src,
+      'data-key' => $org_slug,
+      'async' => TRUE,
+    ],
+  ];
+
+  $attachments['#attached']['html_head'][] = [
+    $script_element,
+    'convor_widget',
+  ];
+
+  // Bubble config cacheability so cached pages invalidate on settings change.
+  $metadata = BubbleableMetadata::createFromObject($config);
+  $metadata->applyTo($attachments);
+}
+
+/**
+ * Implements hook_help().
+ *
+ * Provides on-module-page guidance and links to the settings form.
+ */
+function convor_widget_help(string $route_name): string {
+  switch ($route_name) {
+    case 'help.page.convor_widget':
+      $output = '';
+      $output .= '<h3>' . t('Convor Widget') . '</h3>';
+      $output .= '<p>' . t('The Convor Widget module embeds the Convor live-chat widget on your site. It works by injecting a single <code>&lt;script&gt;</code> tag — <code>&lt;script src="<api-base>/widget.js" data-key="<org-slug>" async&gt;&lt;/script&gt;</code> — into the <code>&lt;head&gt;</code> of every page.') . '</p>';
+      $output .= '<p>' . t('All widget appearance (colors, position, greeting text, online hours) is configured in the Convor dashboard and applied server-side. This module only stores your organization slug, the script base URL, and an enable toggle.') . '</p>';
+      $output .= '<p>' . t('<a href=":url">Configure the widget</a>.', [':url' => Url::fromRoute('convor_widget.settings')->toString()]) . '</p>';
+      return $output;
+
+    default:
+      return '';
+  }
+}

@@ -1,0 +1,4 @@
+administer convor widget:
+  title: 'Administer Convor widget'
+  description: 'Configure the Convor live-chat widget (organization slug, API base, enable/disable).'
+  restrict access: true
