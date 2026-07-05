@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+  ~ Convor Widget default configuration values.
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <convor_widget>
+            <general>
+                <enabled>0</enabled>
+                <org_slug></org_slug>
+                <api_base>https://cdn.convor.io</api_base>
+            </general>
+        </convor_widget>
+    </default>
+</config>

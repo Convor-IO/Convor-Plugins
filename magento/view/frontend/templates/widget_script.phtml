@@ -1,0 +1,13 @@
+<?php
+/**
+ * Convor widget <script> tag.
+ *
+ * @var \Convor\Widget\Block\WidgetScript $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+
+// phpcs:disable Magento2.Files.LineLength.MaxExceeded
+?>
+<script src="<?= $escaper->escapeUrl($block->getScriptUrl()) ?>"
+        data-key="<?= $escaper->escapeHtmlAttr($block->getOrgSlug()) ?>"
+        async></script>

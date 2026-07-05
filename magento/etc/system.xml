@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!--
+  ~ Convor Widget admin configuration (Stores > Configuration > Convor > Widget).
+  -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="convor" translate="label" sortOrder="500">
+            <label>Convor</label>
+        </tab>
+
+        <section id="convor_widget" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Widget</label>
+            <tab>convor</tab>
+            <resource>Convor_Widget::config</resource>
+
+            <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General</label>
+
+                <field id="enabled" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Convor Widget</label>
+                    <comment>Master switch. When disabled, the widget script is not rendered on the storefront.</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+
+                <field id="org_slug" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Organization Slug</label>
+                    <comment>Your organization's public slug, visible in the Convor dashboard under Settings → Widget.</comment>
+                    <validate>required-entry validate-alphanum</validate>
+                    <can_be_empty>0</can_be_empty>
+                </field>
+
+                <field id="api_base" translate="label comment" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Widget Script Base URL</label>
+                    <comment>Defaults to the Convor CDN (https://cdn.convor.io). Only change to point at a custom CDN or staging environment.</comment>
+                    <validate>required-entry validate-url</validate>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

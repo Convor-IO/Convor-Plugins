@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!--
+  ~ Convor Widget Content-Security-Policy whitelist.
+  ~
+  ~ Magento 2.4+ enforces a strict CSP by default. The widget loads an
+  ~ external script from cdn.convor.io, opens an iframe, and makes REST /
+  ~ WebSocket calls to the Convor API. The hosts below are whitelisted so
+  ~ the widget functions without triggering CSP violations.
+  -->
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp/etc/csp_whitelist.xsd">
+    <policies>
+        <!-- Script that bootstraps the widget. -->
+        <policy id="script-src">
+            <values>
+                <value id="convor-cdn" type="host">https://cdn.convor.io</value>
+            </values>
+        </policy>
+
+        <!-- Iframe the widget renders for the chat UI. -->
+        <policy id="frame-src">
+            <values>
+                <value id="convor-cdn-frame" type="host">https://cdn.convor.io</value>
+                <value id="convor-app-frame" type="host">https://app.convor.io</value>
+            </values>
+        </policy>
+
+        <!-- REST API calls (visitor token, widget config, message history). -->
+        <policy id="connect-src">
+            <values>
+                <value id="convor-api" type="host">https://api.convor.io</value>
+                <value id="convor-cdn-connect" type="host">https://cdn.convor.io</value>
+            </values>
+        </policy>
+
+        <!-- WebSocket (Centrifugo) for live message delivery. ws:// and wss://. -->
+        <policy id="img-src">
+            <values>
+                <value id="convor-cdn-img" type="host">https://cdn.convor.io</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>
