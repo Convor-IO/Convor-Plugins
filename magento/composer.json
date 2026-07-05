@@ -1,32 +1,28 @@
 {
-    "name": "convor/widget",
-    "description": "Add the Convor live-chat widget to your Magento 2 / Adobe Commerce storefront.",
-    "type": "magento2-module",
-    "version": "1.0.0",
-    "license": [
-        "MIT"
-    ],
-    "require": {
-        "php": "~8.1.0||~8.2.0||~8.3.0||~8.4.0",
-        "magento/framework": ">=103.0"
-    },
-    "autoload": {
-        "files": [
-            "registration.php"
-        ],
-        "psr-4": {
-            "Convor\\Widget\\": ""
-        }
-    },
-    "authors": [
-        {
-            "name": "Convor",
-            "homepage": "https://convor.io"
-        }
-    ],
-    "support": {
-        "email": "support@convor.io",
-        "issues": "https://github.com/Convor-IO/Convor-Plugins/issues",
-        "source": "https://github.com/Convor-IO/Convor-Plugins"
+  "name": "convor/widget",
+  "description": "Add the Convor live-chat widget to your Magento 2 / Adobe Commerce storefront.",
+  "type": "magento2-module",
+  "version": "1.0.0",
+  "license": ["MIT"],
+  "require": {
+    "php": "~8.1.0||~8.2.0||~8.3.0||~8.4.0",
+    "magento/framework": ">=103.0"
+  },
+  "autoload": {
+    "files": ["registration.php"],
+    "psr-4": {
+      "Convor\\Widget\\": ""
     }
+  },
+  "authors": [
+    {
+      "name": "Convor",
+      "homepage": "https://convor.io"
+    }
+  ],
+  "support": {
+    "email": "support@convor.io",
+    "issues": "https://github.com/Convor-IO/Convor-Plugins/issues",
+    "source": "https://github.com/Convor-IO/Convor-Plugins"
+  }
 }

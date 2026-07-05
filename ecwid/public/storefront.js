@@ -11,16 +11,14 @@
  * Public config is published by the merchant from the embedded settings app
  * (POST /api/settings -> PUT /api/v3/{storeId}/storage/public).
  */
-(function () {
-  "use strict";
-
+(() => {
   // The appId is baked in at build/deploy time by Ecwid, but the same value
   // is echoed in the public config so we can verify the caller. We rely on
   // Ecwid's getAppPublicConfig to return the store-specific JSON.
-  var APP_ID = window.__CONVOR_ECWID_APP_ID__ || "";
+  const APP_ID = window.__CONVOR_ECWID_APP_ID__ || "";
 
   function inject(src, key) {
-    var s = document.createElement("script");
+    const s = document.createElement("script");
     s.src = src;
     s.setAttribute("data-key", key);
     s.async = true;
@@ -29,8 +27,8 @@
 
   function start(slug, apiBase) {
     if (!slug) return;
-    var base = apiBase || "https://cdn.convor.io";
-    inject(base.replace(/\/$/, "") + "/widget.js", slug);
+    const base = apiBase || "https://cdn.convor.io";
+    inject(`${base.replace(/\/$/, "")}/widget.js`, slug);
   }
 
   function readConfig() {
@@ -41,7 +39,7 @@
         typeof Ecwid !== "undefined" &&
         typeof Ecwid.getAppPublicConfig === "function"
       ) {
-        var raw = Ecwid.getAppPublicConfig(APP_ID);
+        const raw = Ecwid.getAppPublicConfig(APP_ID);
         if (raw) return JSON.parse(raw);
       }
     } catch (e) {
@@ -52,7 +50,7 @@
 
   // Ecwid's storefront events fire when the page/widgets are ready.
   function bootstrap() {
-    var cfg = readConfig();
+    const cfg = readConfig();
     if (!cfg || !cfg.slug) return;
     start(cfg.slug, cfg.apiBase);
   }
