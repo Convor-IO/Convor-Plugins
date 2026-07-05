@@ -1,0 +1,52 @@
+{
+  "name": "@convor/segment-bridge",
+  "version": "0.1.0",
+  "description": "Client-side bridge that forwards Segment analytics.js identify/track calls into the Convor live-chat widget.",
+  "license": "MIT",
+  "author": "Convor",
+  "homepage": "https://convor.io",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Convor-IO/Convor-Plugins.git",
+    "directory": "segment"
+  },
+  "bugs": {
+    "url": "https://github.com/Convor-IO/Convor-Plugins/issues"
+  },
+  "keywords": [
+    "convor",
+    "segment",
+    "analytics.js",
+    "live-chat",
+    "widget",
+    "chat",
+    "bridge"
+  ],
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsup",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@types/node": "^22.10.0",
+    "happy-dom": "^15.11.0",
+    "tsup": "^8.3.5",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.8"
+  }
+}

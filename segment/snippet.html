@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Convor ↔ Segment analytics.js bridge — snippet</title>
+    <!--
+      ============================================================================
+      Convor ↔ Segment analytics.js bridge (inline snippet)
+      ============================================================================
+
+      WHAT THIS DOES
+        Loads the Convor live-chat widget and forwards Segment analytics.js
+        identify() / track() calls into the Convor visitor SDK, so visitor
+        identity + events collected via Segment also reach Convor.
+
+      WHERE TO PLACE IT
+        In the <head>, BEFORE your Segment analytics.js snippet
+        (the one that calls analytics.load(...)). Placing it first guarantees
+        every identify/track — including the very first ones — is forwarded.
+        If you can't place it first, it still works: it polls for
+        window.analytics and attaches once available, but calls made before
+        the bridge loads would be missed.
+
+      WHAT TO CHANGE
+        Replace ORG_SLUG below with your Convor organization slug
+        (Settings → Widget in the Convor dashboard).
+
+      This is the inline equivalent of:
+        import { initConvorSegmentBridge } from "@convor/segment-bridge";
+        initConvorSegmentBridge({ slug: "ORG_SLUG" });
+      ============================================================================
+    -->
+
+    <!-- 1) Convor ↔ Segment bridge (inline, no build step required) -->
+    <script>
+      (function () {
+        var SLUG = "ORG_SLUG"; // <-- replace with your Convor org slug
+        var API_BASE = "https://cdn.convor.io"; // optional override
+        var FORWARD_IDENTIFY = true;
+        var FORWARD_TRACK = true;
+        var WIDGET_TIMEOUT_MS = 10000;
+        var ANALYTICS_TIMEOUT_MS = 15000;
+        var POLL_INTERVAL_MS = 50;
+
+        // --- SSR / no-DOM guard -------------------------------------------
+        if (typeof window === "undefined" || typeof document === "undefined") {
+          return;
+        }
+
+        // --- 1. Inject the Convor widget script ---------------------------
+        var src = API_BASE.replace(/\/+$/, "") + "/widget.js";
+        if (!document.querySelector('script[src="' + src + '"]')) {
+          var s = document.createElement("script");
+          s.src = src;
+          s.async = true;
+          s.setAttribute("data-key", SLUG);
+          document.head.appendChild(s);
+        }
+
+        // --- 2. Wait helpers (poll for both globals) ----------------------
+        function waitFor(test, timeoutMs, label, done) {
+          if (test()) {
+            done();
+            return;
+          }
+          var start = Date.now();
+          var timer = setInterval(function () {
+            if (test()) {
+              clearInterval(timer);
+              done();
+              return;
+            }
+            if (Date.now() - start >= timeoutMs) {
+              clearInterval(timer);
+              if (typeof console !== "undefined" && console.warn) {
+                console.warn(
+                  "[convor-segment] timed out after " +
+                    timeoutMs +
+                    "ms waiting for " +
+                    label,
+                );
+              }
+              done();
+            }
+          }, POLL_INTERVAL_MS);
+        }
+
+        // --- 3. Normalize the two Segment emit formats --------------------
+        // Classic analytics.js: emit("identify", userId, traits, options)
+        // analytics-next:       emit("identify", ctx)  (ctx.event.{userId,traits})
+        function asRecord(v) {
+          return v && typeof v === "object" ? v : null;
+        }
+        function normalizeIdentify(args) {
+          if (!args.length) return null;
+          var first = args[0];
+          if (first && typeof first === "object") {
+            var ctx = first;
+            var inner = asRecord(ctx.event) || ctx;
+            var traits = asRecord(inner.traits) || {};
+            var uid = inner.userId != null ? inner.userId : ctx.userId;
+            return { userId: uid, traits: traits };
+          }
+          var traitsArg = asRecord(args[1]) || {};
+          return { userId: first, traits: traitsArg };
+        }
+        function normalizeTrack(args) {
+          if (!args.length) return null;
+          var first = args[0];
+          if (first && typeof first === "object") {
+            var ctx = first;
+            var inner = asRecord(ctx.event) || ctx;
+            if (typeof inner.event !== "string") return null;
+            return {
+              event: inner.event,
+              properties: asRecord(inner.properties) || {},
+            };
+          }
+          if (typeof first !== "string") return null;
+          return { event: first, properties: asRecord(args[1]) || {} };
+        }
+
+        // --- 4. Forwarders ------------------------------------------------
+        function forwardIdentify(payload) {
+          var sdk = window.Convor;
+          if (!sdk) return;
+          var attrs = {};
+          var k;
+          for (k in payload.traits) attrs[k] = payload.traits[k];
+          if (payload.userId != null && payload.userId !== "") {
+            attrs.userId = payload.userId;
+          }
+          sdk.identify(attrs);
+        }
+        function forwardTrack(payload) {
+          if (window.Convor) window.Convor.track(payload.event, payload.properties);
+        }
+
+        // --- 5. Wire it all up --------------------------------------------
+        function attach() {
+          var analytics = window.analytics;
+          if (!analytics || typeof analytics.on !== "function") return;
+          if (FORWARD_IDENTIFY) {
+            analytics.on("identify", function () {
+              var p = normalizeIdentify(arguments);
+              if (p) forwardIdentify(p);
+            });
+          }
+          if (FORWARD_TRACK) {
+            analytics.on("track", function () {
+              var p = normalizeTrack(arguments);
+              if (p) forwardTrack(p);
+            });
+          }
+        }
+
+        // Convor must be ready before forwards have a target; analytics.js
+        // must be ready before we can subscribe. Run them in parallel, then
+        // attach the listeners.
+        var convorReady = false;
+        var analyticsReady = false;
+        function maybeAttach() {
+          if (convorReady && analyticsReady) attach();
+        }
+
+        waitFor(
+          function () {
+            return typeof window.Convor !== "undefined";
+          },
+          WIDGET_TIMEOUT_MS,
+          "window.Convor",
+          function () {
+            convorReady = true;
+            maybeAttach();
+          },
+        );
+        waitFor(
+          function () {
+            return (
+              typeof window.analytics !== "undefined" &&
+              typeof window.analytics.on === "function"
+            );
+          },
+          ANALYTICS_TIMEOUT_MS,
+          "window.analytics",
+          function () {
+            analyticsReady = true;
+            maybeAttach();
+          },
+        );
+      })();
+    </script>
+
+    <!-- 2) Your existing Segment analytics.js snippet goes here, unchanged. -->
+    <!--
+    <script>
+      !function(){var analytics=window.analytics=window.analytics||[];
+      if(!analytics.initialize)if(analytics.invoked)window.console&&console.error&&
+      console.error("Segment snippet included twice.");else{analytics.invoked=!0;
+      analytics.methods=["trackSubmit","trackClick","trackLink","trackForm",
+      "pageview","identify","reset","group","track","ready","alias","debug",
+      "page","once","off","on","addSourceMiddleware","addIntegrationMiddleware",
+      "setAnonymousId","addDestinationMiddleware"];analytics.factory=function(e){
+      return function(){var t=Array.prototype.slice.call(arguments);t.unshift(e);
+      analytics.push(t);return analytics}};for(var e=0;e<analytics.methods.length;e++){
+      var key=analytics.methods[e];analytics[key]=analytics.factory(key)}analytics.load=
+      function(key,e){var t=document.createElement("script");t.type="text/javascript";
+      t.async=!0;t.src="https://cdn.segment.com/analytics.js/v1/"+key+"/analytics.min.js";
+      var n=document.getElementsByTagName("script")[0];n.parentNode.insertBefore(t,n);
+      analytics._loadOptions=e};analytics.SNIPPET_VERSION="4.16.1";
+      analytics.load("YOUR_SEGMENT_WRITE_KEY");analytics.page();}}();
+    </script>
+    -->
+  </head>
+  <body>
+    <h1>Convor ↔ Segment bridge snippet</h1>
+    <p>
+      See the HTML comments in <code>&lt;head&gt;</code> for the full,
+      copy-pasteable bridge snippet and placement instructions.
+    </p>
+  </body>
+</html>
