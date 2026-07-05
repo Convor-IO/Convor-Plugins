@@ -49,8 +49,11 @@ same `module:enable` / `setup:upgrade` commands above.
 
 ## How it works
 
-- `view/frontend/layout/default_head_blocks.xml` adds a block to the global
-  `<head>` so the widget loads on every storefront page.
+- `view/frontend/layout/default_head_blocks.xml` adds the widget block to the
+  global `head.additional` container (the standard Magento `<head>` extension
+  point — `page_configuration.xsd` forbids `<block>` as a direct child of
+  `<head>`, so it must go via `<referenceBlock name="head.additional">`, as
+  `Magento_GoogleAnalytics` does) so the widget loads on every storefront page.
 - `Block/WidgetScript` reads the system configuration and short-circuits
   rendering when the widget is disabled or no slug is set, so there is zero
   overhead when switched off.

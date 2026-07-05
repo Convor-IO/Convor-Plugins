@@ -1,0 +1,64 @@
+# Real OpenCart 4 install for the Convor widget module E2E verification.
+#
+# Boots a fresh OpenCart 4.0.2.3 on php:8.2-apache + MariaDB 11, installs the
+# Convor module from the repo source, registers the storefront header event,
+# and persists the module settings (status=1, org_slug, api_base). The
+# storefront then emits the Convor <script> tag on every page.
+#
+# Bind-mounts:
+#   - entrypoint.sh → /entrypoint.sh   (runs the full install/bootstrap)
+#   - ../../../opencart     → /plugin            (the module source, read-only)
+#
+# Bring it up:
+#   cd integration-tests/fixtures/opencart
+#   docker compose up -d
+#   # ~90s: apt installs + OpenCart download + CLI install + module register
+#   until curl -sf -o /dev/null http://localhost:8084/; do sleep 2; done
+#
+# Verify the snippet:
+#   curl -s http://localhost:8084/ | grep widget.js
+#
+# Tear down (purge DB so the next run is clean):
+#   docker compose down -v
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: opencart
+      MARIADB_DATABASE: opencart
+      MARIADB_USER: opencart
+      MARIADB_PASSWORD: opencart
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  opencart:
+    # OpenCart 4 needs PHP 8.0+; the official php:8.2-apache image gives us a
+    # clean Debian+Apache+mod_php base we control. There is no first-party
+    # OpenCart Docker image, so entrypoint.sh installs OpenCart from source.
+    image: php:8.2-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8084:80"
+    environment:
+      DB_HOST: db
+      DB_NAME: opencart
+      DB_USER: opencart
+      DB_PASS: opencart
+      OC_VERSION: "4.0.2.3"
+      CONVOR_ORG_SLUG: test-org
+      CONVOR_API_BASE: http://localhost:5173
+    volumes:
+      # The module source (admin/, catalog/, install.php, uninstall.php) —
+      # entrypoint.sh copies it onto the webroot after OpenCart is installed.
+      # Path: this file is at integration-tests/fixtures/opencart/, so three
+      # `..` reach the repo root where opencart/ lives.
+      - ../../../opencart:/plugin:ro
+      - ./entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]

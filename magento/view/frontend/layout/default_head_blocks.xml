@@ -3,13 +3,23 @@
   ~ Convor Widget — injects the widget <script> tag into the head of every
   ~ storefront page. Rendered through the widget_script.phtml template, which
   ~ short-circuits when the module is disabled or no org slug is configured.
+  ~
+  ~ The block is added to the `head.additional` reference (NOT placed directly
+  ~ under <head>): Magento's page_configuration.xsd only allows specific
+  ~ element children of <head> (<css>, <script>, <link>, <title>, <meta>, …),
+  ~ never <block>. A <block> there is silently dropped. `head.additional` is
+  ~ the standard container Magento renders inside <head> for exactly this
+  ~ purpose (see Magento_GoogleAnalytics, Magento_Cookie, etc.).
   -->
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
       xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <head>
-        <block class="Convor\Widget\Block\WidgetScript"
-               name="convor.widget.script"
-               template="Convor_Widget::widget_script.phtml"
-               ifconfig="convor_widget/general/enabled"/>
-    </head>
+    <body>
+        <referenceBlock name="head.additional">
+            <block class="Convor\Widget\Block\WidgetScript"
+                   name="convor.widget.script"
+                   as="convor_widget_script"
+                   template="Convor_Widget::widget_script.phtml"
+                   ifconfig="convor_widget/general/enabled"/>
+        </referenceBlock>
+    </body>
 </page>

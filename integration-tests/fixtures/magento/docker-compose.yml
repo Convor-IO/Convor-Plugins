@@ -1,0 +1,95 @@
+# Real Magento 2.4 install for the Convor_Widget module E2E verification.
+#
+# Boots a fresh Magento Open Source 2.4.9 on php:8.3-apache + MariaDB 10.6,
+# enables the Convor_Widget module from the repo source, and writes the three
+# config values. The storefront then emits the Convor <script> tag in <head>.
+#
+# Magento is heavy: first boot runs `composer create-project` (~3-5 min,
+# ~214 packages) + `setup:install` (~2-3 min). Total ~8-12 min cold. The
+# webroot is on a named volume so subsequent boots reuse the source.
+#
+# Bind-mounts:
+#   - magento/ (repo source) → /var/www/html/app/code/Convor/Widget
+#   - entrypoint.sh           → /entrypoint.sh
+#
+# Bring it up:
+#   cd integration-tests/fixtures/magento
+#   docker compose up -d
+#   # follow progress (~8-12 min cold):
+#   docker compose logs -f magento
+#   # wait until storefront responds:
+#   until curl -sf -o /dev/null http://localhost:8085/; do sleep 5; done
+#
+# Verify the snippet:
+#   curl -s http://localhost:8085/ | grep widget.js
+#
+# Tear down (purge DB + webroot so the next run is clean):
+#   docker compose down -v
+services:
+  db:
+    image: mariadb:10.6
+    # innodb_strict_mode=0 avoids "Row size too large" on some Magento DDL.
+    command: ["mysqld", "--innodb_strict_mode=0"]
+    environment:
+      MARIADB_ROOT_PASSWORD: magento
+      MARIADB_DATABASE: magento
+      MARIADB_USER: magento
+      MARIADB_PASSWORD: magento
+    tmpfs:
+      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+  # OpenSearch is REQUIRED by Magento 2.4 — setup:upgrade fails ("No alive
+  # nodes found in your cluster") without it. The single-node, security-
+  # disabled config matches Magento's default expectations. A named volume
+  # (not tmpfs) is used for data because the opensearch image runs as uid
+  # 1000 and can't write to a root-owned tmpfs.
+  opensearch:
+    image: opensearchproject/opensearch:2.11.0
+    environment:
+      - discovery.type=single-node
+      - DISABLE_SECURITY_PLUGIN=true
+      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
+    volumes:
+      - os-data:/usr/share/opensearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:9200/_cluster/health || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+
+  magento:
+    # Plain php:8.3-apache base we fully control (entrypoint.sh does the
+    # composer create-project + setup:install). Avoids the official
+    # magento/magento-cloud image (~3GB, license-bound) and avoids the
+    # shinsenter image's s6/IPv6 orchestration quirks.
+    image: php:8.3-apache
+    depends_on:
+      db:
+        condition: service_healthy
+      opensearch:
+        condition: service_healthy
+    ports:
+      - "8085:80"
+    environment:
+      CONVOR_DB_HOST: db
+      CONVOR_DB_NAME: magento
+      CONVOR_DB_USER: magento
+      CONVOR_DB_PASS: magento
+      MAGENTO_VERSION: "2.4.9"
+    volumes:
+      # Persist the composer-installed webroot across restarts so a second
+      # `docker compose up` is fast (no re-create-project).
+      - mg-webroot:/var/www/html
+      # Module source → Magento's app/code autoload location.
+      - ../../../magento:/var/www/html/app/code/Convor/Widget:ro
+      - ./entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: ["/bin/sh", "/entrypoint.sh"]
+
+volumes:
+  mg-webroot:
+  os-data:
