@@ -10,10 +10,12 @@
     "lint": "biome check .",
     "format": "biome format --write .",
     "typecheck": "pnpm -r --filter='./packages/*' typecheck",
-    "test": "pnpm -r --filter='./packages/*' test"
+    "test": "pnpm -r --filter='./packages/*' test && node integration-tests/run-all.js",
+    "test:e2e": "playwright test --config integration-tests/playwright.config.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
+    "@playwright/test": "^1.60.0",
     "typescript": "^5.7.0"
   }
 }

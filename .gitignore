@@ -19,3 +19,5 @@ shopify/dist/**
 .DS_Store
 .idea/
 .vscode/
+integration-tests/test-results/
+integration-tests/playwright-report/

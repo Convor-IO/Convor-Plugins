@@ -1,0 +1,22 @@
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: wordpress
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: wordpress
+    tmpfs:
+      - /var/lib/mysql
+  wp:
+    image: wordpress:php8.3-apache
+    depends_on: [db]
+    ports: ["8080:80"]
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    volumes:
+      # Install our plugin by bind-mounting the source as a plugin dir.
+      - /home/Maczuga/Programowanie/convor-dev/plugins/wordpress:/var/www/html/wp-content/plugins/convor:ro
