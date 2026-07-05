@@ -108,6 +108,9 @@ async function buildServer(bindings: AppBindings) {
     return html(reply, renderLanding({ installUrl: buildInstallUrl(config) }));
   });
 
+  // Health check — used by orchestrators and integration smoke tests.
+  app.get("/health", async () => ({ ok: true }));
+
   // OAuth callback — exchange code for token, persist install, set session,
   // then redirect to /load so BC's signed_payload flow takes over.
   app.get<{ Querystring: { code?: string; context?: string; scope?: string } }>(

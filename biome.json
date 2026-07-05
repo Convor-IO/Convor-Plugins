@@ -7,7 +7,13 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "ignore": ["**/node_modules/**", "**/dist/**", "**/build/**", "**/.next/**"]
+    "ignore": [
+      "**/node_modules/**",
+      "**/dist/**",
+      "**/build/**",
+      "**/.next/**",
+      "integration-tests/assert-snippet.js"
+    ]
   },
   "formatter": {
     "enabled": true,

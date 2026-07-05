@@ -1,0 +1,15 @@
+{
+  "name": "convor-integration-tests",
+  "private": true,
+  "description": "Integration tests for the Convor BigCommerce + Ecwid widget plugins: snippet-builder unit tests + Fastify boot smoke tests.",
+  "license": "MIT",
+  "type": "commonjs",
+  "scripts": {
+    "test:bigcommerce": "node bigcommerce.test.js",
+    "test:ecwid": "node ecwid.test.js",
+    "test": "node bigcommerce.test.js && node ecwid.test.js"
+  },
+  "dependencies": {
+    "jsdom": "^25.0.1"
+  }
+}
