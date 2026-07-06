@@ -7,7 +7,7 @@
 # Module source (../../drupal) is bind-mounted into modules/custom/convor_widget.
 services:
   db:
-    image: postgres:16
+    image: postgres:18
     environment:
       POSTGRES_DB: drupal
       POSTGRES_USER: drupal
