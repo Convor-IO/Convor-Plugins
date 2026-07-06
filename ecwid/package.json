@@ -18,7 +18,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
+    "dotenv": "^17.4.2",
     "fastify": "^5.2.1"
   },
   "devDependencies": {
