@@ -22,7 +22,7 @@
 #   docker compose down -v
 services:
   db:
-    image: mariadb:11
+    image: mariadb:12
     environment:
       MARIADB_ROOT_PASSWORD: opencart
       MARIADB_DATABASE: opencart
