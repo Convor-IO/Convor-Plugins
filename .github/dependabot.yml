@@ -1,0 +1,148 @@
+# Dependabot — Convor-Plugins
+# Docs: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+#
+# Coverage:
+#   npm            — root pnpm-lock.yaml (packages/* + segment workspace)
+#                    + three npm-locked platform subdirs that carry their own
+#                      package-lock.json: /bigcommerce, /ecwid, /integration-tests
+#   github-actions — .github/workflows/*.yml (no workflows yet; block is in
+#                    place so bumps are proposed as soon as CI lands)
+#   docker-compose — integration-test fixture stacks under
+#                    /integration-tests/fixtures/<platform>/docker-compose.yml
+#                    (wordpress, drupal, joomla, magento, opencart, prestashop)
+#
+# All container images use EXPLICIT version tags (no `latest`, no bare majors).
+# Note: many fixture images are intentionally held on a platform-specific
+# major (mariadb:10.6 for Magento, mysql:8.0 for Prestashop, postgres:16 for
+# Drupal) — Dependabot will still propose them; close any major bump that
+# breaks the fixture. The `docker-compose` ecosystem has no `groups` support,
+# so each image bump opens its own PR.
+#
+# Mirrors saas/website/mailer conventions; kept in sync.
+version: 2
+
+updates:
+  # ── npm (pnpm workspace root) ──────────────────────────────────────────
+  # Root pnpm-lock.yaml covers packages/widget-sdk, packages/widget-react,
+  # and segment. Schedule: weekly, Monday.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 15
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      react:
+        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
+      testing:
+        patterns: ["@playwright/*", "playwright", "vitest", "@vitest/*"]
+
+  # ── npm (npm-locked platform subdirs) ──────────────────────────────────
+  # Each of these ships its own package-lock.json and is NOT part of the pnpm
+  # workspace, so each needs a dedicated entry. Same schedule/prefix as root.
+  - package-ecosystem: "npm"
+    directory: "/bigcommerce"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      fastify:
+        patterns: ["fastify", "@fastify/*"]
+
+  - package-ecosystem: "npm"
+    directory: "/ecwid"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      fastify:
+        patterns: ["fastify", "@fastify/*"]
+
+  - package-ecosystem: "npm"
+    directory: "/integration-tests"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(deps-dev)"
+
+  # ── GitHub Actions ─────────────────────────────────────────────────────
+  # No .github/workflows yet — this block is a no-op until CI is added, at
+  # which point it will pick up pinned actions automatically. Schedule: Tue.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+    open-pull-requests-limit: 10
+    commit-message:
+      prefix: "chore(ci)"
+
+  # ── Docker Compose (integration-test fixtures) ─────────────────────────
+  # Six platform fixture stacks, each its own docker-compose.yml. One entry
+  # per directory. Schedule: weekly, Wednesday.
+  - package-ecosystem: "docker-compose"
+    directory: "/integration-tests/fixtures/wordpress"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/integration-tests/fixtures/drupal"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/integration-tests/fixtures/joomla"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/integration-tests/fixtures/magento"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/integration-tests/fixtures/opencart"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+
+  - package-ecosystem: "docker-compose"
+    directory: "/integration-tests/fixtures/prestashop"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
