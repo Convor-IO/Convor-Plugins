@@ -70,7 +70,7 @@ services:
     # composer create-project + setup:install). Avoids the official
     # magento/magento-cloud image (~3GB, license-bound) and avoids the
     # shinsenter image's s6/IPv6 orchestration quirks.
-    image: php:8.3-apache
+    image: php:8.5-apache
     depends_on:
       db:
         condition: service_healthy
