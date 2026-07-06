@@ -49,7 +49,7 @@ services:
   # (not tmpfs) is used for data because the opensearch image runs as uid
   # 1000 and can't write to a root-owned tmpfs.
   opensearch:
-    image: opensearchproject/opensearch:2.11.0
+    image: opensearchproject/opensearch:3.7.0
     environment:
       - discovery.type=single-node
       - DISABLE_SECURITY_PLUGIN=true
