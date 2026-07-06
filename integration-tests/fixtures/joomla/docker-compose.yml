@@ -7,7 +7,7 @@
 # Joomla plugins directory so the running CMS loads our real code.
 services:
   db:
-    image: mariadb:11
+    image: mariadb:12
     environment:
       MARIADB_ROOT_PASSWORD: joomla
       MARIADB_DATABASE: joomla
