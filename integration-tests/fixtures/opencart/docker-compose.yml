@@ -1,6 +1,6 @@
 # Real OpenCart 4 install for the Convor widget module E2E verification.
 #
-# Boots a fresh OpenCart 4.0.2.3 on php:8.2-apache + MariaDB 11, installs the
+# Boots a fresh OpenCart 4.0.2.3 on php:8.2-apache + MariaDB 12, installs the
 # Convor module from the repo source, registers the storefront header event,
 # and persists the module settings (status=1, org_slug, api_base). The
 # storefront then emits the Convor <script> tag on every page.
@@ -22,7 +22,7 @@
 #   docker compose down -v
 services:
   db:
-    image: mariadb:11
+    image: mariadb:12
     environment:
       MARIADB_ROOT_PASSWORD: opencart
       MARIADB_DATABASE: opencart

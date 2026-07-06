@@ -12,11 +12,12 @@
 #                    (wordpress, drupal, joomla, magento, opencart, prestashop)
 #
 # All container images use EXPLICIT version tags (no `latest`, no bare majors).
-# Note: many fixture images are intentionally held on a platform-specific
-# major (mariadb:10.6 for Magento, mysql:8.0 for Prestashop, postgres:16 for
-# Drupal) — Dependabot will still propose them; close any major bump that
-# breaks the fixture. The `docker-compose` ecosystem has no `groups` support,
-# so each image bump opens its own PR.
+# Direction: track LATEST mariadb/postgres everywhere, EXCEPT where an external
+# CMS has a hard version cap — those are pinned + blocked via `ignore` rules:
+#   - Magento fixture:    mariadb pinned to 10.6 (Magento 2.4 hard requirement)
+#   - PrestaShop fixture: mysql pinned to 8.0    (PrestaShop 8 hard requirement)
+# The `docker-compose` ecosystem has no `groups` support, so each image bump
+# opens its own PR.
 #
 # Mirrors saas/website/mailer conventions; kept in sync.
 version: 2
@@ -120,6 +121,9 @@ updates:
     commit-message:
       prefix: "chore(deps)"
 
+  # Magento: MariaDB is HARD-PINNED to 10.6 (Magento 2.4 hard requirement —
+  # newer MariaDB breaks setup:install). Block all bumps for it; other images
+  # in this fixture (opensearch, php) still update normally.
   - package-ecosystem: "docker-compose"
     directory: "/integration-tests/fixtures/magento"
     schedule:
@@ -128,6 +132,9 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      - dependency-name: "mariadb"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]
 
   - package-ecosystem: "docker-compose"
     directory: "/integration-tests/fixtures/opencart"
@@ -138,6 +145,9 @@ updates:
     commit-message:
       prefix: "chore(deps)"
 
+  # PrestaShop: MySQL is HARD-PINNED to 8.0 (PrestaShop 8 hard requirement —
+  # MySQL 8.4+ drops the mysql_native_password default the installer relies
+  # on). Block all bumps for it.
   - package-ecosystem: "docker-compose"
     directory: "/integration-tests/fixtures/prestashop"
     schedule:
@@ -146,3 +156,6 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      - dependency-name: "mysql"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]

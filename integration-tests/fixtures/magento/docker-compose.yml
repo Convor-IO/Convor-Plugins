@@ -27,6 +27,9 @@
 #   docker compose down -v
 services:
   db:
+    # PINNED: Magento 2.4 requires MariaDB 10.6 exactly (hard cap). Do NOT
+    # bump — newer MariaDB breaks Magento's setup:install. See Magento 2.4
+    # system requirements. Tracked as a pinned exception to "latest mariadb".
     image: mariadb:10.6
     # innodb_strict_mode=0 avoids "Row size too large" on some Magento DDL.
     command: ["mysqld", "--innodb_strict_mode=0"]

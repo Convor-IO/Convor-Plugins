@@ -8,6 +8,9 @@
 # Module source (../../prestashop) is bind-mounted into /modules/convor.
 services:
   db:
+    # PINNED: PrestaShop 8 requires MySQL 8.0 (hard cap). Newer MySQL 8.4+
+    # drops the mysql_native_password plugin default that PrestaShop's
+    # installer relies on. Tracked as a pinned exception to "latest mysql".
     image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: prestashop
