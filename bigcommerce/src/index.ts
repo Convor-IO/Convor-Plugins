@@ -15,17 +15,17 @@ import {
   parseStoreHash,
 } from "./oauth.js";
 import {
+  createSessionToken,
   SESSION_COOKIE_NAME,
   SESSION_MAX_AGE,
-  createSessionToken,
   verifySessionToken,
 } from "./session.js";
 import { verifySignedPayload } from "./signed-payload.js";
 import { FileTokenStore, type TokenStore } from "./token-store.js";
 import { renderError, renderLanding, renderSettings } from "./views.js";
 import {
-  type ConvorWidgetConfig,
   buildWidgetHtml,
+  type ConvorWidgetConfig,
   parseConfig,
   validateConfig,
 } from "./widget-config.js";

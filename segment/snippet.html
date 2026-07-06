@@ -34,7 +34,7 @@
 
     <!-- 1) Convor ↔ Segment bridge (inline, no build step required) -->
     <script>
-      (function () {
+      (() => {
         var SLUG = "ORG_SLUG"; // <-- replace with your Convor org slug
         var API_BASE = "https://cdn.convor.io"; // optional override
         var FORWARD_IDENTIFY = true;
@@ -42,6 +42,7 @@
         var WIDGET_TIMEOUT_MS = 10000;
         var ANALYTICS_TIMEOUT_MS = 15000;
         var POLL_INTERVAL_MS = 50;
+        var s;
 
         // --- SSR / no-DOM guard -------------------------------------------
         if (typeof window === "undefined" || typeof document === "undefined") {
@@ -51,7 +52,7 @@
         // --- 1. Inject the Convor widget script ---------------------------
         var src = API_BASE.replace(/\/+$/, "") + "/widget.js";
         if (!document.querySelector('script[src="' + src + '"]')) {
-          var s = document.createElement("script");
+          s = document.createElement("script");
           s.src = src;
           s.async = true;
           s.setAttribute("data-key", SLUG);
@@ -65,7 +66,7 @@
             return;
           }
           var start = Date.now();
-          var timer = setInterval(function () {
+          var timer = setInterval(() => {
             if (test()) {
               clearInterval(timer);
               done();
@@ -95,11 +96,12 @@
         function normalizeIdentify(args) {
           if (!args.length) return null;
           var first = args[0];
+          var ctx, inner, traits, uid;
           if (first && typeof first === "object") {
-            var ctx = first;
-            var inner = asRecord(ctx.event) || ctx;
-            var traits = asRecord(inner.traits) || {};
-            var uid = inner.userId != null ? inner.userId : ctx.userId;
+            ctx = first;
+            inner = asRecord(ctx.event) || ctx;
+            traits = asRecord(inner.traits) || {};
+            uid = inner.userId != null ? inner.userId : ctx.userId;
             return { userId: uid, traits: traits };
           }
           var traitsArg = asRecord(args[1]) || {};
@@ -108,9 +110,10 @@
         function normalizeTrack(args) {
           if (!args.length) return null;
           var first = args[0];
+          var ctx, inner;
           if (first && typeof first === "object") {
-            var ctx = first;
-            var inner = asRecord(ctx.event) || ctx;
+            ctx = first;
+            inner = asRecord(ctx.event) || ctx;
             if (typeof inner.event !== "string") return null;
             return {
               event: inner.event,
@@ -165,26 +168,22 @@
         }
 
         waitFor(
-          function () {
-            return typeof window.Convor !== "undefined";
-          },
+          () => typeof window.Convor !== "undefined",
           WIDGET_TIMEOUT_MS,
           "window.Convor",
-          function () {
+          () => {
             convorReady = true;
             maybeAttach();
           },
         );
         waitFor(
-          function () {
-            return (
+          () => (
               typeof window.analytics !== "undefined" &&
               typeof window.analytics.on === "function"
-            );
-          },
+            ),
           ANALYTICS_TIMEOUT_MS,
           "window.analytics",
-          function () {
+          () => {
             analyticsReady = true;
             maybeAttach();
           },

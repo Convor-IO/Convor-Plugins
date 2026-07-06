@@ -1,4 +1,4 @@
-import { ECWID_HOSTS, config } from "./config.js";
+import { config, ECWID_HOSTS } from "./config.js";
 
 /**
  * Typed client for the Ecwid REST API.

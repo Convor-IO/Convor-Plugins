@@ -18,13 +18,13 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "dotenv": "^16.4.7",
+    "dotenv": "^17.4.2",
     "fastify": "^5.2.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@types/node": "^22.13.1",
+    "@biomejs/biome": "^2.5.2",
+    "@types/node": "^26.1.0",
     "tsx": "^4.19.2",
-    "typescript": "^5.7.3"
+    "typescript": "^6.0.3"
   }
 }

@@ -10,7 +10,6 @@
  * Those live server-side in the Convor dashboard and are fetched at runtime by
  * the widget, so duplicating them here would just create drift.
  */
-import { WixCSSReact } from "@wix/design-system";
 import {
   Card,
   Cell,
@@ -21,6 +20,7 @@ import {
   TextButton,
   TextInput,
   Toast,
+  WixCSSReact,
 } from "@wix/design-system";
 // Web modules are imported by relative path and bundled by the Wix CLI.
 // `webMethod` wraps the call so it runs with site-owner elevation.

@@ -1,9 +1,9 @@
-import { initConvor } from "@convor/widget-sdk";
 import type {
   ConvorPosition,
   ConvorSDK,
   ConvorTheme,
 } from "@convor/widget-sdk";
+import { initConvor } from "@convor/widget-sdk";
 import { useEffect, useRef } from "react";
 import { setHandle, warn } from "./handle.js";
 

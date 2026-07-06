@@ -44,9 +44,13 @@
     "vite": "^6.2.2"
   },
   "workspaces": {
-    "packages": ["extensions/*"]
+    "packages": [
+      "extensions/*"
+    ]
   },
-  "trustedDependencies": ["@shopify/plugin-cloudflare"],
+  "trustedDependencies": [
+    "@shopify/plugin-cloudflare"
+  ],
   "resolutions": {
     "@graphql-tools/url-loader": "8.0.16",
     "@graphql-codegen/client-preset": "4.7.0",

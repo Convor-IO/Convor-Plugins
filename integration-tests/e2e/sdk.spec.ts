@@ -1,9 +1,9 @@
 import { readFile } from "node:fs/promises";
 import {
+  createServer,
   type IncomingMessage,
   type Server,
   type ServerResponse,
-  createServer,
 } from "node:http";
 import { extname, join, resolve } from "node:path";
 import { expect, test } from "@playwright/test";

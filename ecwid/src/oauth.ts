@@ -1,4 +1,4 @@
-import { ECWID_HOSTS, ECWID_SCOPES, config } from "./config.js";
+import { config, ECWID_HOSTS, ECWID_SCOPES } from "./config.js";
 
 /**
  * Ecwid OAuth — external (server-side) app flow.

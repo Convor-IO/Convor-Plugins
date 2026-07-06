@@ -13,7 +13,13 @@
   "bugs": {
     "url": "https://github.com/Convor-IO/Convor-Plugins/issues"
   },
-  "keywords": ["convor", "live-chat", "widget", "chat", "sdk"],
+  "keywords": [
+    "convor",
+    "live-chat",
+    "widget",
+    "chat",
+    "sdk"
+  ],
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -25,7 +31,9 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "sideEffects": false,
   "scripts": {
     "build": "tsup",
@@ -34,11 +42,12 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@types/node": "^22.10.0",
-    "happy-dom": "^15.11.0",
+    "@biomejs/biome": "^2.5.2",
+    "@types/node": "^26.1.0",
+    "happy-dom": "^20.10.6",
     "tsup": "^8.3.5",
-    "typescript": "^5.7.0",
-    "vitest": "^2.1.8"
+    "typescript": "^6.0.3",
+    "vite": "^7.3.6",
+    "vitest": "^4.1.10"
   }
 }
