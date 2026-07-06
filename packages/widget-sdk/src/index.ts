@@ -1,8 +1,8 @@
 import {
-  DEFAULT_API_BASE,
-  DEFAULT_TIMEOUT_MS,
   buildDataAttrs,
   buildScriptUrl,
+  DEFAULT_API_BASE,
+  DEFAULT_TIMEOUT_MS,
   findScript,
   injectScript,
   waitForReady,
@@ -15,6 +15,7 @@ function hasDOM(): boolean {
   return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
+export { DEFAULT_API_BASE, DEFAULT_TIMEOUT_MS } from "./loader.js";
 export type {
   ConvorOptions,
   ConvorPosition,
@@ -22,8 +23,6 @@ export type {
   ConvorTheme,
   ConvorVisitorSDK,
 } from "./types.js";
-
-export { DEFAULT_API_BASE, DEFAULT_TIMEOUT_MS } from "./loader.js";
 
 /**
  * Embed the Convor live-chat widget and resolve a typed SDK handle.

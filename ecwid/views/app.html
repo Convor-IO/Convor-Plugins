@@ -137,7 +137,7 @@
     </div>
 
     <script>
-      (function () {
+      (() => {
         var form = document.getElementById("settings-form");
         var status = document.getElementById("status");
         var saveBtn = document.getElementById("save");
@@ -147,7 +147,7 @@
           status.className = kind || "";
         }
 
-        form.addEventListener("submit", function (e) {
+        form.addEventListener("submit", (e) => {
           e.preventDefault();
           saveBtn.disabled = true;
           show("Saving…");
@@ -161,38 +161,34 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           })
-            .then(function (r) {
-              return r.json().then(function (body) {
-                return { ok: r.ok, status: r.status, body: body };
-              });
-            })
-            .then(function (res) {
+            .then((r) => r.json().then((body) => ({ ok: r.ok, status: r.status, body: body })))
+            .then((res) => {
               if (res.ok) {
                 show("Saved — widget is live on your storefront.", "ok");
               } else {
                 show((res.body && res.body.error) || "Save failed.", "err");
               }
             })
-            .catch(function () {
+            .catch(() => {
               show("Network error.", "err");
             })
-            .finally(function () {
+            .finally(() => {
               saveBtn.disabled = false;
             });
         });
 
-        document.getElementById("uninstall").addEventListener("click", function () {
+        document.getElementById("uninstall").addEventListener("click", () => {
           if (!confirm("Remove Convor from this store?")) return;
           show("Removing…");
           fetch(
             "/api/uninstall?storeId=" + encodeURIComponent(form.elements["storeId"].value),
             { method: "DELETE" },
           )
-            .then(function (r) { return r.ok ? { ok: true } : r.json(); })
-            .then(function () {
+            .then((r) => r.ok ? { ok: true } : r.json())
+            .then(() => {
               show("Uninstalled. You can close this window.", "ok");
             })
-            .catch(function () {
+            .catch(() => {
               show("Network error.", "err");
             });
         });

@@ -1,6 +1,4 @@
-import { removeScript } from "./loader.js";
-import { callVisitor } from "./loader.js";
-import { findScript } from "./loader.js";
+import { callVisitor, findScript, removeScript } from "./loader.js";
 import type { ConvorSDK } from "./types.js";
 
 /** Internal state tracked per-init so we can return idempotent handles. */

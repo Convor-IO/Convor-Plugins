@@ -5,15 +5,15 @@ import { fileURLToPath } from "node:url";
 import Fastify from "fastify";
 import { config } from "./config.js";
 import {
+  buildPublicConfig,
   EcwidApiError,
   EcwidClient,
-  buildPublicConfig,
 } from "./ecwid-client.js";
 import { escapeHtml } from "./html.js";
 import {
-  OAuthError,
   buildAuthorizeUrl,
   exchangeCodeForToken,
+  OAuthError,
 } from "./oauth.js";
 import { deleteStore, readStore, saveInstall, saveSettings } from "./store.js";
 

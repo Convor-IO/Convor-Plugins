@@ -1,9 +1,9 @@
 import {
+  attachForwarders,
+  buildScriptUrl,
   DEFAULT_ANALYTICS_TIMEOUT_MS,
   DEFAULT_API_BASE,
   DEFAULT_WIDGET_TIMEOUT_MS,
-  attachForwarders,
-  buildScriptUrl,
   findScript,
   injectScript,
   waitForAnalytics,
@@ -11,18 +11,13 @@ import {
 } from "./analytics-source.js";
 import type { ConvorSegmentBridgeOptions } from "./types.js";
 
-export type {
-  AnalyticsEmitter,
-  AnalyticsJS,
-  ConvorSegmentBridgeOptions,
-  ConvorVisitorSDK,
-} from "./types.js";
+export type { IdentifyPayload, TrackPayload } from "./analytics-source.js";
 export {
+  attachForwarders,
+  buildScriptUrl,
   DEFAULT_ANALYTICS_TIMEOUT_MS,
   DEFAULT_API_BASE,
   DEFAULT_WIDGET_TIMEOUT_MS,
-  attachForwarders,
-  buildScriptUrl,
   findScript,
   injectScript,
   normalizeIdentify,
@@ -30,7 +25,12 @@ export {
   waitForAnalytics,
   waitForConvor,
 } from "./analytics-source.js";
-export type { IdentifyPayload, TrackPayload } from "./analytics-source.js";
+export type {
+  AnalyticsEmitter,
+  AnalyticsJS,
+  ConvorSegmentBridgeOptions,
+  ConvorVisitorSDK,
+} from "./types.js";
 
 /** Internal state tracked per-init so re-init is a no-op. */
 interface BridgeState {

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
-  DEFAULT_API_BASE,
   __resetBridge,
+  DEFAULT_API_BASE,
   initConvorSegmentBridge,
   normalizeIdentify,
   normalizeTrack,

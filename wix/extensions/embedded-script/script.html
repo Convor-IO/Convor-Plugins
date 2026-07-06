@@ -20,7 +20,7 @@
      Docs: https://dev.wix.com/docs/build-apps/develop-your-app/develop-a-self-managed-app/supported-extensions/site-extensions/embedded-scripts/add-a-self-managed-embedded-script-extension
 -->
 <script>
-  (function () {
+  (() => {
     var slug = "{{slug}}";
     // Wix URL-encodes parameter values; decode defensively so a slug with a
     // reserved character round-trips correctly.
