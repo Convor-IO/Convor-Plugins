@@ -42,7 +42,7 @@
     "test": "vitest run"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.5.2",
     "@types/node": "^22.10.0",
     "happy-dom": "^15.11.0",
     "tsup": "^8.3.5",
