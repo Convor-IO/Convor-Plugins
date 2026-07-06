@@ -40,7 +40,7 @@ services:
     # OpenCart 4 needs PHP 8.0+; the official php:8.2-apache image gives us a
     # clean Debian+Apache+mod_php base we control. There is no first-party
     # OpenCart Docker image, so entrypoint.sh installs OpenCart from source.
-    image: php:8.2-apache
+    image: php:8.5-apache
     depends_on:
       db:
         condition: service_healthy
