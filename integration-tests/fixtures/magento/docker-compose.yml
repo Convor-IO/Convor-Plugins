@@ -27,7 +27,7 @@
 #   docker compose down -v
 services:
   db:
-    image: mariadb:10.6
+    image: mariadb:12.3
     # innodb_strict_mode=0 avoids "Row size too large" on some Magento DDL.
     command: ["mysqld", "--innodb_strict_mode=0"]
     environment:
