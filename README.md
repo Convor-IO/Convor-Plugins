@@ -86,14 +86,6 @@ Each Convor org can restrict where its widget embeds via the dashboard
 (the host site's domain is automatically the request origin), but merchants
 should add their storefront domain to the allowlist before going live.
 
-## Marketplace submission (Shopify / BigCommerce / Ecwid)
-
-The hosted e-commerce apps need real platform developer accounts, a public
-HTTPS endpoint, and platform review before they're installable from the
-marketplace. See **[`docs/oauth-marketplace-runbook.md`](./docs/oauth-marketplace-runbook.md)**
-for the full step-by-step (account creation, OAuth verification, submission,
-and the code-level gaps to close first).
-
 ## License
 
 MIT
