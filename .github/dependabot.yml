@@ -35,6 +35,16 @@ updates:
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
+    # Cooldown: don't propose a release until it has aged past pnpm's
+    # minimumReleaseAge (24h on the CI runner). Without this Dependabot
+    # opens PRs the moment a version is published and `pnpm install
+    # --frozen-lockfile` rejects them with ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION.
+    # Applied to all npm entries below too (incl. npm-locked subdirs) for
+    # consistent supply-chain hygiene. Majors cool longer since they
+    # carry more risk.
+    cooldown:
+      default-days: 2
+      semver-major-days: 7
     groups:
       react:
         patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
@@ -53,6 +63,9 @@ updates:
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
+    cooldown:
+      default-days: 2
+      semver-major-days: 7
     groups:
       fastify:
         patterns: ["fastify", "@fastify/*"]
@@ -66,6 +79,9 @@ updates:
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
+    cooldown:
+      default-days: 2
+      semver-major-days: 7
     groups:
       fastify:
         patterns: ["fastify", "@fastify/*"]
@@ -78,6 +94,9 @@ updates:
     open-pull-requests-limit: 10
     commit-message:
       prefix: "chore(deps-dev)"
+    cooldown:
+      default-days: 2
+      semver-major-days: 7
 
   # ── GitHub Actions ─────────────────────────────────────────────────────
   # No .github/workflows yet — this block is a no-op until CI is added, at
