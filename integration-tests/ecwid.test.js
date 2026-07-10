@@ -150,6 +150,7 @@ function bootServer(port) {
     ECWID_CLIENT_SECRET: "test-client-secret",
     ECWID_REDIRECT_URL: "https://convor-ecwid.test/install",
     ECWID_APP_ID: APP_ID,
+    DATABASE_URL: "postgres://postgres:postgres@127.0.0.1:1/convor_plugins",
     // Quiet logs in test output.
     FASTIFY_LOG_LEVEL: "error",
   };

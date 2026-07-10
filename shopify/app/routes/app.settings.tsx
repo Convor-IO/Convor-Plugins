@@ -3,7 +3,6 @@ import { json } from "@remix-run/node";
 import { useActionData, useFetcher, useLoaderData } from "@remix-run/react";
 import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
 import {
-  AlphaStack,
   Banner,
   BlockStack,
   Button,
@@ -268,6 +267,7 @@ export default function SettingsPage() {
   const loaderData = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const fetcher = useFetcher<typeof action>();
+  const saveResult = fetcher.data ?? actionData;
   const shopify = useAppBridge();
 
   const [slug, setSlug] = useState(loaderData.config.slug);
@@ -277,18 +277,18 @@ export default function SettingsPage() {
 
   // Toast on successful save / error.
   useEffect(() => {
-    if (!actionData) return;
-    if (actionData.ok) {
+    if (!saveResult) return;
+    if (saveResult.ok) {
       shopify.toast.show("Convor settings saved. Activate the app embed.", {
         duration: 4000,
       });
-    } else if (actionData.error) {
-      shopify.toast.show(actionData.error, {
+    } else if (saveResult.error) {
+      shopify.toast.show(saveResult.error, {
         isError: true,
         duration: 5000,
       });
     }
-  }, [actionData, shopify]);
+  }, [saveResult, shopify]);
 
   return (
     <Page>
@@ -297,8 +297,8 @@ export default function SettingsPage() {
         <Layout.Section>
           <fetcher.Form method="post">
             <BlockStack gap="500">
-              {actionData && !actionData.ok && actionData.error ? (
-                <Banner tone="critical">{actionData.error}</Banner>
+              {saveResult && !saveResult.ok && saveResult.error ? (
+                <Banner tone="critical">{saveResult.error}</Banner>
               ) : null}
 
               <Card>
@@ -345,7 +345,7 @@ export default function SettingsPage() {
               </Card>
 
               <InlineStack align="end">
-                <Button submit primary loading={isSaving}>
+                <Button submit variant="primary" loading={isSaving}>
                   Save settings
                 </Button>
               </InlineStack>
@@ -355,7 +355,7 @@ export default function SettingsPage() {
 
         <Layout.Section variant="oneThird">
           <Card>
-            <AlphaStack gap="300">
+            <BlockStack gap="300">
               <Text variant="headingMd" as="h2">
                 Activate the widget
               </Text>
@@ -364,7 +364,7 @@ export default function SettingsPage() {
                 <strong>Convor Widget</strong> app embed block — turn it on in
                 your theme:
               </Text>
-              <AlphaStack gap="200">
+              <BlockStack gap="200">
                 <Text variant="bodyMd" as="p">
                   1. Online Store → Themes → Customize
                 </Text>
@@ -374,7 +374,7 @@ export default function SettingsPage() {
                 <Text variant="bodyMd" as="p">
                   3. Save
                 </Text>
-              </AlphaStack>
+              </BlockStack>
               <Button
                 url={loaderData.dashboardUrl}
                 target="_blank"
@@ -382,7 +382,7 @@ export default function SettingsPage() {
               >
                 Open Convor dashboard
               </Button>
-            </AlphaStack>
+            </BlockStack>
           </Card>
         </Layout.Section>
       </Layout>

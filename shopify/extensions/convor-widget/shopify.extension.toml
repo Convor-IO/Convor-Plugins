@@ -7,6 +7,7 @@ type = "theme"
 handle = "convor-widget"
 name = "Convor Widget"
 description = "Injects the Convor live-chat widget into your storefront."
+uid = "495a813e-07cf-39c5-635b-5ff5dc6a916cd3d57616"
 
 # Expose the metafield read by the block so the merchant can also surface it
 # in Liquid if they wish. The primary config source is the shop metafield

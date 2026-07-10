@@ -46,11 +46,8 @@ export const config = {
   /** Default Convor widget CDN — overridable per-store via the settings form. */
   defaultApiBase: optional("CONVOR_DEFAULT_API_BASE", "https://cdn.convor.io"),
   port: Number.parseInt(optional("PORT", "3000"), 10),
-  /**
-   * File-backed token store. Tokens don't expire in Ecwid, so a single JSON
-   * file per store is enough for a self-hosted app. Swap for a DB in prod.
-   */
-  dataDir: optional("DATA_DIR", "./data"),
+  /** Postgres database for marketplace-safe install token persistence. */
+  databaseUrl: required("DATABASE_URL"),
 } as const;
 
 /** Access scopes requested from the merchant at install time. */

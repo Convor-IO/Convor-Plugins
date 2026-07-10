@@ -24,12 +24,12 @@ export interface BcCallbackOwner {
 
 /** Shape of the decoded `signed_payload` JWT on the load callback. */
 export interface SignedPayload {
-  /** "bigcommerce". */
-  aud: string;
   /** App client id. */
-  sub: string;
-  /** BC store hash without the leading "store_". */
-  store_hash: string;
+  aud?: string;
+  /** BC store hash as stores/{hash}; present on signed_payload_jwt. */
+  sub?: string;
+  /** BC store hash without the leading "store_"; present on legacy payloads. */
+  store_hash?: string;
   /** ISO-8601 issued-at. */
   iat?: number;
   /** The acting user. */
@@ -58,8 +58,21 @@ export function verifySignedPayload(
   }
 
   const payload = decoded as Record<string, unknown>;
-  if (typeof payload.store_hash !== "string" || !payload.store_hash) {
-    throw new Error("signed_payload missing store_hash.");
+  if (
+    (typeof payload.store_hash !== "string" || !payload.store_hash) &&
+    (typeof payload.sub !== "string" || !payload.sub.startsWith("stores/"))
+  ) {
+    throw new Error("signed_payload missing store hash.");
   }
   return payload as unknown as SignedPayload;
+}
+
+export function storeHashFromSignedPayload(payload: SignedPayload): string {
+  if (payload.store_hash) return payload.store_hash;
+  const sub = payload.sub ?? "";
+  const match = /^stores\/([a-zA-Z0-9]+)$/.exec(sub);
+  if (!match?.[1]) {
+    throw new Error("signed_payload has malformed store subject.");
+  }
+  return match[1];
 }

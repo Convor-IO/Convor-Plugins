@@ -13,7 +13,7 @@ import type { StoreInstall } from "./token-store.js";
  *      `signed_payload` JWT, which we verify to render the embedded app.
  */
 
-const BC_API_HOST = "https://api.bigcommerce.com";
+const BC_API_HOST = "https://login.bigcommerce.com";
 const BC_INSTALL_HOST = "https://login.bigcommerce.com";
 
 /** The Auth Callback URL BC redirects to after the merchant approves. */
@@ -90,7 +90,7 @@ export async function exchangeCodeForToken(
 /** "stores/abc123" → "abc123". Throws if the context is malformed. */
 export function parseStoreHash(context: string): string {
   const match = /^stores\/([a-zA-Z0-9]+)$/.exec(context);
-  if (!match || !match[1]) {
+  if (!match?.[1]) {
     throw new Error(`Malformed BC OAuth context: "${context}".`);
   }
   return match[1];

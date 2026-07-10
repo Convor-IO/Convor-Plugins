@@ -86,7 +86,17 @@ export function buildWidgetHtml(cfg: ConvorWidgetConfig): string {
   const src = `${cfg.apiBase.replace(/\/+$/, "")}/widget.js`;
   // data-key uses double quotes inside an HTML attribute; slug is validated
   // to be [a-z0-9-] so no escaping is needed here.
-  return `<script src="${src}" data-key="${cfg.slug}" async></script>`;
+  return [
+    "<script>",
+    "(function(){",
+    `var script=document.createElement("script");`,
+    `script.src=${JSON.stringify(src)};`,
+    `script.setAttribute("data-key",${JSON.stringify(cfg.slug)});`,
+    "script.async=true;",
+    "(document.head||document.documentElement).appendChild(script);",
+    "})();",
+    "</script>",
+  ].join("");
 }
 
 export { CONVOR_DASHBOARD_URL };

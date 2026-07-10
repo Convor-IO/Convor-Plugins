@@ -1,9 +1,9 @@
 const { spawn } = require("node:child_process");
-const { existsSync, mkdtempSync, rmSync, writeFileSync } = require("node:fs");
-const { tmpdir } = require("node:os");
+const { existsSync, rmSync, writeFileSync } = require("node:fs");
 const { join } = require("node:path");
 const http = require("node:http");
 const net = require("node:net");
+const { JSDOM } = require("jsdom");
 
 const { assertSnippetMatches } = require("./assert-snippet.js");
 
@@ -84,15 +84,11 @@ function get(port, path) {
 
 function runTsxProbe() {
   // A throwaway ESM probe (a .mts file inside the BC package so relative
-  // imports resolve correctly) that imports the real buildWidgetHtml, asserts
-  // it via the shared harness, and prints the resulting snippet as JSON.
+  // imports resolve correctly) that imports the real buildWidgetHtml and
+  // prints the resulting loader wrapper as JSON.
   const probe = `
-import { createRequire } from "node:module";
 import { buildWidgetHtml } from "./src/widget-config.js";
-const require = createRequire(import.meta.url);
-const { assertSnippetMatches } = require(${JSON.stringify(join(REPO_ROOT, "integration-tests/assert-snippet.js"))});
 const html = buildWidgetHtml({ slug: ${JSON.stringify(SLUG)}, apiBase: ${JSON.stringify(API_BASE)} });
-assertSnippetMatches(html, { apiBase: ${JSON.stringify(API_BASE)}, slug: ${JSON.stringify(SLUG)} });
 console.log("RESULT=" + JSON.stringify(html));
 `;
   const probePath = join(BC_DIR, `__snippet_probe_${process.pid}.mts`);
@@ -135,18 +131,38 @@ console.log("RESULT=" + JSON.stringify(html));
   });
 }
 
+function executeLoaderWrapper(html) {
+  const match = html.match(/^<script>([\s\S]*)<\/script>$/i);
+  if (!match) {
+    throw new Error("buildWidgetHtml did not return one inline script wrapper");
+  }
+  const dom = new JSDOM(
+    "<!DOCTYPE html><html><head></head><body></body></html>",
+    { runScripts: "outside-only", url: "https://store.example.com/" },
+  );
+  dom.window.eval(match[1]);
+  const widgetScript = Array.from(
+    dom.window.document.querySelectorAll("script"),
+  ).find((script) => /\/widget\.js$/.test(script.src));
+  if (!widgetScript) {
+    throw new Error("loader wrapper did not append the widget script");
+  }
+  const asyncAttr = widgetScript.async ? " async" : "";
+  return `<script src="${widgetScript.src}" data-key="${widgetScript.getAttribute("data-key")}"${asyncAttr}></script>`;
+}
+
 // ---------------------------------------------------------------------------
 // 2. Boot the Fastify server with stubbed env.
 // ---------------------------------------------------------------------------
 
-function bootServer(port, tokenStorePath) {
+function bootServer(port) {
   const env = {
     ...process.env,
     PORT: String(port),
     BC_CLIENT_ID: "test-client-id",
     BC_CLIENT_SECRET: "test-client-secret",
     APP_BASE_URL: "https://convor-bigcommerce.test",
-    TOKEN_STORE_PATH: tokenStorePath,
+    DATABASE_URL: "postgres://postgres:postgres@127.0.0.1:1/convor_plugins",
     // Suppress pino's pretty logs in test output (keep logs but quiet).
     FASTIFY_LOG_LEVEL: "error",
   };
@@ -203,7 +219,10 @@ async function main() {
   }
   // Double-check from this process too (defence in depth against probe spoofing).
   try {
-    assertSnippetMatches(snippet, { apiBase: API_BASE, slug: SLUG });
+    assertSnippetMatches(executeLoaderWrapper(snippet), {
+      apiBase: API_BASE,
+      slug: SLUG,
+    });
   } catch (err) {
     fail(`snippet assertion failed: ${err.message}`);
     return;
@@ -221,12 +240,9 @@ async function main() {
   }
 
   const port = await freePort();
-  const tokenDir = mkdtempSync(join(tmpdir(), "convor-bc-"));
-  const tokenStorePath = join(tokenDir, "tokens.json");
-
   let server;
   try {
-    server = await bootServer(port, tokenStorePath);
+    server = await bootServer(port);
     await waitForUp(port);
   } catch (err) {
     fail(`server boot failed: ${err.message}`);

@@ -1,20 +1,11 @@
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  unlinkSync,
-  writeFileSync,
-} from "node:fs";
-import { dirname, join } from "node:path";
+import { Pool } from "pg";
 import { config } from "./config.js";
 
 /**
- * File-backed persistence for the OAuth token + per-store Convor settings.
+ * Postgres-backed persistence for the OAuth token + per-store Convor settings.
  *
- * Ecwid access tokens do not expire, so a simple one-file-per-store store is
- * sufficient for a self-hosted app. Each store's data lives at
- * `<dataDir>/<storeId>.json`.
+ * Ecwid access tokens do not expire, so a durable row keyed by storeId is
+ * enough for marketplace installs and survives app restarts/deployments.
  */
 
 export interface InstallRecord {
@@ -35,74 +26,142 @@ export interface StoreRecord {
   settings?: ConvorSettings;
 }
 
-function filePath(storeId: string): string {
-  return join(config.dataDir, `${storeId}.json`);
+interface StoreRow {
+  store_id: string;
+  access_token: string;
+  scope: string;
+  installed_at: Date;
+  slug: string | null;
+  api_base: string | null;
+  settings_updated_at: Date | null;
 }
 
-function ensureDataDir(): void {
-  if (!existsSync(config.dataDir)) {
-    mkdirSync(config.dataDir, { recursive: true });
+const pool = new Pool({ connectionString: config.databaseUrl });
+
+let ready: Promise<void> | undefined;
+
+function ensureSchema(): Promise<void> {
+  ready ??= pool
+    .query(`
+  CREATE TABLE IF NOT EXISTS ecwid_stores (
+    store_id text PRIMARY KEY,
+    access_token text NOT NULL,
+    scope text NOT NULL,
+    installed_at timestamptz NOT NULL DEFAULT now(),
+    slug text,
+    api_base text,
+    settings_updated_at timestamptz,
+    updated_at timestamptz NOT NULL DEFAULT now()
+  )
+`)
+    .then(() => undefined);
+  return ready;
+}
+
+function toRecord(row: StoreRow): StoreRecord {
+  const record: StoreRecord = {
+    install: {
+      storeId: row.store_id,
+      accessToken: row.access_token,
+      scope: row.scope,
+      installedAt: row.installed_at.toISOString(),
+    },
+  };
+  if (row.slug && row.api_base && row.settings_updated_at) {
+    record.settings = {
+      slug: row.slug,
+      apiBase: row.api_base,
+      updatedAt: row.settings_updated_at.toISOString(),
+    };
   }
+  return record;
 }
 
 /** Read a store's full record, or `null` if it isn't installed. */
-export function readStore(storeId: string): StoreRecord | null {
-  const path = filePath(storeId);
-  if (!existsSync(path)) {
-    return null;
-  }
-  const raw = readFileSync(path, "utf8");
-  return JSON.parse(raw) as StoreRecord;
-}
-
-/** Persist a store's full record. */
-function writeStore(storeId: string, record: StoreRecord): void {
-  ensureDataDir();
-  const path = filePath(storeId);
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, JSON.stringify(record, null, 2), "utf8");
+export async function readStore(storeId: string): Promise<StoreRecord | null> {
+  await ensureSchema();
+  const result = await pool.query<StoreRow>(
+    `
+      SELECT
+        store_id,
+        access_token,
+        scope,
+        installed_at,
+        slug,
+        api_base,
+        settings_updated_at
+      FROM ecwid_stores
+      WHERE store_id = $1
+    `,
+    [storeId],
+  );
+  const row = result.rows[0];
+  return row ? toRecord(row) : null;
 }
 
 /** Save or replace the OAuth install record for a store. */
-export function saveInstall(record: InstallRecord): void {
-  const existing = readStore(record.storeId);
-  const next: StoreRecord = { install: record };
-  if (existing?.settings) {
-    next.settings = existing.settings;
-  }
-  writeStore(record.storeId, next);
+export async function saveInstall(record: InstallRecord): Promise<void> {
+  await ensureSchema();
+  await pool.query(
+    `
+      INSERT INTO ecwid_stores (
+        store_id,
+        access_token,
+        scope,
+        installed_at,
+        updated_at
+      )
+      VALUES ($1, $2, $3, $4, now())
+      ON CONFLICT (store_id)
+      DO UPDATE SET
+        access_token = EXCLUDED.access_token,
+        scope = EXCLUDED.scope,
+        updated_at = now()
+    `,
+    [record.storeId, record.accessToken, record.scope, record.installedAt],
+  );
 }
 
 /** Save the Convor settings (slug + apiBase) for a store. */
-export function saveSettings(storeId: string, settings: ConvorSettings): void {
-  const existing = readStore(storeId);
-  if (!existing) {
+export async function saveSettings(
+  storeId: string,
+  settings: ConvorSettings,
+): Promise<void> {
+  await ensureSchema();
+  const result = await pool.query(
+    `
+      UPDATE ecwid_stores
+      SET
+        slug = $2,
+        api_base = $3,
+        settings_updated_at = $4,
+        updated_at = now()
+      WHERE store_id = $1
+    `,
+    [storeId, settings.slug, settings.apiBase, settings.updatedAt],
+  );
+  if (result.rowCount === 0) {
     throw new Error(
       `Cannot save settings for store ${storeId}: app not installed.`,
     );
   }
-  writeStore(storeId, { install: existing.install, settings });
 }
+
 /** Remove all local data for a store (called on uninstall). */
-export function deleteStore(storeId: string): boolean {
-  const path = filePath(storeId);
-  if (!existsSync(path)) {
-    return false;
-  }
-  try {
-    unlinkSync(path);
-    return true;
-  } catch {
-    return false;
-  }
+export async function deleteStore(storeId: string): Promise<boolean> {
+  await ensureSchema();
+  const result = await pool.query(
+    "DELETE FROM ecwid_stores WHERE store_id = $1",
+    [storeId],
+  );
+  return (result.rowCount ?? 0) > 0;
 }
 
 /** Iterate every installed store — used for diagnostics/debug endpoints. */
-export function listStores(): string[] {
-  if (!existsSync(config.dataDir)) {
-    return [];
-  }
-  return readdirSync(config.dataDir)
-    .filter((name) => name.endsWith(".json"))
-    .map((name) => name.replace(/\.json$/, ""));
+export async function listStores(): Promise<string[]> {
+  await ensureSchema();
+  const result = await pool.query<{ store_id: string }>(
+    "SELECT store_id FROM ecwid_stores ORDER BY store_id",
+  );
+  return result.rows.map((row) => row.store_id);
 }

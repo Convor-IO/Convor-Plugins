@@ -1,11 +1,12 @@
 # This file stores configurations for your Shopify app.
 # Learn more: https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = ""
+client_id = "fc4860b98a269311c46e07aa06a854ba"
 name = "Convor Live Chat"
+application_url = "https://editor-vsnet-jill-house.trycloudflare.com"
+embedded = true
 
 [build]
-include_config_on_deploy = true
 
 [access]
 # Convor needs to read/write the shop's metafields (namespace: convor) to
@@ -13,22 +14,22 @@ include_config_on_deploy = true
 use_legacy_install_flow = false
 
 [access_scopes]
-# metafieldsSet on shop metafields requires write_products, OR the newer
-# `write_metafields` access scope. We request both to be safe across API
-# versions and so we can also read shop data for display in settings.
+# Shopify's current Dev Dashboard scope catalog does not expose separate
+# metafield scopes. Product read/write scopes are the valid scope pair for
+# this app's Admin GraphQL settings flow.
 # Learn more: https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,write_metafields,read_metafields"
+scopes = "read_products,write_products"
 use_legacy_install_flow = false
 
 [auth]
 redirect_urls = [
-  "https://CONVOR_APP_URL/auth/callback",
-  "https://CONVOR_APP_URL/auth/callback/inline",
-  "https://CONVOR_APP_URL/auth/login",
+  "https://editor-vsnet-jill-house.trycloudflare.com/auth/callback",
+  "https://editor-vsnet-jill-house.trycloudflare.com/auth/callback/inline",
+  "https://editor-vsnet-jill-house.trycloudflare.com/auth/login",
 ]
 
 [webhooks]
-api_version = "2025-01"
+api_version = "2026-07"
 
   # Handled by: /app/routes/auth.$.tsx (the shopify-app-remix catch-all)
   [[webhooks.subscriptions]]

@@ -1,10 +1,11 @@
-import type { LinksFunction } from "@remix-run/node";
+import { json, type LinksFunction } from "@remix-run/node";
 import {
   Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
   useRouteError,
 } from "@remix-run/react";
 import {
@@ -18,10 +19,16 @@ import {
 } from "@shopify/polaris";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 import polarisTranslations from "@shopify/polaris/locales/en.json";
+import { AppProvider as ShopifyAppProvider } from "@shopify/shopify-app-remix/react";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: polarisStyles },
 ];
+
+export const loader = async () =>
+  json({
+    apiKey: process.env.SHOPIFY_API_KEY ?? "",
+  });
 
 // Frame CSP: Shopify requires us to frame-ancestors the admin so the embedded
 // app renders inside the Shopify admin iframe. The Remix server sets the real
@@ -55,10 +62,12 @@ export default function App() {
   // renders its own <Page> (Polaris), and the App Bridge <TitleBar> /
   // ResourcePicker etc. are pulled in per-route via @shopify/app-bridge-react.
   // The AppProvider i18n is all that's needed at the root.
+  const { apiKey } = useLoaderData<typeof loader>();
+
   return (
-    <PolarisAppProvider i18n={polarisTranslations}>
+    <ShopifyAppProvider apiKey={apiKey} i18n={polarisTranslations}>
       <Outlet />
-    </PolarisAppProvider>
+    </ShopifyAppProvider>
   );
 }
 

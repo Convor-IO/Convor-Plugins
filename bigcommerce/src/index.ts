@@ -5,8 +5,6 @@ import {
   createScript,
   deleteScript,
   findConvorScript,
-  getConvorMetafield,
-  upsertConvorMetafield,
 } from "./bigcommerce-client.js";
 import { type AppConfig, loadConfig } from "./config.js";
 import {
@@ -20,8 +18,12 @@ import {
   SESSION_MAX_AGE,
   verifySessionToken,
 } from "./session.js";
-import { verifySignedPayload } from "./signed-payload.js";
-import { FileTokenStore, type TokenStore } from "./token-store.js";
+import { PostgresSettingsStore, type SettingsStore } from "./settings-store.js";
+import {
+  storeHashFromSignedPayload,
+  verifySignedPayload,
+} from "./signed-payload.js";
+import { PostgresTokenStore, type TokenStore } from "./token-store.js";
 import { renderError, renderLanding, renderSettings } from "./views.js";
 import {
   buildWidgetHtml,
@@ -30,15 +32,14 @@ import {
   validateConfig,
 } from "./widget-config.js";
 
-const METAFIELD_DESCRIPTION = "Convor widget config (org slug + CDN base).";
-
 interface AppBindings {
   config: AppConfig;
+  settings: SettingsStore;
   tokens: TokenStore;
 }
 
 async function buildServer(bindings: AppBindings) {
-  const { config, tokens } = bindings;
+  const { config, settings, tokens } = bindings;
   const app = Fastify({ logger: true });
   await app.register(cookiePlugin, {});
 
@@ -168,56 +169,51 @@ async function buildServer(bindings: AppBindings) {
   // Load callback — the embedded iframe entry point. BC hits this with a
   // signed_payload JWT. We verify it, refresh the session cookie, and render
   // the settings page.
-  app.get<{ Querystring: { signed_payload?: string } }>(
-    "/load",
-    async (req, reply) => {
-      const { signed_payload } = req.query;
-      if (!signed_payload) {
-        // Fall back to the session cookie if BC omitted the payload (e.g. on
-        // an in-app navigation).
-        try {
-          const storeHash = readSession(req);
-          return reply.redirect(`/load/${storeHash}`);
-        } catch {
-          return html(
-            reply,
-            renderError({
-              message: "Missing signed_payload from BigCommerce.",
-            }),
-            400,
-          );
-        }
-      }
-
+  app.get<{
+    Querystring: { signed_payload?: string; signed_payload_jwt?: string };
+  }>("/load", async (req, reply) => {
+    const signed_payload =
+      req.query.signed_payload_jwt ?? req.query.signed_payload;
+    if (!signed_payload) {
+      // Fall back to the session cookie if BC omitted the payload (e.g. on
+      // an in-app navigation).
       try {
-        const payload = verifySignedPayload(
-          signed_payload,
-          config.clientSecret,
-        );
-        const sessionToken = createSessionToken(
-          payload.store_hash,
-          config.clientSecret,
-        );
-        reply.setCookie(SESSION_COOKIE_NAME, sessionToken, {
-          httpOnly: true,
-          secure: true,
-          sameSite: "none",
-          path: "/",
-          maxAge: SESSION_MAX_AGE,
-        });
-        return reply.redirect(`/load/${payload.store_hash}`);
-      } catch (err) {
-        req.log.error({ err }, "signed_payload verification failed");
+        const storeHash = readSession(req);
+        return reply.redirect(`/load/${storeHash}`);
+      } catch {
         return html(
           reply,
           renderError({
-            message: "We could not verify the BigCommerce session.",
+            message: "Missing signed_payload from BigCommerce.",
           }),
-          401,
+          400,
         );
       }
-    },
-  );
+    }
+
+    try {
+      const payload = verifySignedPayload(signed_payload, config.clientSecret);
+      const storeHash = storeHashFromSignedPayload(payload);
+      const sessionToken = createSessionToken(storeHash, config.clientSecret);
+      reply.setCookie(SESSION_COOKIE_NAME, sessionToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        path: "/",
+        maxAge: SESSION_MAX_AGE,
+      });
+      return reply.redirect(`/load/${storeHash}`);
+    } catch (err) {
+      req.log.error({ err }, "signed_payload verification failed");
+      return html(
+        reply,
+        renderError({
+          message: "We could not verify the BigCommerce session.",
+        }),
+        401,
+      );
+    }
+  });
 
   // Internal: render the settings app once we trust the store hash.
   app.get<{ Params: { storeHash: string } }>(
@@ -260,15 +256,7 @@ async function buildServer(bindings: AppBindings) {
       );
       let scriptInstalled = false;
       try {
-        const metafield = await getConvorMetafield(
-          storeHash,
-          config.clientId,
-          install.accessToken,
-        );
-        configSnapshot = parseConfig(
-          metafield?.value ?? null,
-          config.defaultApiBase,
-        );
+        configSnapshot = (await settings.get(storeHash)) ?? configSnapshot;
         const script = await findConvorScript(
           storeHash,
           config.clientId,
@@ -292,18 +280,28 @@ async function buildServer(bindings: AppBindings) {
     },
   );
 
-  // Uninstall webhook (BC posts here when the merchant removes the app).
-  app.post<{ Headers: { "x-auth-token"?: string } }>(
+  // Uninstall callback (BC sends a signed JWT when the merchant removes app).
+  app.get<{ Querystring: { signed_payload_jwt?: string } }>(
     "/uninstall",
     async (req, reply) => {
-      // BC signs uninstall webhooks; for the sample app we trust the presence
-      // of the bearer token header being non-empty and best-effort delete the
-      // script + install record. Production should verify the webhook HMAC.
-      const token = req.headers["x-auth-token"];
-      if (!token) return reply.code(204).send();
+      const { signed_payload_jwt } = req.query;
+      if (!signed_payload_jwt) {
+        return jsonError(reply, 400, "Missing signed_payload_jwt.");
+      }
 
-      // We do not know the store hash from headers alone in the sample; a
-      // real implementation parses it from the verified payload. No-op here.
+      try {
+        const payload = verifySignedPayload(
+          signed_payload_jwt,
+          config.clientSecret,
+        );
+        const storeHash = storeHashFromSignedPayload(payload);
+        await settings.delete(storeHash);
+        await tokens.delete(storeHash);
+      } catch (err) {
+        req.log.warn({ err }, "uninstall callback verification failed");
+        return jsonError(reply, 401, "Invalid uninstall callback.");
+      }
+
       return reply.code(204).send();
     },
   );
@@ -350,18 +348,7 @@ async function buildServer(bindings: AppBindings) {
       apiBase: apiBase || config.defaultApiBase,
     };
 
-    try {
-      await upsertConvorMetafield(
-        sessionHash,
-        config.clientId,
-        install.accessToken,
-        JSON.stringify(resolved),
-        METAFIELD_DESCRIPTION,
-      );
-    } catch (err) {
-      req.log.error({ err }, "metafield upsert failed");
-      return jsonError(reply, 502, describeBcError(err));
-    }
+    await settings.upsert(sessionHash, resolved);
 
     return reply.send({ ok: true, config: resolved });
   });
@@ -379,23 +366,11 @@ async function buildServer(bindings: AppBindings) {
       return jsonError(reply, 404, "Store is not installed.");
     }
 
-    // Resolve the slug from the stored metafield — we never inject a script
-    // before the merchant has saved a config.
-    let widgetConfig: ConvorWidgetConfig;
-    try {
-      const metafield = await getConvorMetafield(
-        sessionHash,
-        config.clientId,
-        install.accessToken,
-      );
-      widgetConfig = parseConfig(
-        metafield?.value ?? null,
-        config.defaultApiBase,
-      );
-    } catch (err) {
-      req.log.error({ err }, "metafield read failed");
-      return jsonError(reply, 502, describeBcError(err));
-    }
+    // Resolve the slug from app storage — we never inject a script before the
+    // merchant has saved a config.
+    const widgetConfig =
+      (await settings.get(sessionHash)) ??
+      parseConfig(null, config.defaultApiBase);
     if (!widgetConfig.slug) {
       return jsonError(
         reply,
@@ -427,6 +402,7 @@ async function buildServer(bindings: AppBindings) {
           name: "Convor Widget",
           description:
             "Loads the Convor live-chat widget. Installed by the Convor app.",
+          kind: "script_tag",
           html: buildWidgetHtml(widgetConfig),
           location: "head",
           load_method: "default",
@@ -514,8 +490,13 @@ async function buildServer(bindings: AppBindings) {
 
 async function main() {
   const config = loadConfig();
-  const tokens = new FileTokenStore({ path: config.tokenStorePath });
-  const app = await buildServer({ config, tokens });
+  const settings = new PostgresSettingsStore({
+    connectionString: config.databaseUrl,
+  });
+  const tokens = new PostgresTokenStore({
+    connectionString: config.databaseUrl,
+  });
+  const app = await buildServer({ config, settings, tokens });
 
   try {
     await app.listen({ port: config.port, host: "0.0.0.0" });

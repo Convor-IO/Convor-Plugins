@@ -6,18 +6,17 @@ control panel to wire up their org.
 
 This is a **single-click app**: a small Fastify server that handles
 BigCommerce OAuth, verifies the load-callback `signed_payload`, stores the
-merchant's org slug as a store metafield, and injects the widget loader via
-the **Scripts API** (`POST /stores/{hash}/v3/scripts`) — BigCommerce's
+merchant's org slug in Postgres, and injects the widget loader via the
+**Scripts API** (`POST /stores/{hash}/v3/content/scripts`) — BigCommerce's
 cleanest, non-deprecated, channel-aware storefront-script mechanism.
 
 ## What this app does
 
 1. **Settings (embedded iframe)** — the merchant enters their Convor org slug
-   on `/load`. It is stored as a **store metafield** (`namespace: convor`,
-   `key: widget`, value: JSON `{ slug, apiBase }`) via
-   `PUT/POST /stores/{hash}/v3/metafields`.
+   on `/load`. It is stored in the app database, keyed by store hash, so the
+   app can render and repair the storefront script after each load callback.
 2. **Widget injection (Scripts API)** — on demand (and idempotently), the app
-   registers a script that renders
+   registers an inline wrapper script that creates
    `<script src="<apiBase>/widget.js" data-key="<slug>" async></script>` into
    the storefront `<head>`.
 
@@ -35,9 +34,10 @@ bigcommerce/
 │   ├── oauth.ts             # install URL + code-for-token exchange
 │   ├── signed-payload.ts    # verify BC load-callback JWT (HS256)
 │   ├── session.ts           # HttpOnly session cookie (HS256)
-│   ├── bigcommerce-client.ts# typed REST client (metafields + scripts)
+│   ├── bigcommerce-client.ts# typed REST client (scripts)
 │   ├── widget-config.ts     # config types, validation, snippet builder
-│   ├── token-store.ts       # JSON-file OAuth-token store (sample)
+│   ├── token-store.ts       # Postgres OAuth-token store
+│   ├── settings-store.ts    # Postgres widget settings store
 │   ├── views.ts             # landing + settings + error HTML
 │   └── html.ts              # escaping + minimal page shell + styles
 ├── package.json
@@ -59,11 +59,11 @@ merchant ──/──▶ "Install" ──▶ BigCommerce OAuth
             /load?signed_payload=…  ── verify JWT (HS256, client_secret)
               │  refresh session cookie
               ▼
-            /load/{hash}  ──▶ settings page (pre-loaded metafield + script status)
+            /load/{hash}  ──▶ settings page (pre-loaded settings + script status)
 
-settings page ──POST /api/settings──────────▶ upsert store metafield
-              ──POST /api/install-script─────▶ POST /v3/scripts (Scripts API)
-              ──POST /api/uninstall-script───▶ DELETE /v3/scripts/{uuid}
+settings page ──POST /api/settings──────────▶ upsert Postgres settings
+              ──POST /api/install-script─────▶ POST /v3/content/scripts
+              ──POST /api/uninstall-script───▶ DELETE /v3/content/scripts/{uuid}
 ```
 
 ## Prerequisites
@@ -88,7 +88,9 @@ In the Developer Portal (**My Apps → your app → Edit**):
 - **Auth Callback URL**: `https://<APP_BASE_URL>/auth`
 - **Load Callback URL**: `https://<APP_BASE_URL>/load`
 - **Uninstall Callback URL**: `https://<APP_BASE_URL>/uninstall`
-- **OAuth Scopes**: `Content` (read/write) — covers Scripts API + metafields.
+- **OAuth Scopes**: `Content` (read/write) — covers Scripts API. The dev app
+  also requests `Information and Settings` so the store install prompt matches
+  the current Developer Portal app configuration.
 
 ### Tunnel for local development
 
@@ -112,14 +114,15 @@ screen.
 
 ## The Scripts API call
 
-`POST https://api.bigcommerce.com/stores/{store_hash}/v3/scripts` with
-`X-Auth-Client` + `X-Auth-Token` headers and body:
+`POST https://api.bigcommerce.com/stores/{store_hash}/v3/content/scripts` with
+`X-Auth-Token` headers and body:
 
 ```json
 {
   "name": "Convor Widget",
   "description": "Loads the Convor live-chat widget. Installed by the Convor app.",
-  "html": "<script src=\"https://cdn.convor.io/widget.js\" data-key=\"acme-store\" async></script>",
+  "kind": "script_tag",
+  "html": "<script>(function(){var script=document.createElement(\"script\");script.src=\"https://cdn.convor.io/widget.js\";script.setAttribute(\"data-key\",\"acme-store\");script.async=true;(document.head||document.documentElement).appendChild(script);})();</script>",
   "location": "head",
   "load_method": "default",
   "visibility": "storefront",
@@ -135,12 +138,8 @@ storefront stays clean.
 
 ## Storage
 
-- **OAuth access tokens** — `data/tokens.json` (one JSON object per line, keyed
-  by store hash). This is a **sample** store; it is single-instance and has no
-  locking. **For production, swap `FileTokenStore` for a Postgres/Redis-backed
-  implementation** before listing on the marketplace.
-- **Widget config** — store metafield `convor.widget` (JSON), owned by the
-  store.
+- **OAuth access tokens** — Postgres table `bigcommerce_tokens`.
+- **Widget config** — Postgres table `bigcommerce_settings`.
 - **Session** — short-lived (8h) HS256 JWT in an `HttpOnly; Secure;
   SameSite=None` cookie (the app runs inside a cross-origin BC iframe).
 

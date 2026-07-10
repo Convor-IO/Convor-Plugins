@@ -8,8 +8,8 @@ import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prism
 import prisma from "./db.server";
 
 // The Convor widget config is stored as a shop metafield (namespace "convor",
-// key "widget"), so we need write_metafields + read_metafields. write_products
-// is required by Shopify to call metafieldsSet on shop resources.
+// key "widget"). Shopify's current Dev Dashboard accepts product read/write
+// scopes for this Admin GraphQL settings flow.
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
   apiSecretKey: process.env.SHOPIFY_API_SECRET || "",

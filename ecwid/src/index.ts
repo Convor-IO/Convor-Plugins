@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
@@ -101,7 +102,7 @@ server.get("/install", async (req, reply) => {
   }
 
   const storeId = String(token.store_id);
-  saveInstall({
+  await saveInstall({
     storeId,
     accessToken: token.access_token,
     scope: token.scope,
@@ -119,7 +120,7 @@ server.get("/app", async (req, reply) => {
   if (!storeId) {
     return reply.code(400).send("Missing storeId.");
   }
-  const record = readStore(storeId);
+  const record = await readStore(storeId);
 
   const slug = record?.settings?.slug ?? "";
   const apiBase = record?.settings?.apiBase ?? config.defaultApiBase;
@@ -165,7 +166,7 @@ server.post("/api/settings", async (req, reply) => {
     return reply.code(400).send({ error: "Invalid apiBase URL." });
   }
 
-  const record = readStore(storeId);
+  const record = await readStore(storeId);
   if (!record) {
     return reply.code(404).send({
       error: "Store not installed. Reinstall the app via /.",
@@ -193,7 +194,7 @@ server.post("/api/settings", async (req, reply) => {
     return reply.code(502).send({ error: msg });
   }
 
-  saveSettings(storeId, {
+  await saveSettings(storeId, {
     slug,
     apiBase: resolvedApiBase,
     updatedAt: new Date().toISOString(),
@@ -211,7 +212,7 @@ server.delete("/api/uninstall", async (req, reply) => {
   if (!storeId) {
     return reply.code(400).send({ error: "storeId is required." });
   }
-  const record = readStore(storeId);
+  const record = await readStore(storeId);
   if (record) {
     const client = new EcwidClient(storeId, record.install.accessToken);
     try {
@@ -224,7 +225,62 @@ server.delete("/api/uninstall", async (req, reply) => {
       );
     }
   }
-  deleteStore(storeId);
+  await deleteStore(storeId);
+  return reply.send({ ok: true });
+});
+
+interface EcwidWebhookBody {
+  eventId?: unknown;
+  eventCreated?: unknown;
+  storeId?: unknown;
+  eventType?: unknown;
+}
+
+function verifyEcwidWebhook(
+  body: EcwidWebhookBody,
+  signature: string | undefined,
+): boolean {
+  if (!signature) return false;
+  const eventId = typeof body.eventId === "string" ? body.eventId : "";
+  const eventCreated =
+    typeof body.eventCreated === "number" ||
+    typeof body.eventCreated === "string"
+      ? String(body.eventCreated)
+      : "";
+  if (!eventId || !eventCreated) return false;
+
+  const expected = createHmac("sha256", config.clientSecret)
+    .update(`${eventCreated}.${eventId}`)
+    .digest("base64");
+  const expectedBuffer = Buffer.from(expected);
+  const receivedBuffer = Buffer.from(signature);
+  return (
+    expectedBuffer.length === receivedBuffer.length &&
+    timingSafeEqual(expectedBuffer, receivedBuffer)
+  );
+}
+
+/**
+ * `POST /api/webhooks` — signed Ecwid webhooks. We only mutate local state for
+ * `application.uninstalled`; other events are acknowledged for delivery.
+ */
+server.post("/api/webhooks", async (req, reply) => {
+  const body = req.body as EcwidWebhookBody;
+  const signature = req.headers["x-ecwid-webhook-signature"];
+  const signatureValue = Array.isArray(signature) ? signature[0] : signature;
+
+  if (!verifyEcwidWebhook(body, signatureValue)) {
+    req.log.warn({ body }, "Ecwid webhook signature verification failed");
+    return reply.code(401).send({ ok: false });
+  }
+
+  if (
+    body.eventType === "application.uninstalled" &&
+    (typeof body.storeId === "number" || typeof body.storeId === "string")
+  ) {
+    await deleteStore(String(body.storeId));
+  }
+
   return reply.send({ ok: true });
 });
 

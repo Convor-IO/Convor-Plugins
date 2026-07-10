@@ -25,12 +25,14 @@ const host = new URL(process.env.SHOPIFY_APP_URL || "http://localhost")
 
 // `hmr` accepts an object; inferring from Vite here would pull in
 // platform-specific types. The shape is stable across versions.
-let hmrConfig: {
-  protocol: string;
-  host: string;
-  port: number;
-  clientPort: number;
-};
+let hmrConfig:
+  | {
+      protocol: string;
+      host: string;
+      port: number;
+      clientPort: number;
+    }
+  | false;
 
 if (host === "localhost") {
   hmrConfig = {
@@ -40,17 +42,12 @@ if (host === "localhost") {
     clientPort: 64999,
   };
 } else {
-  hmrConfig = {
-    protocol: "wss",
-    host: host,
-    port: Number.parseInt(process.env.FRONTEND_PORT ?? "8002"),
-    clientPort: 443,
-  };
+  hmrConfig = false;
 }
 
 export default defineConfig({
   server: {
-    allowedHosts: [host],
+    allowedHosts: [host, "editor-vsnet-jill-house.trycloudflare.com"],
     cors: {
       preflightContinue: true,
     },
@@ -70,7 +67,7 @@ export default defineConfig({
         v3_throwAbortReason: true,
         v3_lazyRouteDiscovery: true,
         v3_singleFetch: false,
-        v3_routeConfig: true,
+        v3_routeConfig: false,
       },
     }),
     tsconfigPaths(),

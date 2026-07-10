@@ -137,13 +137,13 @@ export async function upsertConvorMetafield(
 }
 
 // ---------------------------------------------------------------------------
-// Scripts API — POST /stores/{hash}/v3/scripts injects the Convor widget
-// loader into the storefront. Channel-aware and not deprecated.
+// Scripts API — POST /stores/{hash}/v3/content/scripts injects the Convor
+// widget loader into the storefront. Channel-aware and not deprecated.
 // ---------------------------------------------------------------------------
 
 export type ScriptLocation = "head" | "body" | "footer";
 export type ScriptLoadMethod = "default" | "defer" | "async";
-export type ScriptKind = "script_tag" | "url" | "script_channel";
+export type ScriptKind = "script_tag" | "src";
 
 export interface BcScript {
   uuid: string;
@@ -174,6 +174,7 @@ interface BcScriptListResponse {
 export interface CreateScriptInput {
   name: string;
   description: string;
+  kind: ScriptKind;
   /** Raw HTML (incl. inline `<script>`) injected at `location`. */
   html: string;
   location: ScriptLocation;
@@ -190,11 +191,14 @@ export async function createScript(
   accessToken: string,
   input: CreateScriptInput,
 ): Promise<BcScript> {
-  const res = await fetch(`${API_HOST}/stores/${storeHash}/v3/scripts`, {
-    method: "POST",
-    headers: authHeaders(clientId, accessToken),
-    body: JSON.stringify(input),
-  });
+  const res = await fetch(
+    `${API_HOST}/stores/${storeHash}/v3/content/scripts`,
+    {
+      method: "POST",
+      headers: authHeaders(clientId, accessToken),
+      body: JSON.stringify(input),
+    },
+  );
   if (!res.ok) throw await readError(res);
   const data = (await res.json()) as BcScriptResponse;
   if (!data.data) {
@@ -208,9 +212,12 @@ export async function listScripts(
   clientId: string,
   accessToken: string,
 ): Promise<BcScript[]> {
-  const res = await fetch(`${API_HOST}/stores/${storeHash}/v3/scripts`, {
-    headers: authHeaders(clientId, accessToken),
-  });
+  const res = await fetch(
+    `${API_HOST}/stores/${storeHash}/v3/content/scripts`,
+    {
+      headers: authHeaders(clientId, accessToken),
+    },
+  );
   if (!res.ok) throw await readError(res);
   const data = (await res.json()) as BcScriptListResponse;
   return data.data ?? [];
@@ -223,7 +230,9 @@ export async function deleteScript(
   uuid: string,
 ): Promise<void> {
   const res = await fetch(
-    `${API_HOST}/stores/${storeHash}/v3/scripts/${encodeURIComponent(uuid)}`,
+    `${API_HOST}/stores/${storeHash}/v3/content/scripts/${encodeURIComponent(
+      uuid,
+    )}`,
     {
       method: "DELETE",
       headers: authHeaders(clientId, accessToken),

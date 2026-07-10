@@ -152,9 +152,9 @@
           saveBtn.disabled = true;
           show("Saving…");
           var payload = {
-            storeId: form.elements["storeId"].value,
-            slug: form.elements["slug"].value.trim(),
-            apiBase: form.elements["apiBase"].value.trim(),
+            storeId: form.elements.storeId.value,
+            slug: form.elements.slug.value.trim(),
+            apiBase: form.elements.apiBase.value.trim(),
           };
           fetch("/api/settings", {
             method: "POST",
@@ -166,7 +166,7 @@
               if (res.ok) {
                 show("Saved — widget is live on your storefront.", "ok");
               } else {
-                show((res.body && res.body.error) || "Save failed.", "err");
+                show(res.body?.error || "Save failed.", "err");
               }
             })
             .catch(() => {
@@ -181,7 +181,7 @@
           if (!confirm("Remove Convor from this store?")) return;
           show("Removing…");
           fetch(
-            "/api/uninstall?storeId=" + encodeURIComponent(form.elements["storeId"].value),
+            `/api/uninstall?storeId=${encodeURIComponent(form.elements.storeId.value)}`,
             { method: "DELETE" },
           )
             .then((r) => r.ok ? { ok: true } : r.json())

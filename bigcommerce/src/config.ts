@@ -34,7 +34,7 @@ export interface AppConfig {
   appBaseUrl: string;
   port: number;
   defaultApiBase: string;
-  tokenStorePath: string;
+  databaseUrl: string;
 }
 
 export function loadConfig(): AppConfig {
@@ -63,7 +63,7 @@ export function loadConfig(): AppConfig {
       "CONVOR_DEFAULT_API_BASE",
       DEFAULT_API_BASE,
     ).replace(/\/+$/, ""),
-    tokenStorePath: optional("TOKEN_STORE_PATH", "./data/tokens.json"),
+    databaseUrl: required("DATABASE_URL"),
   };
 }
 

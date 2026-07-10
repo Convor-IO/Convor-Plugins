@@ -97,7 +97,7 @@ Copy `.env.example` → `.env` and fill in:
 SHOPIFY_API_KEY=...
 SHOPIFY_API_SECRET=...
 SHOPIFY_APP_URL=https://<your-tunnel>.trycloudflare.com
-SCOPES=write_products,write_metafields,read_metafields
+SCOPES=read_products,write_products
 ```
 
 For local HTTPS without `shopify app dev`, expose the Remix dev server
@@ -177,10 +177,9 @@ the metafield.
 
 ## Scopes
 
-- `write_products` — required by Shopify to call `metafieldsSet` on shop
-  resources.
-- `write_metafields` / `read_metafields` — read/write the `convor.widget`
-  shop metafield.
+- `read_products` / `write_products` — accepted by Shopify's current Dev
+  Dashboard and used by the embedded settings flow that writes
+  `convor.widget`.
 
 No `write_script_tags` — this app does **not** use the (deprecated) ScriptTag
 API. Storefront injection is done exclusively via the Theme App Extension.

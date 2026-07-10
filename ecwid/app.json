@@ -16,7 +16,7 @@
       "type": "array",
       "items": { "type": "string" },
       "description": "Access scopes requested from the merchant.",
-      "default": ["read_store_profile", "customize_storefront"]
+      "default": ["read_store_profile", "customize_storefront", "read_catalog"]
     },
     "redirectUri": {
       "type": "string",
