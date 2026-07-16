@@ -25,16 +25,13 @@ const DEFAULT_API_BASE = 'https://cdn.convor.io';
  *  - a closing </script>
  *
  * @param {string} apiBase
- * @param {string} slug
  * @returns {RegExp}
  */
-function buildSnippetRegex(apiBase, slug) {
+function buildSnippetRegex(apiBase) {
 	const escapedApiBase = apiBase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-	const escapedSlug = slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 	// src value: apiBase + optional trailing slash + /widget.js (the slash may
 	// already be part of apiBase, so we tolerate exactly one or two slashes).
 	const srcPattern = `src=["']${escapedApiBase}\\/*widget\\.js["']`;
-	const dataKeyPattern = `data-key=["']${escapedSlug}["']`;
 	// <script ... attributes ...> ... </script>. Allow attributes in any order
 	// and extra attributes in between.
 	return new RegExp(
@@ -61,7 +58,7 @@ function assertSnippetMatches(html, opts) {
 		throw new Error('assertSnippetMatches: html is empty / not a string');
 	}
 
-	const regex = buildSnippetRegex(apiBase, slug);
+	const regex = buildSnippetRegex(apiBase);
 
 	const scriptMatch = html.match(regex);
 	if (!scriptMatch) {
@@ -74,13 +71,14 @@ function assertSnippetMatches(html, opts) {
 	}
 
 	const scriptTag = scriptMatch[0];
+	const openingTag = scriptTag.slice(0, scriptTag.indexOf('>') + 1);
 
 	// Verify data-key is present and correct.
 	const dataKeyRe = new RegExp(
 		`data-key=["']${slug.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']`,
 		'i',
 	);
-	if (!dataKeyRe.test(scriptTag)) {
+	if (!dataKeyRe.test(openingTag)) {
 		throw new Error(
 			`Snippet found but data-key mismatch.\n` +
 				`Script tag: ${scriptTag}\nExpected data-key="${slug}"`,
@@ -88,7 +86,7 @@ function assertSnippetMatches(html, opts) {
 	}
 
 	// Verify async attribute is present.
-	if (!/\basync\b/i.test(scriptTag)) {
+	if (!/\sasync(?:\s|=|>)/i.test(openingTag)) {
 		throw new Error(
 			`Snippet found but missing the 'async' attribute.\nScript tag: ${scriptTag}`,
 		);

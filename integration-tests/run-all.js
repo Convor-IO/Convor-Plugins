@@ -12,6 +12,7 @@ const { join } = require("node:path");
 // All integration-test suites. Each entry is `<script-name>` (without .js);
 // the file is `<script-name>.test.js` in this directory.
 const tests = [
+  "assert-snippet",
   // PHP platforms (server-rendered snippets)
   "wordpress",
   "prestashop",
