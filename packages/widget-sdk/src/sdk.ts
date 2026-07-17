@@ -31,9 +31,9 @@ export function createSdk(): ConvorSDK {
     on: (event, cb) => callVisitor("on", event, cb),
     off: (event, cb) => callVisitor("off", event, cb),
     destroy: () => {
-      callVisitor("destroy");
       const state = singleton;
-      if (!state) return;
+      if (!state || state.destroyed) return;
+      callVisitor("destroy");
       removeScript(state.script);
       // `findScript` is a fallback in case the ref got detached elsewhere.
       const stale = findScript(state.src);

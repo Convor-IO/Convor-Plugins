@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DEFAULT_API_BASE, initConvor } from "../index.js";
 import { buildDataAttrs, buildScriptUrl } from "../loader.js";
 import { __resetSingleton } from "../sdk.js";
@@ -162,12 +162,20 @@ describe("initConvor — destroy", () => {
     ).toBeNull();
   });
 
-  it("destroy is idempotent (safe to call twice)", async () => {
+  it("destroys the visitor and script exactly once", async () => {
     const ready = initConvor({ slug: "acme" });
     setTimeout(simulateReady, 0);
     const sdk = await ready;
+    const visitorDestroy = vi.fn();
+    if (!window.Convor) throw new Error("visitor SDK was not initialized");
+    window.Convor.destroy = visitorDestroy;
 
     sdk.destroy();
-    expect(() => sdk.destroy()).not.toThrow();
+    sdk.destroy();
+
+    expect(visitorDestroy).toHaveBeenCalledOnce();
+    expect(
+      document.head.querySelector(`script[src="${WIDGET_SRC}"]`),
+    ).toBeNull();
   });
 });
