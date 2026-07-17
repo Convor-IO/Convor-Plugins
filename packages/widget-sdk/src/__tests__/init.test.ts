@@ -81,6 +81,19 @@ describe("initConvor — injection", () => {
     expect(script?.getAttribute("data-key")).toBe("acme");
   });
 
+  it("builds the injected script URL from a custom apiBase", async () => {
+    const apiBase = "http://localhost:5173";
+    const ready = initConvor({ apiBase, slug: "acme" });
+    setTimeout(simulateReady, 0);
+
+    await ready;
+
+    const script = document.head.querySelector<HTMLScriptElement>("script");
+    expect(script?.src).toBe(`${apiBase}/widget.js`);
+    expect(script?.dataset.key).toBe("acme");
+    expect(script?.parentNode).toBe(document.head);
+  });
+
   it("rejects when no slug is supplied", async () => {
     await expect(
       // @ts-expect-error exercising the runtime guard with a missing slug
@@ -112,11 +125,11 @@ describe("initConvor — idempotency", () => {
   it("does not inject a second script when called twice with the same src", async () => {
     const first = initConvor({ slug: "acme" });
     setTimeout(simulateReady, 0);
-    await first;
+    const sdk1 = await first;
 
     // Second call should reuse the existing script tag.
     const sdk2 = await initConvor({ slug: "acme" });
-    expect(sdk2).toBeDefined();
+    expect(sdk2).toBe(sdk1);
 
     const scripts = document.head.querySelectorAll<HTMLScriptElement>(
       `script[src="${WIDGET_SRC}"]`,
