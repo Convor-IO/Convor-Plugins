@@ -11,8 +11,8 @@
  * test values are safe) and $block (getScriptUrl/getOrgSlug from env) and
  * requires the REAL .phtml, capturing its output. This test fetches that
  * output over `php -S` and asserts it matches canonical. It then fetches the
- * parsed CSP whitelist and asserts script-src whitelists cdn.convor.io, and
- * reports on connect-src (the WS/API host — a common omission).
+ * parsed CSP whitelist and asserts that script, REST API, and realtime
+ * WebSocket traffic are all permitted by the policies Magento ships.
  */
 
 const { join } = require("node:path");
@@ -54,7 +54,7 @@ async function main() {
 
     const scriptSrc = policies["script-src"] || [];
     assert.ok(
-      scriptSrc.some((h) => h.includes("cdn.convor.io")),
+      scriptSrc.includes("https://cdn.convor.io"),
       `CSP script-src does not whitelist cdn.convor.io (got: ${scriptSrc.join(", ")})`,
     );
     console.log("PASS: magento CSP script-src whitelists cdn.convor.io");
@@ -62,27 +62,29 @@ async function main() {
     // --- 3. connect-src must include the REST API host (api.convor.io) so
     // the widget's fetchRemoteConfig / visitor-token XHRs aren't blocked. ---
     const connectSrc = policies["connect-src"] || [];
-    const hasApi = connectSrc.some((h) => h.includes("api.convor.io"));
-    const hasCdn = connectSrc.some((h) => h.includes("cdn.convor.io"));
+    const hasApi = connectSrc.includes("https://api.convor.io");
+    const hasCdn = connectSrc.includes("https://cdn.convor.io");
     assert.ok(
       hasApi,
       "CSP connect-src is missing api.convor.io — widget REST calls (config, visitor-token) would be CSP-blocked",
+    );
+    assert.ok(
+      hasCdn,
+      "CSP connect-src is missing cdn.convor.io — CDN-hosted widget requests would be CSP-blocked",
     );
     console.log(
       `      CSP connect-src = [${connectSrc.join(", ")}] → api.convor.io ${hasApi ? "present" : "MISSING"}, cdn.convor.io ${hasCdn ? "present" : "MISSING"}`,
     );
 
-    // NOTE on WebSocket: the shipped csp_whitelist.xml has an img-src policy
-    // whose comment says "WebSocket (Centrifugo)" — that label is wrong
-    // (img-src governs images, not WS). connect-src only lists the two
-    // https:// hosts, so a production wss:// Centrifugo connect would be
-    // blocked. Reported as a finding, not fatal for snippet emission.
-    const wsHost = connectSrc.find((h) => h.startsWith("ws"));
-    if (!wsHost) {
-      console.log(
-        "      NOTE: connect-src has no wss:// host — live Centrifugo WebSocket (realtime chat) would be CSP-blocked in production. (The img-src policy's comment wrongly claims it covers WebSocket.)",
-      );
-    }
+    assert.ok(
+      connectSrc.includes("wss://api.convor.io"),
+      "CSP connect-src is missing wss://api.convor.io — API-hosted realtime connections would be blocked",
+    );
+    assert.ok(
+      connectSrc.includes("wss://*.convor.io"),
+      "CSP connect-src is missing wss://*.convor.io — per-org Centrifugo connections from remote config would be blocked",
+    );
+    console.log("PASS: magento CSP connect-src permits Convor realtime WSS");
 
     console.log("\n=== magento: PASS ===");
   } finally {
