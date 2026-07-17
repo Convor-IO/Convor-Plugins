@@ -27,7 +27,10 @@ const WIDGET_API_BASE = process.env.WIDGET_API_BASE ?? "http://localhost:5173";
 const SDK_DIST = resolve(__dirname, "../../packages/widget-sdk/dist");
 
 // Tiny static file server: serves the SDK bundle + the harness HTML.
-async function startHarnessServer(port: number): Promise<Server> {
+async function startHarnessServer(): Promise<{
+  server: Server;
+  url: string;
+}> {
   const handler = async (req: IncomingMessage, res: ServerResponse) => {
     const url = req.url === "/" ? "/index.html" : (req.url ?? "/404");
     const filePath = join(SDK_DIST, url);
@@ -53,9 +56,24 @@ async function startHarnessServer(port: number): Promise<Server> {
       res.end("not found");
     }
   };
-  return new Promise<Server>((resolve) => {
+  return new Promise((resolve, reject) => {
     const srv = createServer(handler);
-    srv.listen(port, "127.0.0.1", () => resolve(srv));
+    srv.once("error", reject);
+    srv.listen(0, "127.0.0.1", () => {
+      srv.off("error", reject);
+      const address = srv.address();
+      if (!address || typeof address === "string") {
+        reject(new Error("Harness server did not expose a TCP address"));
+        return;
+      }
+      resolve({ server: srv, url: `http://127.0.0.1:${address.port}` });
+    });
+  });
+}
+
+async function closeServer(server: Server): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => (error ? reject(error) : resolve()));
   });
 }
 
@@ -84,25 +102,29 @@ function harnessHtml(): string {
 test("widget-sdk: real Chromium loads the SDK and mounts the widget iframe", async ({
   page,
 }) => {
-  await startHarnessServer(4099);
-  await page.goto("http://127.0.0.1:4099/");
+  const { server, url } = await startHarnessServer();
+  try {
+    await page.goto(url);
 
-  // SDK resolved + the loader executed.
-  await expect
-    .poll(async () => page.locator("#result").textContent(), {
-      timeout: 15_000,
-    })
-    .toBe("sdk-ready:object");
+    // SDK resolved + the loader executed.
+    await expect
+      .poll(async () => page.locator("#result").textContent(), {
+        timeout: 15_000,
+      })
+      .toBe("sdk-ready:object");
 
-  // Canonical script tag injected by the SDK into document.head.
-  await expect(
-    page.locator(
-      `head script[src="${WIDGET_API_BASE}/widget.js"][data-key="acme"]`,
-    ),
-  ).toHaveCount(1);
+    // Canonical script tag injected by the SDK into document.head.
+    await expect(
+      page.locator(
+        `head script[src="${WIDGET_API_BASE}/widget.js"][data-key="acme"]`,
+      ),
+    ).toHaveCount(1);
 
-  // Trigger-button iframe mounted.
-  await expect(page.locator('iframe[src*="widget-iframe.html"]')).toBeVisible({
-    timeout: 15_000,
-  });
+    // Trigger-button iframe mounted.
+    await expect(page.locator('iframe[src*="widget-iframe.html"]')).toBeVisible(
+      { timeout: 15_000 },
+    );
+  } finally {
+    await closeServer(server);
+  }
 });

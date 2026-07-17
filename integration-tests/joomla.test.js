@@ -12,11 +12,7 @@
 
 const path = require("node:path");
 const { assertSnippetMatches } = require("./assert-snippet");
-const {
-  startPhpServer,
-  fetchText,
-  checkApiBaseReachable,
-} = require("./_helpers");
+const { startPhpServer, fetchText } = require("./_helpers");
 
 const PORT = 8104;
 const API_BASE = "http://localhost:5173";
@@ -50,11 +46,6 @@ async function main() {
     });
     console.log("PASS: joomla snippet matches canonical form");
     console.log("Matched tag:", matched);
-
-    const reach = await checkApiBaseReachable(API_BASE);
-    console.log(
-      `apiBase reachability: ${reach.reachable ? "OK" : "SKIPPED"} — ${reach.note}`,
-    );
   } finally {
     server.kill();
   }

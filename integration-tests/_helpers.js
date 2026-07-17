@@ -82,28 +82,4 @@ async function fetchText(url) {
   return { status: res.status, text };
 }
 
-/**
- * Best-effort reachability check for the configured apiBase/widget.js.
- * Resolves to { reachable: boolean, status: number|null, note: string }.
- *
- * @param {string} apiBase
- */
-async function checkApiBaseReachable(apiBase) {
-  const url = `${apiBase.replace(/\/$/, "")}/widget.js`;
-  try {
-    const res = await fetch(url);
-    return {
-      reachable: res.ok,
-      status: res.status,
-      note: `GET ${url} → HTTP ${res.status}`,
-    };
-  } catch (err) {
-    return {
-      reachable: false,
-      status: null,
-      note: `GET ${url} failed: ${err.message} (dev server not running — reachability check skipped)`,
-    };
-  }
-}
-
-module.exports = { startPhpServer, fetchText, checkApiBaseReachable };
+module.exports = { startPhpServer, fetchText };
