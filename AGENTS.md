@@ -29,6 +29,10 @@ settings** — they create drift.
 
 ## Conventions
 
+- **Breaking changes are acceptable**: This project is not running in
+  production yet. Prefer a clean rewrite or a better design when the code
+  benefits from it; do not preserve backward compatibility solely for its own
+  sake.
 - **Biome** for lint/format on TS packages (mirrors the broader Convor
   conventions: 80-char width, double quotes, 2-space indent, semicolons).
   WordPress PHP follows WordPress coding standards.
