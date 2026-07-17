@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   __resetBridge,
   DEFAULT_API_BASE,
@@ -381,7 +381,7 @@ describe("initConvorSegmentBridge — idempotency", () => {
 describe("teardownConvorSegmentBridge", () => {
   beforeEach(resetDom);
 
-  it("detaches listeners so forwards stop", async () => {
+  it("detaches listeners exactly once and remains inert on repeated teardown", async () => {
     const analytics = makeAnalytics();
     window.analytics = analytics;
 
@@ -392,31 +392,28 @@ describe("teardownConvorSegmentBridge", () => {
 
     analytics.emit("track", "before", {});
     expect(trackCalls).toBe(1);
+    expect(analytics.listeners.get("track")).toHaveLength(1);
 
     teardownConvorSegmentBridge();
+    expect(analytics.listeners.get("track")).toHaveLength(0);
+
+    teardownConvorSegmentBridge();
+    expect(analytics.listeners.get("track")).toHaveLength(0);
     analytics.emit("track", "after", {});
     expect(trackCalls).toBe(1);
-  });
-
-  it("is a no-op when nothing was initialized", () => {
-    expect(() => teardownConvorSegmentBridge()).not.toThrow();
   });
 });
 
 describe("initConvorSegmentBridge — SSR guard", () => {
   beforeEach(resetDom);
+  afterEach(() => vi.unstubAllGlobals());
 
   it("rejects with a clear error when window/document are unavailable", async () => {
-    const savedWindow = globalThis.window;
-    const savedDocument = globalThis.document;
-    (globalThis as { window?: typeof savedWindow }).window = undefined;
-    (globalThis as { document?: typeof savedDocument }).document = undefined;
+    vi.stubGlobal("window", undefined);
+    vi.stubGlobal("document", undefined);
 
     await expect(initConvorSegmentBridge({ slug: "acme" })).rejects.toThrow(
       /browser environment/,
     );
-
-    globalThis.window = savedWindow;
-    globalThis.document = savedDocument;
   });
 });
