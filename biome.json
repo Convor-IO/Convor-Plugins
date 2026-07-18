@@ -19,11 +19,11 @@
   },
   "formatter": {
     "enabled": true,
+    "formatWithErrors": true,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 80,
-    "formatWithErrors": true,
     "lineEnding": "lf",
+    "lineWidth": 80,
     "attributePosition": "auto",
     "bracketSameLine": false,
     "bracketSpacing": true,
@@ -49,13 +49,13 @@
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "double",
-      "semicolons": "always",
-      "trailingCommas": "es5",
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
+      "trailingCommas": "es5",
+      "semicolons": "always",
       "arrowParentheses": "always",
       "bracketSameLine": false,
+      "quoteStyle": "double",
       "attributePosition": "auto",
       "bracketSpacing": false
     }
