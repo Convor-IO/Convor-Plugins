@@ -61,6 +61,10 @@ settings** — they create drift.
      JS-driven snippet assertions; biome does not lint PHP).
 7. **Keep responses short.** State what you did and what's next — no preamble,
    no restating the request, no filler.
+8. **Idiomatic, sense-for-sense translation — n/a here.** Plugins inject the
+   canonical embed snippet and expose settings UIs; they carry no user-visible
+   strings of their own to localize (the widget's strings are owned by the SaaS
+   i18n packages).
 
 ### Repo-specific
 
