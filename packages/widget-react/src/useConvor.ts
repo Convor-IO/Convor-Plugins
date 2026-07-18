@@ -1,6 +1,6 @@
-import type { ConvorSDK } from "@convor/widget-sdk";
-import { useSyncExternalStore } from "react";
-import { getHandle, subscribe } from "./handle.js";
+import type {ConvorSDK} from "@convor/widget-sdk";
+import {useSyncExternalStore} from "react";
+import {getHandle, subscribe} from "./handle.js";
 
 /**
  * Access the live Convor SDK handle from any child component.
@@ -28,6 +28,6 @@ export function useConvor(): ConvorSDK | null {
     subscribe,
     getHandle,
     // SSR snapshot: the widget can't load on the server, so always null.
-    () => null,
+    () => null
   );
 }

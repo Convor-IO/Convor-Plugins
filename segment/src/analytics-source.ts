@@ -1,4 +1,4 @@
-import type { AnalyticsJS } from "./types.js";
+import type {AnalyticsJS} from "./types.js";
 
 /** Default CDN base when `apiBase` is omitted. */
 export const DEFAULT_API_BASE = "https://cdn.convor.io";
@@ -86,8 +86,8 @@ export function waitForConvor(timeoutMs: number): Promise<void> {
         clearInterval(timer);
         reject(
           new Error(
-            `[convor-segment] timed out after ${timeoutMs}ms waiting for window.Convor`,
-          ),
+            `[convor-segment] timed out after ${timeoutMs}ms waiting for window.Convor`
+          )
         );
       }
     }, POLL_INTERVAL_MS);
@@ -131,8 +131,8 @@ export function waitForAnalytics(timeoutMs: number): Promise<AnalyticsJS> {
         clearInterval(timer);
         reject(
           new Error(
-            `[convor-segment] timed out after ${timeoutMs}ms waiting for window.analytics`,
-          ),
+            `[convor-segment] timed out after ${timeoutMs}ms waiting for window.analytics`
+          )
         );
       }
     }, POLL_INTERVAL_MS);
@@ -189,7 +189,7 @@ export function normalizeIdentify(args: unknown[]): IdentifyPayload | null {
     const userIdRaw = inner.userId ?? ctx.userId;
     const userId =
       typeof userIdRaw === "string" ? userIdRaw : String(userIdRaw ?? "");
-    return { userId: userId || undefined, traits };
+    return {userId: userId || undefined, traits};
   }
 
   // Classic analytics.js: (userId, traits, options).
@@ -203,7 +203,7 @@ export function normalizeIdentify(args: unknown[]): IdentifyPayload | null {
     typeof traitsArg === "object" && traitsArg !== null
       ? (traitsArg as Record<string, unknown>)
       : {};
-  return { userId, traits };
+  return {userId, traits};
 }
 
 /**
@@ -232,7 +232,7 @@ export function normalizeTrack(args: unknown[]): TrackPayload | null {
       typeof propertiesArg === "object" && propertiesArg !== null
         ? (propertiesArg as Record<string, unknown>)
         : {};
-    return { event, properties };
+    return {event, properties};
   }
 
   // Classic analytics.js: (event, properties, options).
@@ -242,7 +242,7 @@ export function normalizeTrack(args: unknown[]): TrackPayload | null {
     typeof propertiesArg === "object" && propertiesArg !== null
       ? (propertiesArg as Record<string, unknown>)
       : {};
-  return { event: first, properties };
+  return {event: first, properties};
 }
 
 /** Forward a normalized identify payload to the Convor visitor SDK. */
@@ -252,7 +252,7 @@ export function forwardIdentify(payload: IdentifyPayload): void {
     warn("window.Convor not ready — skipping identify forward");
     return;
   }
-  const attrs: Record<string, unknown> = { ...payload.traits };
+  const attrs: Record<string, unknown> = {...payload.traits};
   if (payload.userId) attrs.userId = payload.userId;
   sdk.identify(attrs);
 }
@@ -275,7 +275,7 @@ export function forwardTrack(payload: TrackPayload): void {
  */
 export function attachForwarders(
   analytics: AnalyticsJS,
-  opts: { forwardIdentify: boolean; forwardTrack: boolean },
+  opts: {forwardIdentify: boolean; forwardTrack: boolean}
 ): () => void {
   const listeners: Array<[string, (...args: unknown[]) => void]> = [];
 

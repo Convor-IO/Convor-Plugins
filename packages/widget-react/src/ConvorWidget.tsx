@@ -1,11 +1,7 @@
-import type {
-  ConvorPosition,
-  ConvorSDK,
-  ConvorTheme,
-} from "@convor/widget-sdk";
-import { initConvor } from "@convor/widget-sdk";
-import { useEffect, useRef } from "react";
-import { setHandle, warn } from "./handle.js";
+import type {ConvorPosition, ConvorSDK, ConvorTheme} from "@convor/widget-sdk";
+import {initConvor} from "@convor/widget-sdk";
+import {useEffect, useRef} from "react";
+import {setHandle, warn} from "./handle.js";
 
 /** Props accepted by {@link ConvorWidget}. */
 export interface ConvorWidgetProps {
@@ -107,7 +103,7 @@ export function ConvorWidget(props: ConvorWidgetProps): React.ReactElement {
     ) {
       warn(
         "ConvorWidget appearance props changed after mount — these are ignored. " +
-          "Unmount/remount the component (or change `slug`) to apply new overrides.",
+          "Unmount/remount the component (or change `slug`) to apply new overrides."
       );
       changedRef.current = {
         apiBase: props.apiBase,

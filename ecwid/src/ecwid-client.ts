@@ -1,4 +1,4 @@
-import { config, ECWID_HOSTS } from "./config.js";
+import {config, ECWID_HOSTS} from "./config.js";
 
 /**
  * Typed client for the Ecwid REST API.
@@ -34,7 +34,7 @@ function apiUrl(
   storeId: string,
   path: string,
   token: string,
-  query?: Record<string, string>,
+  query?: Record<string, string>
 ): string {
   const url = new URL(`${ECWID_HOSTS.api}/${storeId}${path}`, ECWID_HOSTS.api);
   url.searchParams.set("token", token);
@@ -59,7 +59,7 @@ export class EcwidClient {
   async getStorage(key: string): Promise<string | null> {
     const res = await fetch(
       apiUrl(this.storeId, `/storage/${encodeURIComponent(key)}`, this.token),
-      { method: "GET" },
+      {method: "GET"}
     );
     if (res.status === 404) {
       return null;
@@ -80,9 +80,9 @@ export class EcwidClient {
       apiUrl(this.storeId, `/storage/${encodeURIComponent(key)}`, this.token),
       {
         method: "PUT",
-        headers: { "Content-Type": "application/json;charset=utf-8" },
+        headers: {"Content-Type": "application/json;charset=utf-8"},
         body: value,
-      },
+      }
     );
     if (!res.ok) {
       throw await readError(res);
@@ -93,7 +93,7 @@ export class EcwidClient {
   async deleteStorage(key: string): Promise<void> {
     const res = await fetch(
       apiUrl(this.storeId, `/storage/${encodeURIComponent(key)}`, this.token),
-      { method: "DELETE" },
+      {method: "DELETE"}
     );
     // 404 is fine — nothing to delete.
     if (!res.ok && res.status !== 404) {
@@ -127,7 +127,7 @@ export interface ConvorPublicConfig {
 
 export function buildPublicConfig(
   slug: string,
-  apiBase: string,
+  apiBase: string
 ): ConvorPublicConfig {
   return {
     slug,

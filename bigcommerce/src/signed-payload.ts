@@ -47,7 +47,7 @@ export interface SignedPayload {
  */
 export function verifySignedPayload(
   token: string,
-  clientSecret: string,
+  clientSecret: string
 ): SignedPayload {
   const decoded = jwt.verify(token, clientSecret, {
     algorithms: ["HS256"],

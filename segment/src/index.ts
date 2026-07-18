@@ -9,9 +9,9 @@ import {
   waitForAnalytics,
   waitForConvor,
 } from "./analytics-source.js";
-import type { ConvorSegmentBridgeOptions } from "./types.js";
+import type {ConvorSegmentBridgeOptions} from "./types.js";
 
-export type { IdentifyPayload, TrackPayload } from "./analytics-source.js";
+export type {IdentifyPayload, TrackPayload} from "./analytics-source.js";
 export {
   attachForwarders,
   buildScriptUrl,
@@ -76,11 +76,11 @@ export function __resetBridge(): void {
  * ```
  */
 export async function initConvorSegmentBridge(
-  options: ConvorSegmentBridgeOptions,
+  options: ConvorSegmentBridgeOptions
 ): Promise<void> {
   if (!options || !options.slug) {
     throw new Error(
-      "[convor-segment] initConvorSegmentBridge requires a `slug` option",
+      "[convor-segment] initConvorSegmentBridge requires a `slug` option"
     );
   }
 
@@ -88,7 +88,7 @@ export async function initConvorSegmentBridge(
     throw new Error(
       "[convor-segment] initConvorSegmentBridge must be called in a browser " +
         "environment (window/document are undefined). Guard with a " +
-        '`typeof window !== "undefined"` check when running on the server.',
+        '`typeof window !== "undefined"` check when running on the server.'
     );
   }
 
@@ -115,8 +115,8 @@ export async function initConvorSegmentBridge(
   ]);
 
   // 4. Attach the forwarding listeners.
-  const detach = attachForwarders(analytics, { forwardIdentify, forwardTrack });
-  singleton = { src, detach };
+  const detach = attachForwarders(analytics, {forwardIdentify, forwardTrack});
+  singleton = {src, detach};
 }
 
 /**

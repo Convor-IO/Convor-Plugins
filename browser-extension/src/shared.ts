@@ -46,14 +46,14 @@ export async function getSettings(): Promise<ConvorSettings> {
   const raw = await chrome.storage.sync.get(STORAGE_KEY);
   const stored = raw[STORAGE_KEY];
   if (!stored || typeof stored !== "object") {
-    return { ...DEFAULT_SETTINGS };
+    return {...DEFAULT_SETTINGS};
   }
-  return { ...DEFAULT_SETTINGS, ...(stored as Partial<ConvorSettings>) };
+  return {...DEFAULT_SETTINGS, ...(stored as Partial<ConvorSettings>)};
 }
 
 /** Replace the full settings object. */
 export async function setSettings(settings: ConvorSettings): Promise<void> {
-  await chrome.storage.sync.set({ [STORAGE_KEY]: settings });
+  await chrome.storage.sync.set({[STORAGE_KEY]: settings});
 }
 
 /**
@@ -100,7 +100,7 @@ export function normalizeHost(entry: string): string {
  */
 export function matchesAllowedSites(
   url: string,
-  allowedSites: string[],
+  allowedSites: string[]
 ): boolean {
   let hostname: string;
   try {

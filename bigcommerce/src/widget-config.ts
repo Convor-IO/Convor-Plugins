@@ -1,4 +1,4 @@
-import { CONVOR_DASHBOARD_URL } from "./config.js";
+import {CONVOR_DASHBOARD_URL} from "./config.js";
 
 /**
  * The merchant-facing Convor widget config. Stored verbatim as the value of
@@ -13,11 +13,11 @@ export interface ConvorWidgetConfig {
 export const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,62}[a-z0-9])?$/;
 
 export function emptyConfig(defaultApiBase: string): ConvorWidgetConfig {
-  return { slug: "", apiBase: defaultApiBase };
+  return {slug: "", apiBase: defaultApiBase};
 }
 
 export function isConvorWidgetConfig(
-  value: unknown,
+  value: unknown
 ): value is ConvorWidgetConfig {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
@@ -27,7 +27,7 @@ export function isConvorWidgetConfig(
 /** Parse a metafield value string into a config, falling back to defaults. */
 export function parseConfig(
   raw: string | null | undefined,
-  defaultApiBase: string,
+  defaultApiBase: string
 ): ConvorWidgetConfig {
   if (!raw) return emptyConfig(defaultApiBase);
   try {
@@ -53,7 +53,7 @@ export interface ValidationError {
 export function validateConfig(
   slug: string,
   apiBase: string,
-  defaultApiBase: string,
+  defaultApiBase: string
 ): ValidationError[] {
   const errors: ValidationError[] = [];
   const trimmedSlug = slug.trim();
@@ -76,7 +76,7 @@ export function validateConfig(
       throw new Error("bad protocol");
     }
   } catch {
-    errors.push({ field: "apiBase", message: "API base must be a valid URL." });
+    errors.push({field: "apiBase", message: "API base must be a valid URL."});
   }
   return errors;
 }
@@ -99,4 +99,4 @@ export function buildWidgetHtml(cfg: ConvorWidgetConfig): string {
   ].join("");
 }
 
-export { CONVOR_DASHBOARD_URL };
+export {CONVOR_DASHBOARD_URL};

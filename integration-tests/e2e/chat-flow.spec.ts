@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import {expect, test} from "@playwright/test";
 
 /**
  * Full chat-flow E2E: open the bubble → type a message → send → confirm it
@@ -34,7 +34,7 @@ const WP_URL = process.env.WP_URL ?? "http://localhost:8080";
 test("full chat flow: visitor sends a message and sees it echoed", async ({
   page,
 }) => {
-  await page.goto(WP_URL, { waitUntil: "networkidle" });
+  await page.goto(WP_URL, {waitUntil: "networkidle"});
 
   // 1. The launcher trigger is visible in the parent page.
   await expect(page.locator(".convor-trigger")).toBeVisible({
@@ -52,7 +52,7 @@ test("full chat flow: visitor sends a message and sees it echoed", async ({
   const sendBtn = widget.locator(".convor-input__send").first();
 
   // Wait for the input to mount (the widget connects to Centrifugo first).
-  await expect(input).toBeVisible({ timeout: 20_000 });
+  await expect(input).toBeVisible({timeout: 20_000});
 
   // 4. Type a unique message so we can grep for it on the way back.
   const messageText = `E2E probe ${Date.now()}`;
@@ -64,6 +64,6 @@ test("full chat flow: visitor sends a message and sees it echoed", async ({
   //    Assert our text appears in the rendered message bubbles within 15s
   //    (covers the full network + WS subscription path).
   await expect(
-    widget.locator(".convor-msg__bubble", { hasText: messageText }),
-  ).toBeVisible({ timeout: 15_000 });
+    widget.locator(".convor-msg__bubble", {hasText: messageText})
+  ).toBeVisible({timeout: 15_000});
 });

@@ -9,8 +9,8 @@
  */
 
 const path = require("node:path");
-const { assertSnippetMatches } = require("./assert-snippet");
-const { startPhpServer, fetchText } = require("./_helpers");
+const {assertSnippetMatches} = require("./assert-snippet");
+const {startPhpServer, fetchText} = require("./_helpers");
 
 const PORT = 8103;
 const API_BASE = "http://localhost:5173";
@@ -29,7 +29,7 @@ async function main() {
   });
 
   try {
-    const { status, text } = await fetchText(`http://127.0.0.1:${PORT}/`);
+    const {status, text} = await fetchText(`http://127.0.0.1:${PORT}/`);
     if (status !== 200) {
       throw new Error(`HTTP ${status} from harness`);
     }

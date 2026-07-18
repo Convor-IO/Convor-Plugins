@@ -1,6 +1,6 @@
-import { beforeEach, describe, expect, it } from "vitest";
-import { __resetBridge, initConvorSegmentBridge } from "../index.js";
-import type { AnalyticsJS } from "../types.js";
+import {beforeEach, describe, expect, it} from "vitest";
+import {__resetBridge, initConvorSegmentBridge} from "../index.js";
+import type {AnalyticsJS} from "../types.js";
 
 // Integration tests — exercise the REAL script-tag injection path of the
 // Segment bridge against the local widget dev server URL
@@ -60,7 +60,7 @@ function resetDom(): void {
 
 // Release the bridge waitForConvor poll.
 function simulateConvorReady(
-  impl: Partial<{ identify: (a: Record<string, unknown>) => void }> = {},
+  impl: Partial<{identify: (a: Record<string, unknown>) => void}> = {}
 ): void {
   window.Convor = {
     identify: impl.identify ?? (() => {}),
@@ -83,11 +83,11 @@ describe("initConvorSegmentBridge — real DOM injection against local widget UR
     await ready;
 
     const tag = document.head.querySelector<HTMLScriptElement>(
-      `script[src="${LOCAL_WIDGET_SRC}"]`,
+      `script[src="${LOCAL_WIDGET_SRC}"]`
     );
     expect(
       tag,
-      "widget script tag must be present in document.head",
+      "widget script tag must be present in document.head"
     ).not.toBeNull();
     expect(tag?.getAttribute("src")).toBe(LOCAL_WIDGET_SRC);
     expect(tag?.dataset.key).toBe("acme");
@@ -103,23 +103,18 @@ describe("initConvorSegmentBridge — real DOM injection against local widget UR
       slug: "acme",
       apiBase: LOCAL_API_BASE,
     });
-    setTimeout(() => simulateConvorReady({ identify: (a) => spy.push(a) }), 0);
+    setTimeout(() => simulateConvorReady({identify: (a) => spy.push(a)}), 0);
     await ready;
 
     // Sanity: the script tag is still the one we injected (not duplicated by
     // the forward path).
     const scripts = document.head.querySelectorAll<HTMLScriptElement>(
-      `script[src="${LOCAL_WIDGET_SRC}"]`,
+      `script[src="${LOCAL_WIDGET_SRC}"]`
     );
     expect(scripts.length).toBe(1);
 
     // Emit a classic analytics.js identify event.
-    analytics.emit(
-      "identify",
-      "user-42",
-      { email: "x@y.com", plan: "pro" },
-      {},
-    );
+    analytics.emit("identify", "user-42", {email: "x@y.com", plan: "pro"}, {});
 
     expect(spy, "Convor.identify must be called exactly once").toHaveLength(1);
     expect(spy[0]).toEqual({

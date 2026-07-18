@@ -24,7 +24,7 @@ One codebase, two stores: **Chrome Web Store** (MV3) and **Firefox Add-ons
 
 ### Prerequisites
 
-- Node.js 18+ and pnpm 9 (`corepack enable`)
+- Node.js 22.12+ and pnpm 11 (`corepack enable`)
 - Python 3 + [Pillow](https://python-pillow.org) — only to regenerate the
   icons (committed PNGs are fine to use as-is)
 

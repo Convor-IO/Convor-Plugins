@@ -68,7 +68,7 @@ settings page ──POST /api/settings──────────▶ upsert P
 
 ## Prerequisites
 
-- Node `>=20.11`
+- Node `>=22.12 <23`
 - A BigCommerce [Developer Portal](https://devtools.bigcommerce.com) app
 - A dev/sandbox store to install against
 - A public HTTPS URL for the app (Cloudflare Tunnel or ngrok in dev)

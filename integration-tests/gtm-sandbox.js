@@ -45,7 +45,7 @@ function makeSandbox(templateData, loadedWindowState = {}) {
 
   const requireMap = {
     injectScript: (url, onSuccess, onFailure, attrs) => {
-      calls.injectScript.push({ url, onSuccess, onFailure, attrs });
+      calls.injectScript.push({url, onSuccess, onFailure, attrs});
       // Simulate the script loading synchronously: widget.js parses and
       // registers its globals onto window, THEN GTM fires onSuccess. Merge
       // the loaded state in first so copyFromWindow('ConvorWidget') inside
@@ -56,14 +56,14 @@ function makeSandbox(templateData, loadedWindowState = {}) {
       }
     },
     callInWindow: (path, ...args) => {
-      calls.callInWindow.push({ path, args });
+      calls.callInWindow.push({path, args});
       const fn = resolvePath(path);
       if (typeof fn === "function") {
         fn(...args);
       }
     },
     copyFromWindow: (path) => {
-      calls.copyFromWindow.push({ path });
+      calls.copyFromWindow.push({path});
       return resolvePath(path);
     },
     logToConsole: (msg) => calls.log.push(msg),
@@ -95,7 +95,7 @@ function makeSandbox(templateData, loadedWindowState = {}) {
     return calls;
   }
 
-  return { run };
+  return {run};
 }
 
-module.exports = { makeSandbox };
+module.exports = {makeSandbox};

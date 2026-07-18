@@ -1,7 +1,7 @@
-import { act, cleanup, render } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { ConvorWidget } from "../ConvorWidget.js";
-import { __resetHandle } from "../handle.js";
+import {act, cleanup, render} from "@testing-library/react";
+import {afterEach, beforeEach, describe, expect, it} from "vitest";
+import {ConvorWidget} from "../ConvorWidget.js";
+import {__resetHandle} from "../handle.js";
 
 /**
  * Integration tests — render `<ConvorWidget>` and assert the REAL script-tag
@@ -36,7 +36,7 @@ function resetDom(): void {
 
 /** Release the SDK's `waitForReady` poll (the embed loader owns this global). */
 function simulateReady(): void {
-  window.ConvorWidget = { ready: true };
+  window.ConvorWidget = {ready: true};
   window.Convor = {
     init: () => {},
     identify: () => {},
@@ -68,7 +68,7 @@ describe("ConvorWidget — real DOM injection against local widget URL", () => {
     await flushReady();
 
     const tag = document.head.querySelector<HTMLScriptElement>(
-      `script[src="${LOCAL_WIDGET_SRC}"]`,
+      `script[src="${LOCAL_WIDGET_SRC}"]`
     );
     expect(tag, "script tag must be present in document.head").not.toBeNull();
     expect(tag?.getAttribute("src")).toBe(LOCAL_WIDGET_SRC);
@@ -77,20 +77,20 @@ describe("ConvorWidget — real DOM injection against local widget URL", () => {
   });
 
   it("removes the script tag on unmount", async () => {
-    const { unmount } = render(
-      <ConvorWidget slug="acme" apiBase={LOCAL_API_BASE} />,
+    const {unmount} = render(
+      <ConvorWidget slug="acme" apiBase={LOCAL_API_BASE} />
     );
     setTimeout(simulateReady, 0);
     await flushReady();
 
     expect(
-      document.head.querySelector(`script[src="${LOCAL_WIDGET_SRC}"]`),
+      document.head.querySelector(`script[src="${LOCAL_WIDGET_SRC}"]`)
     ).not.toBeNull();
 
     unmount();
 
     expect(
-      document.head.querySelector(`script[src="${LOCAL_WIDGET_SRC}"]`),
+      document.head.querySelector(`script[src="${LOCAL_WIDGET_SRC}"]`)
     ).toBeNull();
   });
 });

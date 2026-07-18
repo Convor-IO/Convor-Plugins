@@ -3,7 +3,7 @@
  * wait for it to be ready, fetch, and check apiBase reachability.
  */
 
-const { spawn } = require("node:child_process");
+const {spawn} = require("node:child_process");
 const http = require("node:http");
 
 /**
@@ -22,7 +22,7 @@ function startPhpServer(opts) {
     const args = ["-S", `127.0.0.1:${opts.port}`, opts.harness];
     const proc = spawn("php", args, {
       cwd: opts.docroot || process.cwd(),
-      env: { ...process.env, ...(opts.env || {}) },
+      env: {...process.env, ...(opts.env || {})},
       stdio: ["ignore", "pipe", "pipe"],
     });
 
@@ -41,8 +41,8 @@ function startPhpServer(opts) {
       kill();
       reject(
         new Error(
-          `php -S did not start on port ${opts.port}\nstderr:\n${stderrBuf}`,
-        ),
+          `php -S did not start on port ${opts.port}\nstderr:\n${stderrBuf}`
+        )
       );
     }, 8000);
 
@@ -56,14 +56,14 @@ function startPhpServer(opts) {
         return;
       }
       const req = http.get(
-        { host: "127.0.0.1", port: opts.port, path: "/" },
+        {host: "127.0.0.1", port: opts.port, path: "/"},
         (res) => {
           res.resume();
           res.on("end", () => {
             clearTimeout(startupTimeout);
-            resolve({ proc, kill });
+            resolve({proc, kill});
           });
-        },
+        }
       );
       req.on("error", () => setTimeout(poll, 100));
     };
@@ -79,7 +79,7 @@ function startPhpServer(opts) {
 async function fetchText(url) {
   const res = await fetch(url);
   const text = await res.text();
-  return { status: res.status, text };
+  return {status: res.status, text};
 }
 
-module.exports = { startPhpServer, fetchText };
+module.exports = {startPhpServer, fetchText};

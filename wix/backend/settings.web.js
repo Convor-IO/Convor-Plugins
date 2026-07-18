@@ -25,7 +25,8 @@
  *   https://dev.wix.com/docs/api-reference/app-management/embedded-scripts/embed-script
  *   https://dev.wix.com/docs/api-reference/app-management/embedded-scripts/get-current
  */
-import { embeddedScripts } from "@wix/app-management";
+import {embeddedScripts} from "@wix/app-management";
+import {Permissions, webMethod} from "@wix/web-methods";
 
 /** The extension id from extensions/embedded-script/config.json. */
 const SCRIPT_ID = "convor-widget-loader";
@@ -57,7 +58,7 @@ function validateSlug(raw) {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     throw new Error(
       "Slug must contain only lowercase letters, numbers, and single dashes " +
-        "(e.g. 'acme-store').",
+        "(e.g. 'acme-store')."
     );
   }
   return slug;
@@ -68,13 +69,13 @@ function validateSlug(raw) {
  *
  * @returns {Promise<{ slug: string } | null>}
  */
-export async function getSettings() {
+async function getSettingsImpl() {
   const current = await embeddedScripts.getCurrent();
   if (!current || current.scriptId !== SCRIPT_ID) {
     return null;
   }
   const slug = current.parameters?.slug ?? "";
-  return slug ? { slug } : null;
+  return slug ? {slug} : null;
 }
 
 /**
@@ -84,17 +85,17 @@ export async function getSettings() {
  * @param {{ slug: string }} input
  * @returns {Promise<{ slug: string }>}
  */
-export async function saveSettings(input) {
+async function saveSettingsImpl(input) {
   const slug = validateSlug(input?.slug);
 
   // embedScript is idempotent: calling it again with the same scriptId updates
   // the parameters in place (no duplicate script on the site).
   await embeddedScripts.embedScript({
     scriptId: SCRIPT_ID,
-    parameters: { slug },
+    parameters: {slug},
   });
 
-  return { slug };
+  return {slug};
 }
 
 /**
@@ -103,10 +104,14 @@ export async function saveSettings(input) {
  *
  * @returns {Promise<{ ok: true }>}
  */
-export async function clearSettings() {
+async function clearSettingsImpl() {
   const current = await embeddedScripts.getCurrent();
   if (current?.scriptId === SCRIPT_ID) {
     await embeddedScripts.removeScript(SCRIPT_ID);
   }
-  return { ok: true };
+  return {ok: true};
 }
+
+export const getSettings = webMethod(Permissions.Admin, getSettingsImpl);
+export const saveSettings = webMethod(Permissions.Admin, saveSettingsImpl);
+export const clearSettings = webMethod(Permissions.Admin, clearSettingsImpl);

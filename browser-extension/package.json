@@ -8,19 +8,23 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
     "format": "biome format --write .",
-    "icons": "python3 scripts/generate-icons.py"
+    "icons": "python3 scripts/generate-icons.py",
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "webextension-polyfill": "^0.12.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "2.5.0",
     "@types/chrome": "^0.0.287",
     "@types/webextension-polyfill": "^0.12.1",
-    "tsup": "^8.3.5",
-    "typescript": "^5.7.0"
+    "tsup": "8.5.1",
+    "typescript": "6.0.3"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22.12 <23"
   }
 }

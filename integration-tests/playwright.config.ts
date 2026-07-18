@@ -1,9 +1,9 @@
-import { defineConfig } from "@playwright/test";
+import {defineConfig} from "@playwright/test";
 
 export default defineConfig({
   testDir: "./e2e",
   timeout: 30_000,
-  expect: { timeout: 10_000 },
+  expect: {timeout: 10_000},
   use: {
     headless: true,
     // The widget dev server runs at :5173 (saas/apps/widget). Plugins
@@ -13,7 +13,7 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { browserName: "chromium" },
+      use: {browserName: "chromium"},
     },
   ],
 });

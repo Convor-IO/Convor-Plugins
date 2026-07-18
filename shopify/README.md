@@ -59,8 +59,8 @@ shopify/
 
 ## Prerequisites
 
-- Node `>=20.19 <22 || >=22.12`
-- pnpm 9+
+- Node `>=22.12 <23`
+- pnpm 11
 - A Shopify Partners account and a dev store
 - The Shopify CLI (`pnpm dlx shopify app dev` — no global install needed)
 

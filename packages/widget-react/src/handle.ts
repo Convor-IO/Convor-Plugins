@@ -1,4 +1,4 @@
-import type { ConvorSDK } from "@convor/widget-sdk";
+import type {ConvorSDK} from "@convor/widget-sdk";
 
 /**
  * Module-level singleton holding the most-recent SDK handle.

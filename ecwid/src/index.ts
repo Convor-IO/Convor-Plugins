@@ -1,22 +1,14 @@
-import { createHmac, timingSafeEqual } from "node:crypto";
-import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import {createHmac, timingSafeEqual} from "node:crypto";
+import {existsSync} from "node:fs";
+import {readFile} from "node:fs/promises";
+import {dirname, join} from "node:path";
+import {fileURLToPath} from "node:url";
 import Fastify from "fastify";
-import { config } from "./config.js";
-import {
-  buildPublicConfig,
-  EcwidApiError,
-  EcwidClient,
-} from "./ecwid-client.js";
-import { escapeHtml } from "./html.js";
-import {
-  buildAuthorizeUrl,
-  exchangeCodeForToken,
-  OAuthError,
-} from "./oauth.js";
-import { deleteStore, readStore, saveInstall, saveSettings } from "./store.js";
+import {config} from "./config.js";
+import {buildPublicConfig, EcwidApiError, EcwidClient} from "./ecwid-client.js";
+import {escapeHtml} from "./html.js";
+import {buildAuthorizeUrl, exchangeCodeForToken, OAuthError} from "./oauth.js";
+import {deleteStore, readStore, saveInstall, saveSettings} from "./store.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -59,7 +51,7 @@ function isValidApiBase(apiBase: string): boolean {
   }
 }
 
-const server = Fastify({ logger: true });
+const server = Fastify({logger: true});
 
 /** `GET /` — install landing page linking to the Ecwid OAuth dialog. */
 server.get("/", async (_req, reply) => {
@@ -75,9 +67,9 @@ server.get("/", async (_req, reply) => {
  * and persist the install record, then redirect into the embedded app.
  */
 server.get("/install", async (req, reply) => {
-  const query = req.query as { code?: string; error?: string };
+  const query = req.query as {code?: string; error?: string};
   if (query.error) {
-    req.log.error({ error: query.error }, "OAuth authorization denied");
+    req.log.error({error: query.error}, "OAuth authorization denied");
     return reply
       .code(400)
       .type("text/html")
@@ -94,7 +86,7 @@ server.get("/install", async (req, reply) => {
   } catch (err) {
     const msg =
       err instanceof OAuthError ? err.message : "Token exchange failed.";
-    req.log.error({ err }, "OAuth token exchange failed");
+    req.log.error({err}, "OAuth token exchange failed");
     return reply
       .code(400)
       .type("text/html")
@@ -108,7 +100,7 @@ server.get("/install", async (req, reply) => {
     scope: token.scope,
     installedAt: new Date().toISOString(),
   });
-  req.log.info({ storeId, scope: token.scope }, "Ecwid app installed");
+  req.log.info({storeId, scope: token.scope}, "Ecwid app installed");
 
   // Drop into the embedded settings app.
   return reply.redirect(`/app?storeId=${encodeURIComponent(storeId)}`, 302);
@@ -116,7 +108,7 @@ server.get("/install", async (req, reply) => {
 
 /** `GET /app` — embedded settings form (rendered in the Ecwid Control Panel iframe). */
 server.get("/app", async (req, reply) => {
-  const storeId = (req.query as { storeId?: string }).storeId;
+  const storeId = (req.query as {storeId?: string}).storeId;
   if (!storeId) {
     return reply.code(400).send("Missing storeId.");
   }
@@ -130,7 +122,7 @@ server.get("/app", async (req, reply) => {
     html
       .replace(/__STORE_ID__/g, escapeHtml(storeId))
       .replace(/__SLUG__/g, escapeHtml(slug))
-      .replace(/__API_BASE__/g, escapeHtml(apiBase)),
+      .replace(/__API_BASE__/g, escapeHtml(apiBase))
   );
 });
 
@@ -154,7 +146,7 @@ server.post("/api/settings", async (req, reply) => {
       : config.defaultApiBase;
 
   if (!storeId) {
-    return reply.code(400).send({ error: "storeId is required." });
+    return reply.code(400).send({error: "storeId is required."});
   }
   if (!isValidSlug(slug)) {
     return reply.code(400).send({
@@ -163,7 +155,7 @@ server.post("/api/settings", async (req, reply) => {
     });
   }
   if (!isValidApiBase(apiBase)) {
-    return reply.code(400).send({ error: "Invalid apiBase URL." });
+    return reply.code(400).send({error: "Invalid apiBase URL."});
   }
 
   const record = await readStore(storeId);
@@ -186,12 +178,12 @@ server.post("/api/settings", async (req, reply) => {
   try {
     await client.putStorage("public", publicConfig);
   } catch (err) {
-    req.log.error({ err, storeId }, "Failed to publish public config");
+    req.log.error({err, storeId}, "Failed to publish public config");
     const msg =
       err instanceof EcwidApiError
         ? `Ecwid API error (${err.status}).`
         : "Failed to publish storefront config.";
-    return reply.code(502).send({ error: msg });
+    return reply.code(502).send({error: msg});
   }
 
   await saveSettings(storeId, {
@@ -200,7 +192,7 @@ server.post("/api/settings", async (req, reply) => {
     updatedAt: new Date().toISOString(),
   });
 
-  return reply.send({ ok: true, slug, apiBase: resolvedApiBase });
+  return reply.send({ok: true, slug, apiBase: resolvedApiBase});
 });
 
 /**
@@ -208,9 +200,9 @@ server.post("/api/settings", async (req, reply) => {
  * stops rendering, then drop the local install record.
  */
 server.delete("/api/uninstall", async (req, reply) => {
-  const storeId = (req.query as { storeId?: string }).storeId;
+  const storeId = (req.query as {storeId?: string}).storeId;
   if (!storeId) {
-    return reply.code(400).send({ error: "storeId is required." });
+    return reply.code(400).send({error: "storeId is required."});
   }
   const record = await readStore(storeId);
   if (record) {
@@ -220,13 +212,13 @@ server.delete("/api/uninstall", async (req, reply) => {
     } catch (err) {
       // Best-effort — token may already be revoked. Log and continue.
       req.log.warn(
-        { err, storeId },
-        "Could not clear public config on uninstall",
+        {err, storeId},
+        "Could not clear public config on uninstall"
       );
     }
   }
   await deleteStore(storeId);
-  return reply.send({ ok: true });
+  return reply.send({ok: true});
 });
 
 interface EcwidWebhookBody {
@@ -238,7 +230,7 @@ interface EcwidWebhookBody {
 
 function verifyEcwidWebhook(
   body: EcwidWebhookBody,
-  signature: string | undefined,
+  signature: string | undefined
 ): boolean {
   if (!signature) return false;
   const eventId = typeof body.eventId === "string" ? body.eventId : "";
@@ -270,8 +262,8 @@ server.post("/api/webhooks", async (req, reply) => {
   const signatureValue = Array.isArray(signature) ? signature[0] : signature;
 
   if (!verifyEcwidWebhook(body, signatureValue)) {
-    req.log.warn({ body }, "Ecwid webhook signature verification failed");
-    return reply.code(401).send({ ok: false });
+    req.log.warn({body}, "Ecwid webhook signature verification failed");
+    return reply.code(401).send({ok: false});
   }
 
   if (
@@ -281,11 +273,11 @@ server.post("/api/webhooks", async (req, reply) => {
     await deleteStore(String(body.storeId));
   }
 
-  return reply.send({ ok: true });
+  return reply.send({ok: true});
 });
 
 /** Health check. */
-server.get("/health", async () => ({ ok: true }));
+server.get("/health", async () => ({ok: true}));
 
 /**
  * `GET /storefront.js` — the loader JS Ecwid auto-injects on storefront pages.
@@ -301,7 +293,7 @@ server.get("/storefront.js", async (_req, reply) => {
   // Bake in the appId so the loader knows which public config to read.
   js = js.replace(
     "window.__CONVOR_ECWID_APP_ID__",
-    JSON.stringify(config.appId),
+    JSON.stringify(config.appId)
   );
   return reply
     .type("application/javascript; charset=utf-8")
@@ -311,13 +303,13 @@ server.get("/storefront.js", async (_req, reply) => {
 
 const start = async (): Promise<void> => {
   try {
-    await server.listen({ host: "0.0.0.0", port: config.port });
+    await server.listen({host: "0.0.0.0", port: config.port});
     server.log.info(
-      { storefrontJs: config.storefrontJs },
-      "Convor-Ecwid app running. Register this storefront.js URL with Ecwid (customize_storefront scope).",
+      {storefrontJs: config.storefrontJs},
+      "Convor-Ecwid app running. Register this storefront.js URL with Ecwid (customize_storefront scope)."
     );
   } catch (err) {
-    server.log.error({ err }, "Server failed to start");
+    server.log.error({err}, "Server failed to start");
     process.exit(1);
   }
 };

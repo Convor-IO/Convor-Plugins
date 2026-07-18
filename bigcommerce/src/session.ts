@@ -18,9 +18,9 @@ export interface SessionClaims {
 
 export function createSessionToken(
   storeHash: string,
-  clientSecret: string,
+  clientSecret: string
 ): string {
-  return jwt.sign({ store_hash: storeHash }, clientSecret, {
+  return jwt.sign({store_hash: storeHash}, clientSecret, {
     algorithm: "HS256",
     expiresIn: SESSION_TTL_SECONDS,
   });
@@ -29,7 +29,7 @@ export function createSessionToken(
 /** Verify a session cookie JWT. Throws on invalid signature or expiry. */
 export function verifySessionToken(
   token: string,
-  clientSecret: string,
+  clientSecret: string
 ): SessionClaims {
   const decoded = jwt.verify(token, clientSecret, {
     algorithms: ["HS256"],

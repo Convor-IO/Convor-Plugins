@@ -1,4 +1,4 @@
-import { defineConfig } from "tsup";
+import {defineConfig} from "tsup";
 
 /**
  * Bundle the four extension entry points to self-contained scripts under
@@ -26,7 +26,7 @@ export default defineConfig({
   },
   format: ["iife"],
   outDir: "dist",
-  outExtension: () => ({ js: ".js" }),
+  outExtension: () => ({js: ".js"}),
   clean: true,
   splitting: false,
   sourcemap: false,

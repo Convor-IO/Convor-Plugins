@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import {Pool} from "pg";
 
 /** Persisted OAuth install data, keyed by store hash. */
 export interface StoreInstall {
@@ -35,7 +35,7 @@ export class PostgresTokenStore implements TokenStore {
   private ready: Promise<void> | undefined;
 
   constructor(opts: PostgresTokenStoreOptions) {
-    this.pool = new Pool({ connectionString: opts.connectionString });
+    this.pool = new Pool({connectionString: opts.connectionString});
   }
 
   private ensureSchema(): Promise<void> {
@@ -61,7 +61,7 @@ export class PostgresTokenStore implements TokenStore {
         FROM bigcommerce_tokens
         WHERE store_hash = $1
       `,
-      [storeHash],
+      [storeHash]
     );
     const row = result.rows[0];
     if (!row) return undefined;
@@ -96,7 +96,7 @@ export class PostgresTokenStore implements TokenStore {
         install.accessToken,
         install.scope ?? null,
         install.installedAt,
-      ],
+      ]
     );
   }
 
@@ -104,7 +104,7 @@ export class PostgresTokenStore implements TokenStore {
     await this.ensureSchema();
     await this.pool.query(
       "DELETE FROM bigcommerce_tokens WHERE store_hash = $1",
-      [storeHash],
+      [storeHash]
     );
   }
 

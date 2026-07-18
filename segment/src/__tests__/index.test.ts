@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
 import {
   __resetBridge,
   DEFAULT_API_BASE,
@@ -7,7 +7,7 @@ import {
   normalizeTrack,
   teardownConvorSegmentBridge,
 } from "../index.js";
-import type { AnalyticsJS, ConvorVisitorSDK } from "../types.js";
+import type {AnalyticsJS, ConvorVisitorSDK} from "../types.js";
 
 const WIDGET_SRC = `${DEFAULT_API_BASE}/widget.js`;
 
@@ -48,7 +48,7 @@ function resetDom(): void {
 
 /** Pretend the Convor embed loader has booted. */
 function simulateConvorReady(impl: Partial<ConvorVisitorSDK> = {}): void {
-  window.ConvorWidget = { ready: true };
+  window.ConvorWidget = {ready: true};
   window.Convor = {
     identify: impl.identify ?? (() => {}),
     track: impl.track ?? (() => {}),
@@ -58,7 +58,7 @@ function simulateConvorReady(impl: Partial<ConvorVisitorSDK> = {}): void {
 
 describe("buildScriptUrl (via export)", () => {
   it("trims a trailing slash and appends /widget.js", async () => {
-    const { buildScriptUrl } = await import("../index.js");
+    const {buildScriptUrl} = await import("../index.js");
     expect(buildScriptUrl("https://cdn.convor.io")).toBe(WIDGET_SRC);
     expect(buildScriptUrl("https://cdn.convor.io/")).toBe(WIDGET_SRC);
     expect(buildScriptUrl("https://cdn.convor.io///")).toBe(WIDGET_SRC);
@@ -67,16 +67,16 @@ describe("buildScriptUrl (via export)", () => {
 
 describe("normalizeIdentify", () => {
   it("parses classic analytics.js args: (userId, traits, options)", () => {
-    const payload = normalizeIdentify(["user-123", { email: "a@b.com" }, {}]);
+    const payload = normalizeIdentify(["user-123", {email: "a@b.com"}, {}]);
     expect(payload).toEqual({
       userId: "user-123",
-      traits: { email: "a@b.com" },
+      traits: {email: "a@b.com"},
     });
   });
 
   it("parses classic args when userId is null (anonymous identify)", () => {
-    const payload = normalizeIdentify([null, { name: "Anon" }]);
-    expect(payload?.traits).toEqual({ name: "Anon" });
+    const payload = normalizeIdentify([null, {name: "Anon"}]);
+    expect(payload?.traits).toEqual({name: "Anon"});
   });
 
   it("parses analytics-next ctx object with nested event", () => {
@@ -85,11 +85,11 @@ describe("normalizeIdentify", () => {
       event: {
         type: "identify",
         userId: "user-9",
-        traits: { plan: "pro" },
+        traits: {plan: "pro"},
       },
     };
     const payload = normalizeIdentify([ctx]);
-    expect(payload).toEqual({ userId: "user-9", traits: { plan: "pro" } });
+    expect(payload).toEqual({userId: "user-9", traits: {plan: "pro"}});
   });
 
   it("returns null for empty args", () => {
@@ -99,8 +99,8 @@ describe("normalizeIdentify", () => {
 
 describe("normalizeTrack", () => {
   it("parses classic analytics.js args: (event, properties, options)", () => {
-    const payload = normalizeTrack(["signup", { plan: "pro" }, {}]);
-    expect(payload).toEqual({ event: "signup", properties: { plan: "pro" } });
+    const payload = normalizeTrack(["signup", {plan: "pro"}, {}]);
+    expect(payload).toEqual({event: "signup", properties: {plan: "pro"}});
   });
 
   it("parses analytics-next ctx object with nested event", () => {
@@ -109,11 +109,11 @@ describe("normalizeTrack", () => {
       event: {
         type: "track",
         event: "checkout",
-        properties: { total: 42 },
+        properties: {total: 42},
       },
     };
     const payload = normalizeTrack([ctx]);
-    expect(payload).toEqual({ event: "checkout", properties: { total: 42 } });
+    expect(payload).toEqual({event: "checkout", properties: {total: 42}});
   });
 
   it("returns null when the classic first arg is not a string", () => {
@@ -132,12 +132,12 @@ describe("initConvorSegmentBridge — injection", () => {
     const analytics = makeAnalytics();
     window.analytics = analytics;
 
-    const ready = initConvorSegmentBridge({ slug: "acme" });
+    const ready = initConvorSegmentBridge({slug: "acme"});
     setTimeout(() => simulateConvorReady(), 0);
     await ready;
 
     const scripts = Array.from(
-      document.head.querySelectorAll<HTMLScriptElement>("script"),
+      document.head.querySelectorAll<HTMLScriptElement>("script")
     );
     expect(scripts.length).toBe(1);
     expect(scripts[0]?.src).toBe(WIDGET_SRC);
@@ -149,14 +149,14 @@ describe("initConvorSegmentBridge — injection", () => {
     window.analytics = makeAnalytics();
     await expect(
       // @ts-expect-error exercising the runtime guard with a missing slug
-      initConvorSegmentBridge({}),
+      initConvorSegmentBridge({})
     ).rejects.toThrow(/slug/);
   });
 
   it("rejects when window.Convor never becomes ready", async () => {
     window.analytics = makeAnalytics();
     await expect(
-      initConvorSegmentBridge({ slug: "acme", widgetTimeoutMs: 60 }),
+      initConvorSegmentBridge({slug: "acme", widgetTimeoutMs: 60})
     ).rejects.toThrow(/window\.Convor/);
   });
 
@@ -164,7 +164,7 @@ describe("initConvorSegmentBridge — injection", () => {
     // Convor is ready, but analytics.js never loads.
     simulateConvorReady();
     await expect(
-      initConvorSegmentBridge({ slug: "acme", analyticsTimeoutMs: 60 }),
+      initConvorSegmentBridge({slug: "acme", analyticsTimeoutMs: 60})
     ).rejects.toThrow(/window\.analytics/);
   });
 });
@@ -177,12 +177,12 @@ describe("initConvorSegmentBridge — forwarding (classic analytics.js)", () => 
     window.analytics = analytics;
 
     const spy: Array<Record<string, unknown>> = [];
-    const ready = initConvorSegmentBridge({ slug: "acme" });
-    setTimeout(() => simulateConvorReady({ identify: (a) => spy.push(a) }), 0);
+    const ready = initConvorSegmentBridge({slug: "acme"});
+    setTimeout(() => simulateConvorReady({identify: (a) => spy.push(a)}), 0);
     await ready;
 
     // Classic emit: (userId, traits, options).
-    analytics.emit("identify", "user-1", { email: "x@y.com", name: "Sam" }, {});
+    analytics.emit("identify", "user-1", {email: "x@y.com", name: "Sam"}, {});
 
     expect(spy).toHaveLength(1);
     expect(spy[0]).toEqual({
@@ -196,22 +196,22 @@ describe("initConvorSegmentBridge — forwarding (classic analytics.js)", () => 
     const analytics = makeAnalytics();
     window.analytics = analytics;
 
-    const spy: Array<{ event: string; props?: Record<string, unknown> }> = [];
-    const ready = initConvorSegmentBridge({ slug: "acme" });
+    const spy: Array<{event: string; props?: Record<string, unknown>}> = [];
+    const ready = initConvorSegmentBridge({slug: "acme"});
     setTimeout(
       () =>
         simulateConvorReady({
-          track: (event, props) => spy.push({ event, props }),
+          track: (event, props) => spy.push({event, props}),
         }),
-      0,
+      0
     );
     await ready;
 
     // Classic emit: (event, properties, options).
-    analytics.emit("track", "added_to_cart", { sku: "abc", qty: 2 }, {});
+    analytics.emit("track", "added_to_cart", {sku: "abc", qty: 2}, {});
 
     expect(spy).toEqual([
-      { event: "added_to_cart", props: { sku: "abc", qty: 2 } },
+      {event: "added_to_cart", props: {sku: "abc", qty: 2}},
     ]);
   });
 
@@ -231,7 +231,7 @@ describe("initConvorSegmentBridge — forwarding (classic analytics.js)", () => 
           identify: () => identifyCalls++,
           track: () => trackCalls++,
         }),
-      0,
+      0
     );
     await ready;
 
@@ -257,7 +257,7 @@ describe("initConvorSegmentBridge — forwarding (classic analytics.js)", () => 
           identify: () => identifyCalls++,
           track: () => trackCalls++,
         }),
-      0,
+      0
     );
     await ready;
 
@@ -276,31 +276,31 @@ describe("initConvorSegmentBridge — forwarding (analytics-next ctx)", () => {
     window.analytics = analytics;
 
     const spy: Array<Record<string, unknown>> = [];
-    const ready = initConvorSegmentBridge({ slug: "acme" });
-    setTimeout(() => simulateConvorReady({ identify: (a) => spy.push(a) }), 0);
+    const ready = initConvorSegmentBridge({slug: "acme"});
+    setTimeout(() => simulateConvorReady({identify: (a) => spy.push(a)}), 0);
     await ready;
 
     // analytics-next emits a single context object.
     analytics.emit("identify", {
       type: "identify",
-      event: { type: "identify", userId: "u-7", traits: { tier: "gold" } },
+      event: {type: "identify", userId: "u-7", traits: {tier: "gold"}},
     });
 
-    expect(spy).toEqual([{ userId: "u-7", tier: "gold" }]);
+    expect(spy).toEqual([{userId: "u-7", tier: "gold"}]);
   });
 
   it("forwards analytics-next track ctx → window.Convor.track", async () => {
     const analytics = makeAnalytics();
     window.analytics = analytics;
 
-    const spy: Array<{ event: string; props?: Record<string, unknown> }> = [];
-    const ready = initConvorSegmentBridge({ slug: "acme" });
+    const spy: Array<{event: string; props?: Record<string, unknown>}> = [];
+    const ready = initConvorSegmentBridge({slug: "acme"});
     setTimeout(
       () =>
         simulateConvorReady({
-          track: (event, props) => spy.push({ event, props }),
+          track: (event, props) => spy.push({event, props}),
         }),
-      0,
+      0
     );
     await ready;
 
@@ -309,11 +309,11 @@ describe("initConvorSegmentBridge — forwarding (analytics-next ctx)", () => {
       event: {
         type: "track",
         event: "purchase",
-        properties: { revenue: 99.5 },
+        properties: {revenue: 99.5},
       },
     });
 
-    expect(spy).toEqual([{ event: "purchase", props: { revenue: 99.5 } }]);
+    expect(spy).toEqual([{event: "purchase", props: {revenue: 99.5}}]);
   });
 });
 
@@ -324,7 +324,7 @@ describe("initConvorSegmentBridge — waits for late analytics.js", () => {
     // Convor is ready immediately, analytics.js is not yet on the page.
     simulateConvorReady();
 
-    const ready = initConvorSegmentBridge({ slug: "acme" });
+    const ready = initConvorSegmentBridge({slug: "acme"});
     // analytics.js loads after a tick.
     setTimeout(() => {
       window.analytics = makeAnalytics();
@@ -348,14 +348,14 @@ describe("initConvorSegmentBridge — idempotency", () => {
 
   it("does not inject a second script when called twice", async () => {
     window.analytics = makeAnalytics();
-    const first = initConvorSegmentBridge({ slug: "acme" });
+    const first = initConvorSegmentBridge({slug: "acme"});
     setTimeout(() => simulateConvorReady(), 0);
     await first;
 
-    await initConvorSegmentBridge({ slug: "acme" });
+    await initConvorSegmentBridge({slug: "acme"});
 
     const scripts = document.head.querySelectorAll<HTMLScriptElement>(
-      `script[src="${WIDGET_SRC}"]`,
+      `script[src="${WIDGET_SRC}"]`
     );
     expect(scripts.length).toBe(1);
   });
@@ -369,10 +369,10 @@ describe("initConvorSegmentBridge — idempotency", () => {
 
     window.analytics = makeAnalytics();
     setTimeout(() => simulateConvorReady(), 0);
-    await initConvorSegmentBridge({ slug: "acme" });
+    await initConvorSegmentBridge({slug: "acme"});
 
     const scripts = document.head.querySelectorAll<HTMLScriptElement>(
-      `script[src="${WIDGET_SRC}"]`,
+      `script[src="${WIDGET_SRC}"]`
     );
     expect(scripts.length).toBe(1);
   });
@@ -386,8 +386,8 @@ describe("teardownConvorSegmentBridge", () => {
     window.analytics = analytics;
 
     let trackCalls = 0;
-    const ready = initConvorSegmentBridge({ slug: "acme" });
-    setTimeout(() => simulateConvorReady({ track: () => trackCalls++ }), 0);
+    const ready = initConvorSegmentBridge({slug: "acme"});
+    setTimeout(() => simulateConvorReady({track: () => trackCalls++}), 0);
     await ready;
 
     analytics.emit("track", "before", {});
@@ -412,8 +412,8 @@ describe("initConvorSegmentBridge — SSR guard", () => {
     vi.stubGlobal("window", undefined);
     vi.stubGlobal("document", undefined);
 
-    await expect(initConvorSegmentBridge({ slug: "acme" })).rejects.toThrow(
-      /browser environment/,
+    await expect(initConvorSegmentBridge({slug: "acme"})).rejects.toThrow(
+      /browser environment/
     );
   });
 });

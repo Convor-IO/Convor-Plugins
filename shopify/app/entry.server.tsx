@@ -1,10 +1,10 @@
-import { PassThrough } from "node:stream";
-import type { AppLoadContext, EntryContext } from "@remix-run/node";
-import { createReadableStreamFromReadable } from "@remix-run/node";
-import { RemixServer } from "@remix-run/react";
-import { isbot } from "isbot";
-import { renderToPipeableStream } from "react-dom/server";
-import { addDocumentResponseHeaders } from "./shopify.server";
+import {PassThrough} from "node:stream";
+import type {AppLoadContext, EntryContext} from "@remix-run/node";
+import {createReadableStreamFromReadable} from "@remix-run/node";
+import {RemixServer} from "@remix-run/react";
+import {isbot} from "isbot";
+import {renderToPipeableStream} from "react-dom/server";
+import {addDocumentResponseHeaders} from "./shopify.server";
 
 export const streamTimeout = 5000;
 
@@ -15,7 +15,7 @@ export default async function handleRequest(
   remixContext: EntryContext,
   // shopify-app-remix passes this through; we don't use it but the signature
   // must match what Remix expects.
-  _loadContext?: AppLoadContext,
+  _loadContext?: AppLoadContext
 ) {
   addDocumentResponseHeaders(request, responseHeaders);
 
@@ -27,7 +27,7 @@ export default async function handleRequest(
 
   return new Promise((resolve, reject) => {
     let shellRendered = false;
-    const { pipe, abort } = renderToPipeableStream(
+    const {pipe, abort} = renderToPipeableStream(
       <RemixServer
         context={remixContext}
         url={request.url}
@@ -44,7 +44,7 @@ export default async function handleRequest(
             new Response(stream, {
               headers: responseHeaders,
               status,
-            }),
+            })
           );
           pipe(body);
         },
@@ -58,7 +58,7 @@ export default async function handleRequest(
             console.error(error);
           }
         },
-      },
+      }
     );
 
     // Automatically timeout the React renderer after 6 seconds, which ensures

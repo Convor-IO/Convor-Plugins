@@ -37,7 +37,7 @@ export function injectConvorWidget(apiBase: string, slug: string): boolean {
   const base = (apiBase || "https://cdn.convor.io").replace(/\/+$/, "");
   const src = `${base}/widget.js`;
   const existing = document.querySelector<HTMLScriptElement>(
-    `script[data-convor="extension"], script[src="${src}"]`,
+    `script[data-convor="extension"], script[src="${src}"]`
   );
   if (existing) {
     return false;

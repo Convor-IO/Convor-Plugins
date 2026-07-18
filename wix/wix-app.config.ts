@@ -13,7 +13,7 @@
  * a dashboard page (in `settings-panel/`) where the merchant enters their
  * Convor org slug. All appearance config lives server-side in Convor.
  */
-import type { WixAppConfig } from "@wix/cli-app";
+import type {WixAppConfig} from "./wix-cli-app";
 
 const config: WixAppConfig = {
   appId: process.env.WIX_APP_ID,
