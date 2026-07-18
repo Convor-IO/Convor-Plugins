@@ -9,17 +9,22 @@
     "build": "echo 'Wix apps are deployed with the Wix CLI (wix app deploy). This package has no build step.' && exit 0",
     "dev": "echo 'Run the Wix CLI directly: wix dev' && exit 1",
     "format": "biome format --write .",
-    "lint": "biome check ."
+    "lint": "biome check .",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@wix/app-management": "^1.0.0",
+    "@wix/cli-app": "^1.1.226",
+    "@wix/design-system": "^1.299.0",
     "@wix/essentials": "^1.0.0",
     "@wix/sdk": "^1.0.0",
+    "@wix/web-methods": "^1.0.12",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.0",
+    "@types/node": "22.20.1",
     "@types/react": "18.3.0",
     "@types/react-dom": "18.3.0",
     "typescript": "6.0.3"

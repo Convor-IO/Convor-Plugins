@@ -14,27 +14,20 @@ import {
   Card,
   Cell,
   FormField,
+  Input,
   Layout,
   Loader,
   Page,
   TextButton,
-  TextInput,
   Toast,
-  WixCSSReact,
+  WixDesignSystemProvider,
 } from "@wix/design-system";
-// Web modules are imported by relative path and bundled by the Wix CLI.
-// `webMethod` wraps the call so it runs with site-owner elevation.
-import {webMethod} from "@wix/essentials";
 import {useEffect, useState} from "react";
 import {
   clearSettings,
   getSettings,
   saveSettings,
 } from "../backend/settings.web";
-
-const getSettingsWM = webMethod(getSettings);
-const saveSettingsWM = webMethod(saveSettings);
-const clearSettingsWM = webMethod(clearSettings);
 
 type Status = "loading" | "ready" | "saving" | "saved" | "error";
 
@@ -44,7 +37,7 @@ export default function Settings() {
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
-    getSettingsWM()
+    getSettings()
       .then((res) => {
         setSlug(res?.slug ?? "");
         setStatus("ready");
@@ -58,7 +51,7 @@ export default function Settings() {
   function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setStatus("saving");
-    saveSettingsWM({slug})
+    saveSettings({slug})
       .then(() => {
         setStatus("saved");
         setToast("Saved. Your chat bubble is now live.");
@@ -71,7 +64,7 @@ export default function Settings() {
 
   function handleClear() {
     setStatus("saving");
-    clearSettingsWM()
+    clearSettings()
       .then(() => {
         setSlug("");
         setStatus("ready");
@@ -84,7 +77,7 @@ export default function Settings() {
   }
 
   return (
-    <WixCSSReact>
+    <WixDesignSystemProvider>
       <Page>
         <Page.Header
           title="Convor Live Chat"
@@ -108,7 +101,7 @@ export default function Settings() {
                   <Card.Content>
                     <form onSubmit={handleSave}>
                       <FormField label="Org slug" required>
-                        <TextInput
+                        <Input
                           value={slug}
                           onChange={(e) =>
                             setSlug(e.target.value.trim().toLowerCase())
@@ -156,13 +149,11 @@ export default function Settings() {
           )}
         </Page.Content>
         {toast && (
-          <Toast
-            message={toast}
-            onClose={() => setToast(null)}
-            timeout={4000}
-          />
+          <Toast key="settings-feedback" onDismiss={() => setToast(null)}>
+            {toast}
+          </Toast>
         )}
       </Page>
-    </WixCSSReact>
+    </WixDesignSystemProvider>
   );
 }
