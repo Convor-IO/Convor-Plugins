@@ -7,8 +7,10 @@
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "build": "pnpm -r --if-present build",
+    "gate": "pnpm lint && pnpm typecheck && pnpm test",
     "lint": "biome check .",
     "format": "biome format --write .",
+    "prepare": "husky",
     "typecheck": "pnpm -r --if-present typecheck",
     "test": "pnpm -r --if-present test && node integration-tests/run-all.js",
     "test:e2e": "playwright test --config integration-tests/playwright.config.ts"
@@ -16,6 +18,11 @@
   "devDependencies": {
     "@biomejs/biome": "^2.5.2",
     "@playwright/test": "^1.60.0",
+    "husky": "^9.1.7",
+    "nano-staged": "^1.0.2",
     "typescript": "^6.0.3"
+  },
+  "nano-staged": {
+    "*.{js,jsx,ts,tsx,css,json}": "biome check --write --reporter=concise --no-errors-on-unmatched"
   }
 }
