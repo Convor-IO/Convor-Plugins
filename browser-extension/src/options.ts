@@ -92,10 +92,10 @@ el.form.addEventListener("submit", (event) => {
 
 el.reset.addEventListener("click", async () => {
   const confirmed = window.confirm(
-    "Reset all Convor extension settings to defaults?",
+    "Reset all Convor extension settings to defaults?"
   );
   if (!confirmed) return;
-  await setSettings({ ...DEFAULT_SETTINGS });
+  await setSettings({...DEFAULT_SETTINGS});
   await load();
   status("Reset to defaults.", "ok");
 });

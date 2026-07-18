@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import {expect, test} from "@playwright/test";
 
 /**
  * Real-browser E2E against a real WordPress install.
@@ -44,26 +44,26 @@ test("real WordPress: widget <script> loads and the trigger button mounts", asyn
 
   // 1. The canonical script tag is present in the rendered HTML.
   const scriptTag = page.locator(
-    `script[src*="/widget.js"][data-key="${ORG_SLUG}"]`,
+    `script[src*="/widget.js"][data-key="${ORG_SLUG}"]`
   );
   await expect(scriptTag).toHaveCount(1);
   await expect(scriptTag).toHaveAttribute(
     "src",
-    `${WIDGET_API_BASE}/widget.js`,
+    `${WIDGET_API_BASE}/widget.js`
   );
 
   // 2. The browser actually fetched /widget.js.
-  await expect.poll(() => scriptRequests.length, { timeout: 10_000 }).toBe(1);
+  await expect.poll(() => scriptRequests.length, {timeout: 10_000}).toBe(1);
 
   // 3. The loader executed: window.ConvorWidget is defined.
   await expect
     .poll(
       async () =>
         page.evaluate(() => {
-          const w = window as Window & { ConvorWidget?: unknown };
+          const w = window as Window & {ConvorWidget?: unknown};
           return typeof w.ConvorWidget;
         }),
-      { timeout: 10_000 },
+      {timeout: 10_000}
     )
     .toBe("object");
 
@@ -74,5 +74,5 @@ test("real WordPress: widget <script> loads and the trigger button mounts", asyn
   const triggerFrame = page.frameLocator(`iframe[src*="widget-iframe.html"]`);
   // We don't assert on the iframe's content (depends on backend); just that
   // the frame exists, proving the loader ran to completion.
-  await expect(triggerFrame.owner()).toBeVisible({ timeout: 15_000 });
+  await expect(triggerFrame.owner()).toBeVisible({timeout: 15_000});
 });

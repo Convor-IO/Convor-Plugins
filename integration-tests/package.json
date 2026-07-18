@@ -5,21 +5,25 @@
   "license": "MIT",
   "type": "commonjs",
   "scripts": {
-    "test:wordpress": "node wordpress.test.js",
-    "test:prestashop": "node prestashop.test.js",
+    "test": "node run-all.js",
+    "test:bigcommerce": "node bigcommerce.test.js",
+    "test:browser-extension": "node browser-extension.test.js",
+    "test:builders": "node builders.test.js",
     "test:drupal": "node drupal.test.js",
+    "test:ecwid": "node ecwid.test.js",
+    "test:gtm": "node gtm.test.js",
     "test:joomla": "node joomla.test.js",
     "test:magento": "node magento.test.js",
     "test:opencart": "node opencart.test.js",
-    "test:bigcommerce": "node bigcommerce.test.js",
-    "test:ecwid": "node ecwid.test.js",
-    "test:gtm": "node gtm.test.js",
-    "test:browser-extension": "node browser-extension.test.js",
-    "test:builders": "node builders.test.js",
-    "test": "node run-all.js"
+    "test:prestashop": "node prestashop.test.js",
+    "test:wordpress": "node wordpress.test.js"
   },
   "dependencies": {
     "http-proxy": "^1.18.1",
     "jsdom": "^29.1.1"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22.12 <23"
   }
 }

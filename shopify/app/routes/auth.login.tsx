@@ -1,5 +1,5 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { Form, useActionData, useLoaderData } from "@remix-run/react";
+import type {ActionFunctionArgs, LoaderFunctionArgs} from "@remix-run/node";
+import {Form, useActionData, useLoaderData} from "@remix-run/react";
 import {
   Button,
   Card,
@@ -10,35 +10,35 @@ import {
   TextField,
 } from "@shopify/polaris";
 import polarisTranslations from "@shopify/polaris/locales/en.json";
-import { useState } from "react";
+import {useState} from "react";
 
-import { login } from "../shopify.server";
+import {login} from "../shopify.server";
 
 // Convert the shopify-app-remix login errors into a friendly { shop } string
 // for the TextField error prop.
 function loginErrorMessage(
-  errors: Record<string, string> | { shop?: string } | undefined,
-): { shop?: string } {
+  errors: Record<string, string> | {shop?: string} | undefined
+): {shop?: string} {
   if (!errors) return {};
   // shopify-app-remix returns { shop: "..." } on a missing/invalid shop.
   if ("shop" in errors && typeof errors.shop === "string") {
-    return { shop: errors.shop };
+    return {shop: errors.shop};
   }
   // Fallback: join any string values.
   const values = Object.values(errors).filter(
-    (v): v is string => typeof v === "string",
+    (v): v is string => typeof v === "string"
   );
-  return values.length ? { shop: values.join(" ") } : {};
+  return values.length ? {shop: values.join(" ")} : {};
 }
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({request}: LoaderFunctionArgs) => {
   const errors = loginErrorMessage(await login(request));
-  return { errors, polarisTranslations };
+  return {errors, polarisTranslations};
 };
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({request}: ActionFunctionArgs) => {
   const errors = loginErrorMessage(await login(request));
-  return { errors };
+  return {errors};
 };
 
 export default function Auth() {

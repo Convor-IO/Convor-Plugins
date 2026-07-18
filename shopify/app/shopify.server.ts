@@ -4,7 +4,7 @@ import {
   AppDistribution,
   shopifyApp,
 } from "@shopify/shopify-app-remix/server";
-import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
+import {PrismaSessionStorage} from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
 
 // The Convor widget config is stored as a shop metafield (namespace "convor",
@@ -24,7 +24,7 @@ const shopify = shopifyApp({
     expiringOfflineAccessTokens: true,
   },
   ...(process.env.SHOP_CUSTOM_DOMAIN
-    ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }
+    ? {customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN]}
     : {}),
 });
 

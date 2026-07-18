@@ -14,11 +14,11 @@
  * `YOUR_ORG_SLUG`.
  */
 
-const { readFileSync } = require("node:fs");
-const { join } = require("node:path");
+const {readFileSync} = require("node:fs");
+const {join} = require("node:path");
 const assert = require("node:assert/strict");
 
-const { assertSnippetMatches } = require("./assert-snippet.js");
+const {assertSnippetMatches} = require("./assert-snippet.js");
 
 const REPO_ROOT = join(__dirname, "..");
 const BUILDERS_DIR = join(REPO_ROOT, "builders");
@@ -50,12 +50,12 @@ async function main() {
     });
 
     console.log(
-      `PASS: ${builder} snippet.html + README match canonical (${tag.trim().replace(/\s+/g, " ")})`,
+      `PASS: ${builder} snippet.html + README match canonical (${tag.trim().replace(/\s+/g, " ")})`
     );
   }
 
   console.log(
-    `\n=== builders: ${BUILDERS.length}/${BUILDERS.length} passed ===`,
+    `\n=== builders: ${BUILDERS.length}/${BUILDERS.length} passed ===`
   );
 }
 

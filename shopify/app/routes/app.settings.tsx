@@ -1,7 +1,7 @@
-import type { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { useActionData, useFetcher, useLoaderData } from "@remix-run/react";
-import { TitleBar, useAppBridge } from "@shopify/app-bridge-react";
+import type {ActionFunctionArgs, LoaderFunctionArgs} from "@remix-run/node";
+import {json} from "@remix-run/node";
+import {useActionData, useFetcher, useLoaderData} from "@remix-run/react";
+import {TitleBar, useAppBridge} from "@shopify/app-bridge-react";
 import {
   Banner,
   BlockStack,
@@ -15,9 +15,9 @@ import {
   Text,
   TextField,
 } from "@shopify/polaris";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
 
-import { authenticate } from "../shopify.server";
+import {authenticate} from "../shopify.server";
 
 // ---------------------------------------------------------------------------
 // Convor widget config — the single source of truth for the app.
@@ -39,7 +39,7 @@ export type ConvorWidgetConfig = {
 };
 
 export function isConvorWidgetConfig(
-  value: unknown,
+  value: unknown
 ): value is ConvorWidgetConfig {
   if (typeof value !== "object" || value === null) return false;
   const v = value as Record<string, unknown>;
@@ -47,14 +47,14 @@ export function isConvorWidgetConfig(
 }
 
 function parseConfig(raw: string | null | undefined): ConvorWidgetConfig {
-  if (!raw) return { slug: "", apiBase: DEFAULT_API_BASE };
+  if (!raw) return {slug: "", apiBase: DEFAULT_API_BASE};
   try {
     const parsed: unknown = JSON.parse(raw);
     if (isConvorWidgetConfig(parsed)) return parsed;
   } catch {
     // fall through to default
   }
-  return { slug: "", apiBase: DEFAULT_API_BASE };
+  return {slug: "", apiBase: DEFAULT_API_BASE};
 }
 
 // ---------------------------------------------------------------------------
@@ -75,20 +75,20 @@ const GET_WIDGET_METAFIELD = `#graphql
 // Loader
 // ---------------------------------------------------------------------------
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
+export const loader = async ({request}: LoaderFunctionArgs) => {
+  const {admin} = await authenticate.admin(request);
 
   const response = await admin.graphql(GET_WIDGET_METAFIELD);
   const body = (await response.json()) as {
     data?: {
-      shop?: { metafield?: { value: string | null } | null } | null;
+      shop?: {metafield?: {value: string | null} | null} | null;
     };
-    errors?: Array<{ message: string }>;
+    errors?: Array<{message: string}>;
   };
 
   if (body.errors && body.errors.length > 0) {
     throw new Error(
-      `Failed to load Convor settings: ${body.errors.map((e) => e.message).join(", ")}`,
+      `Failed to load Convor settings: ${body.errors.map((e) => e.message).join(", ")}`
     );
   }
 
@@ -104,8 +104,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 // Action — save the slug via metafieldsSet.
 // ---------------------------------------------------------------------------
 
-export const action = async ({ request }: ActionFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
+export const action = async ({request}: ActionFunctionArgs) => {
+  const {admin} = await authenticate.admin(request);
 
   const formData = await request.formData();
   const slug = String(formData.get("slug") ?? "").trim();
@@ -116,8 +116,8 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   // public widget script, so we guard against obviously bad input.
   if (!slug) {
     return json(
-      { ok: false, error: "Please enter your Convor org slug.", slug, apiBase },
-      { status: 400 },
+      {ok: false, error: "Please enter your Convor org slug.", slug, apiBase},
+      {status: 400}
     );
   }
   // Convor slugs are lowercase alphanumeric + dashes, e.g. "acme-store".
@@ -130,19 +130,19 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         slug,
         apiBase,
       },
-      { status: 400 },
+      {status: 400}
     );
   }
   try {
     new URL(apiBase);
   } catch {
     return json(
-      { ok: false, error: "API base must be a valid URL.", slug, apiBase },
-      { status: 400 },
+      {ok: false, error: "API base must be a valid URL.", slug, apiBase},
+      {status: 400}
     );
   }
 
-  const value = JSON.stringify({ slug, apiBase } satisfies ConvorWidgetConfig);
+  const value = JSON.stringify({slug, apiBase} satisfies ConvorWidgetConfig);
 
   // metafieldsSet requires the ownerId of the resource the metafield belongs
   // to. We're storing per-shop widget config, so we resolve the shop GID.
@@ -151,11 +151,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
       query ConvorShopId {
         shop { id }
       }
-    `,
+    `
   );
   const shopBody = (await shopResponse.json()) as {
-    data?: { shop?: { id?: string } | null };
-    errors?: Array<{ message: string }>;
+    data?: {shop?: {id?: string} | null};
+    errors?: Array<{message: string}>;
   };
   if (shopBody.errors && shopBody.errors.length > 0) {
     return json(
@@ -165,7 +165,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         slug,
         apiBase,
       },
-      { status: 502 },
+      {status: 502}
     );
   }
   const ownerId = shopBody.data?.shop?.id;
@@ -177,7 +177,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         slug,
         apiBase,
       },
-      { status: 502 },
+      {status: 502}
     );
   }
 
@@ -212,7 +212,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           },
         ],
       },
-    },
+    }
   );
 
   const body = (await response.json()) as {
@@ -224,10 +224,10 @@ export const action = async ({ request }: ActionFunctionArgs) => {
           key: string;
           value: string;
         }>;
-        userErrors: Array<{ field: string[]; message: string }>;
+        userErrors: Array<{field: string[]; message: string}>;
       };
     };
-    errors?: Array<{ message: string }>;
+    errors?: Array<{message: string}>;
   };
 
   // Top-level GraphQL transport errors (auth, rate limit, etc.).
@@ -239,7 +239,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         slug,
         apiBase,
       },
-      { status: 502 },
+      {status: 502}
     );
   }
 
@@ -252,11 +252,11 @@ export const action = async ({ request }: ActionFunctionArgs) => {
         slug,
         apiBase,
       },
-      { status: 422 },
+      {status: 422}
     );
   }
 
-  return json({ ok: true, slug, apiBase, error: null });
+  return json({ok: true, slug, apiBase, error: null});
 };
 
 // ---------------------------------------------------------------------------

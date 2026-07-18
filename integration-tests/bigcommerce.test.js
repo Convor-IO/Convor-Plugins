@@ -1,11 +1,11 @@
-const { spawn } = require("node:child_process");
-const { existsSync, rmSync, writeFileSync } = require("node:fs");
-const { join } = require("node:path");
+const {spawn} = require("node:child_process");
+const {existsSync, rmSync, writeFileSync} = require("node:fs");
+const {join} = require("node:path");
 const http = require("node:http");
 const net = require("node:net");
-const { JSDOM } = require("jsdom");
+const {JSDOM} = require("jsdom");
 
-const { assertSnippetMatches } = require("./assert-snippet.js");
+const {assertSnippetMatches} = require("./assert-snippet.js");
 
 const REPO_ROOT = join(__dirname, "..");
 const BC_DIR = join(REPO_ROOT, "bigcommerce");
@@ -35,13 +35,13 @@ function waitForUp(port, timeoutMs = 8000) {
   const start = Date.now();
   return new Promise(function retry(resolve, reject) {
     const req = http.get(
-      { host: "127.0.0.1", port, path: "/health", timeout: 1000 },
-      () => resolve(),
+      {host: "127.0.0.1", port, path: "/health", timeout: 1000},
+      () => resolve()
     );
     req.on("error", () => {
       if (Date.now() - start > timeoutMs) {
         reject(
-          new Error(`server on :${port} did not come up within ${timeoutMs}ms`),
+          new Error(`server on :${port} did not come up within ${timeoutMs}ms`)
         );
         return;
       }
@@ -61,7 +61,7 @@ function waitForUp(port, timeoutMs = 8000) {
 function get(port, path) {
   return new Promise((resolve, reject) => {
     const req = http.get(
-      { host: "127.0.0.1", port, path, timeout: 5000 },
+      {host: "127.0.0.1", port, path, timeout: 5000},
       (res) => {
         let body = "";
         res.setEncoding("utf8");
@@ -69,9 +69,9 @@ function get(port, path) {
           body += chunk;
         });
         res.on("end", () =>
-          resolve({ status: res.statusCode, headers: res.headers, body }),
+          resolve({status: res.statusCode, headers: res.headers, body})
         );
-      },
+      }
     );
     req.on("error", reject);
     req.on("timeout", () => req.destroy(new Error("request timeout")));
@@ -108,12 +108,12 @@ console.log("RESULT=" + JSON.stringify(html));
     });
     child.on("error", reject);
     child.on("close", (code) => {
-      rmSync(probePath, { force: true });
+      rmSync(probePath, {force: true});
       if (code !== 0) {
         reject(
           new Error(
-            `tsx probe exited ${code}\nstdout:\n${out}\nstderr:\n${err}`,
-          ),
+            `tsx probe exited ${code}\nstdout:\n${out}\nstderr:\n${err}`
+          )
         );
         return;
       }
@@ -121,8 +121,8 @@ console.log("RESULT=" + JSON.stringify(html));
       if (!m) {
         reject(
           new Error(
-            `tsx probe produced no RESULT line\nstdout:\n${out}\nstderr:\n${err}`,
-          ),
+            `tsx probe produced no RESULT line\nstdout:\n${out}\nstderr:\n${err}`
+          )
         );
         return;
       }
@@ -138,11 +138,11 @@ function executeLoaderWrapper(html) {
   }
   const dom = new JSDOM(
     "<!DOCTYPE html><html><head></head><body></body></html>",
-    { runScripts: "outside-only", url: "https://store.example.com/" },
+    {runScripts: "outside-only", url: "https://store.example.com/"}
   );
   dom.window.eval(match[1]);
   const widgetScript = Array.from(
-    dom.window.document.querySelectorAll("script"),
+    dom.window.document.querySelectorAll("script")
   ).find((script) => /\/widget\.js$/.test(script.src));
   if (!widgetScript) {
     throw new Error("loader wrapper did not append the widget script");
@@ -269,7 +269,7 @@ async function main() {
       allOk = false;
     } else {
       console.log(
-        `✅ PASS bigcommerce GET / -> HTTP ${root.status} (landing page)`,
+        `✅ PASS bigcommerce GET / -> HTTP ${root.status} (landing page)`
       );
     }
   } finally {

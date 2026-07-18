@@ -30,7 +30,7 @@ interface PageInput {
 }
 
 /** Wrap body HTML in a minimal HTML5 shell. */
-export function htmlPage({ title, body }: PageInput): string {
+export function htmlPage({title, body}: PageInput): string {
   return `<!doctype html>
 <html lang="en">
 <head>

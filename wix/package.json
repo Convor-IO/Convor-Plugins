@@ -6,10 +6,10 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "echo 'Run the Wix CLI directly: wix dev' && exit 1",
     "build": "echo 'Wix apps are deployed with the Wix CLI (wix app deploy). This package has no build step.' && exit 0",
-    "lint": "biome check .",
-    "format": "biome format --write ."
+    "dev": "echo 'Run the Wix CLI directly: wix dev' && exit 1",
+    "format": "biome format --write .",
+    "lint": "biome check ."
   },
   "dependencies": {
     "@wix/app-management": "^1.0.0",
@@ -19,9 +19,13 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
-    "@types/react": "^18.3.0",
-    "@types/react-dom": "^18.3.0",
-    "typescript": "^5.7.0"
+    "@biomejs/biome": "2.5.0",
+    "@types/react": "18.3.0",
+    "@types/react-dom": "18.3.0",
+    "typescript": "6.0.3"
+  },
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22.12 <23"
   }
 }

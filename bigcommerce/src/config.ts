@@ -10,7 +10,7 @@ function required(key: string): string {
   const value = process.env[key];
   if (!value || value.trim() === "") {
     throw new Error(
-      `Missing required env var ${key}. Copy env.example to .env and fill it in.`,
+      `Missing required env var ${key}. Copy env.example to .env and fill it in.`
     );
   }
   return value.trim();
@@ -47,7 +47,7 @@ export function loadConfig(): AppConfig {
   const appBaseUrl = optional("APP_BASE_URL", "").replace(/\/+$/, "");
   if (!appBaseUrl) {
     throw new Error(
-      "Missing APP_BASE_URL — the public HTTPS URL of the running app.",
+      "Missing APP_BASE_URL — the public HTTPS URL of the running app."
     );
   }
   if (!/^https:\/\//i.test(appBaseUrl)) {
@@ -61,7 +61,7 @@ export function loadConfig(): AppConfig {
     port,
     defaultApiBase: optional(
       "CONVOR_DEFAULT_API_BASE",
-      DEFAULT_API_BASE,
+      DEFAULT_API_BASE
     ).replace(/\/+$/, ""),
     databaseUrl: required("DATABASE_URL"),
   };

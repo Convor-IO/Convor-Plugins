@@ -34,12 +34,12 @@
  *   5. Regression guard: empty slug must NOT inject (fails safe).
  */
 
-const { readFileSync } = require("node:fs");
-const { join } = require("node:path");
+const {readFileSync} = require("node:fs");
+const {join} = require("node:path");
 const assert = require("node:assert/strict");
 
-const { assertSnippetMatches } = require("./assert-snippet.js");
-const { makeSandbox } = require("./gtm-sandbox.js");
+const {assertSnippetMatches} = require("./assert-snippet.js");
+const {makeSandbox} = require("./gtm-sandbox.js");
 
 const TPL_PATH = join(__dirname, "..", "gtm", "template.tpl");
 const API_BASE = "http://localhost:5173";
@@ -52,7 +52,7 @@ function extractSandboxedJs(tpl) {
   const start = tpl.indexOf(startMarker);
   assert.ok(
     start > -1,
-    "template has no ___SANDBOXED_JS_FOR_WEB_TEMPLATE___ section",
+    "template has no ___SANDBOXED_JS_FOR_WEB_TEMPLATE___ section"
   );
   const after = tpl.indexOf("\n", start) + 1;
   let end = tpl.length;
@@ -79,30 +79,30 @@ async function main() {
   assert.doesNotMatch(
     codeOnly,
     /['"`][^'"`]*widget\.js\?[^'"`]*/,
-    "template must NOT build a widget.js URL with a query string (the widget ignores ?key=)",
+    "template must NOT build a widget.js URL with a query string (the widget ignores ?key=)"
   );
   assert.doesNotMatch(
     codeOnly,
     /setInWindow/,
-    "template must NOT call setInWindow",
+    "template must NOT call setInWindow"
   );
   assert.doesNotMatch(
     codeOnly,
     /ConvorConfig/,
-    "template must NOT reference ConvorConfig",
+    "template must NOT reference ConvorConfig"
   );
   assert.match(
     codeOnly,
     /callInWindow\s*\(\s*['"]ConvorWidget\.init['"]/,
-    "template must call window.ConvorWidget.init via callInWindow",
+    "template must call window.ConvorWidget.init via callInWindow"
   );
   assert.match(
     codeOnly,
     /injectScript\s*\(\s*\w+\s*,\s*\w+\s*,\s*\w+/,
-    "template must call injectScript(url, onSuccess, onFailure)",
+    "template must call injectScript(url, onSuccess, onFailure)"
   );
   console.log(
-    "PASS: broken mechanisms removed (?key=, ConvorConfig) — now uses injectScript + ConvorWidget.init",
+    "PASS: broken mechanisms removed (?key=, ConvorConfig) — now uses injectScript + ConvorWidget.init"
   );
 
   // --- 2. Run the template in the stubbed sandbox. ---
@@ -125,7 +125,7 @@ async function main() {
       position: "",
       theme: "",
     },
-    loadedWindowState,
+    loadedWindowState
   );
   const calls = sandbox.run(js);
 
@@ -133,37 +133,37 @@ async function main() {
   assert.equal(
     calls.injectScript.length,
     1,
-    "expected exactly one injectScript call",
+    "expected exactly one injectScript call"
   );
   const inj = calls.injectScript[0];
   assert.equal(
     inj.url,
     `${API_BASE}/widget.js`,
-    `injectScript URL must be clean canonical (got: ${inj.url})`,
+    `injectScript URL must be clean canonical (got: ${inj.url})`
   );
   assert.ok(
     !inj.url.includes("?"),
-    "injectScript URL must NOT carry a query string",
+    "injectScript URL must NOT carry a query string"
   );
 
   const initCalls = calls.callInWindow.filter(
-    (c) => c.path === "ConvorWidget.init",
+    (c) => c.path === "ConvorWidget.init"
   );
   assert.equal(
     initCalls.length,
     1,
-    "expected exactly one ConvorWidget.init call",
+    "expected exactly one ConvorWidget.init call"
   );
   const initArg = initCalls[0].args[0];
   assert.equal(initArg.key, SLUG, "init() must be passed the org slug as key");
   assert.notEqual(
     initArg.key,
     undefined,
-    "init() must NOT be called with undefined key (the original bug)",
+    "init() must NOT be called with undefined key (the original bug)"
   );
   assert.ok(calls.gtmOnSuccess >= 1, "gtmOnSuccess should fire after init");
   console.log(
-    `PASS: injectScript("${inj.url}") → ConvorWidget.init({ key: "${initArg.key}", … }) → gtmOnSuccess`,
+    `PASS: injectScript("${inj.url}") → ConvorWidget.init({ key: "${initArg.key}", … }) → gtmOnSuccess`
   );
 
   // --- 4. Reconstruct the canonical snippet from the captured URL + key. ---
@@ -176,7 +176,7 @@ async function main() {
     slug: SLUG,
   });
   console.log(
-    `PASS: behaviour-equivalent snippet matches canonical (${tag.trim().replace(/\s+/g, " ")})`,
+    `PASS: behaviour-equivalent snippet matches canonical (${tag.trim().replace(/\s+/g, " ")})`
   );
 
   // --- 5. Empty-slug regression guard: must fail safe, not load keyless. ---
@@ -188,12 +188,12 @@ async function main() {
       position: "",
       theme: "",
     },
-    loadedWindowState,
+    loadedWindowState
   ).run(js);
   assert.equal(
     badCalls.injectScript.length,
     0,
-    "empty slug must NOT inject the widget script",
+    "empty slug must NOT inject the widget script"
   );
   assert.ok(badCalls.gtmOnFailure >= 1, "empty slug must report gtmOnFailure");
   console.log("PASS: empty slug → no inject + gtmOnFailure (fails safe)");

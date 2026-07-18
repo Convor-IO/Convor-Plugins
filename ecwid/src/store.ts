@@ -1,5 +1,5 @@
-import { Pool } from "pg";
-import { config } from "./config.js";
+import {Pool} from "pg";
+import {config} from "./config.js";
 
 /**
  * Postgres-backed persistence for the OAuth token + per-store Convor settings.
@@ -36,7 +36,7 @@ interface StoreRow {
   settings_updated_at: Date | null;
 }
 
-const pool = new Pool({ connectionString: config.databaseUrl });
+const pool = new Pool({connectionString: config.databaseUrl});
 
 let ready: Promise<void> | undefined;
 
@@ -93,7 +93,7 @@ export async function readStore(storeId: string): Promise<StoreRecord | null> {
       FROM ecwid_stores
       WHERE store_id = $1
     `,
-    [storeId],
+    [storeId]
   );
   const row = result.rows[0];
   return row ? toRecord(row) : null;
@@ -118,14 +118,14 @@ export async function saveInstall(record: InstallRecord): Promise<void> {
         scope = EXCLUDED.scope,
         updated_at = now()
     `,
-    [record.storeId, record.accessToken, record.scope, record.installedAt],
+    [record.storeId, record.accessToken, record.scope, record.installedAt]
   );
 }
 
 /** Save the Convor settings (slug + apiBase) for a store. */
 export async function saveSettings(
   storeId: string,
-  settings: ConvorSettings,
+  settings: ConvorSettings
 ): Promise<void> {
   await ensureSchema();
   const result = await pool.query(
@@ -138,11 +138,11 @@ export async function saveSettings(
         updated_at = now()
       WHERE store_id = $1
     `,
-    [storeId, settings.slug, settings.apiBase, settings.updatedAt],
+    [storeId, settings.slug, settings.apiBase, settings.updatedAt]
   );
   if (result.rowCount === 0) {
     throw new Error(
-      `Cannot save settings for store ${storeId}: app not installed.`,
+      `Cannot save settings for store ${storeId}: app not installed.`
     );
   }
 }
@@ -152,7 +152,7 @@ export async function deleteStore(storeId: string): Promise<boolean> {
   await ensureSchema();
   const result = await pool.query(
     "DELETE FROM ecwid_stores WHERE store_id = $1",
-    [storeId],
+    [storeId]
   );
   return (result.rowCount ?? 0) > 0;
 }
@@ -160,8 +160,8 @@ export async function deleteStore(storeId: string): Promise<boolean> {
 /** Iterate every installed store — used for diagnostics/debug endpoints. */
 export async function listStores(): Promise<string[]> {
   await ensureSchema();
-  const result = await pool.query<{ store_id: string }>(
-    "SELECT store_id FROM ecwid_stores ORDER BY store_id",
+  const result = await pool.query<{store_id: string}>(
+    "SELECT store_id FROM ecwid_stores ORDER BY store_id"
   );
   return result.rows.map((row) => row.store_id);
 }

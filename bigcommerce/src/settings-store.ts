@@ -1,5 +1,5 @@
-import { Pool } from "pg";
-import type { ConvorWidgetConfig } from "./widget-config.js";
+import {Pool} from "pg";
+import type {ConvorWidgetConfig} from "./widget-config.js";
 
 export interface SettingsStore {
   get(storeHash: string): Promise<ConvorWidgetConfig | undefined>;
@@ -22,7 +22,7 @@ export class PostgresSettingsStore implements SettingsStore {
   private ready: Promise<void> | undefined;
 
   constructor(opts: PostgresSettingsStoreOptions) {
-    this.pool = new Pool({ connectionString: opts.connectionString });
+    this.pool = new Pool({connectionString: opts.connectionString});
   }
 
   private ensureSchema(): Promise<void> {
@@ -48,7 +48,7 @@ export class PostgresSettingsStore implements SettingsStore {
         FROM bigcommerce_settings
         WHERE store_hash = $1
       `,
-      [storeHash],
+      [storeHash]
     );
     const row = result.rows[0];
     if (!row) return undefined;
@@ -75,7 +75,7 @@ export class PostgresSettingsStore implements SettingsStore {
           api_base = EXCLUDED.api_base,
           updated_at = now()
       `,
-      [storeHash, config.slug, config.apiBase],
+      [storeHash, config.slug, config.apiBase]
     );
   }
 
@@ -83,7 +83,7 @@ export class PostgresSettingsStore implements SettingsStore {
     await this.ensureSchema();
     await this.pool.query(
       "DELETE FROM bigcommerce_settings WHERE store_hash = $1",
-      [storeHash],
+      [storeHash]
     );
   }
 

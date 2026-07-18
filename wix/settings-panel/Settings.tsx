@@ -24,8 +24,8 @@ import {
 } from "@wix/design-system";
 // Web modules are imported by relative path and bundled by the Wix CLI.
 // `webMethod` wraps the call so it runs with site-owner elevation.
-import { webMethod } from "@wix/essentials";
-import { useEffect, useState } from "react";
+import {webMethod} from "@wix/essentials";
+import {useEffect, useState} from "react";
 import {
   clearSettings,
   getSettings,
@@ -58,7 +58,7 @@ export default function Settings() {
   function handleSave(e: React.FormEvent) {
     e.preventDefault();
     setStatus("saving");
-    saveSettingsWM({ slug })
+    saveSettingsWM({slug})
       .then(() => {
         setStatus("saved");
         setToast("Saved. Your chat bubble is now live.");
@@ -118,7 +118,7 @@ export default function Settings() {
                           maxLength={64}
                         />
                       </FormField>
-                      <div style={{ marginTop: 18 }}>
+                      <div style={{marginTop: 18}}>
                         <TextButton
                           type="submit"
                           disabled={status === "saving"}
@@ -130,7 +130,7 @@ export default function Settings() {
                             type="button"
                             onClick={handleClear}
                             disabled={status === "saving"}
-                            style={{ marginLeft: 12 }}
+                            style={{marginLeft: 12}}
                           >
                             Remove from site
                           </TextButton>

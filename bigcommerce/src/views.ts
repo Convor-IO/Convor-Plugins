@@ -1,12 +1,12 @@
-import { CONVOR_DASHBOARD_URL } from "./config.js";
-import { escapeHtml, escapeJsonScript, htmlPage } from "./html.js";
-import type { ConvorWidgetConfig } from "./widget-config.js";
+import {CONVOR_DASHBOARD_URL} from "./config.js";
+import {escapeHtml, escapeJsonScript, htmlPage} from "./html.js";
+import type {ConvorWidgetConfig} from "./widget-config.js";
 
 interface LandingInput {
   installUrl: string;
 }
 
-export function renderLanding({ installUrl }: LandingInput): string {
+export function renderLanding({installUrl}: LandingInput): string {
   return htmlPage({
     title: "Convor Live Chat for BigCommerce",
     body: `
@@ -37,7 +37,7 @@ interface SettingsInput {
 }
 
 export function renderSettings(input: SettingsInput): string {
-  const { config, defaultApiBase, scriptInstalled } = input;
+  const {config, defaultApiBase, scriptInstalled} = input;
   const initialState = escapeJsonScript({
     storeHash: input.storeHash,
     ownerEmail: input.ownerEmail,
@@ -99,7 +99,7 @@ interface ErrorInput {
   message: string;
 }
 
-export function renderError({ message }: ErrorInput): string {
+export function renderError({message}: ErrorInput): string {
   return htmlPage({
     title: "Convor — something went wrong",
     body: `

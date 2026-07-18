@@ -21,7 +21,7 @@ export interface BcRequestError {
 
 function authHeaders(
   clientId: string,
-  accessToken: string,
+  accessToken: string
 ): Record<string, string> {
   return {
     ...HEADERS,
@@ -63,7 +63,7 @@ export interface BcMetafield {
 
 interface BcMetafieldListResponse {
   metafields: BcMetafield[];
-  meta_pagination?: { total?: number };
+  meta_pagination?: {total?: number};
 }
 
 interface BcMetafieldResponse {
@@ -73,7 +73,7 @@ interface BcMetafieldResponse {
 export async function getConvorMetafield(
   storeHash: string,
   clientId: string,
-  accessToken: string,
+  accessToken: string
 ): Promise<BcMetafield | null> {
   // BC filters store metafields by namespace+key via query params.
   const url = new URL(`${API_HOST}/stores/${storeHash}/v3/metafields`);
@@ -81,7 +81,7 @@ export async function getConvorMetafield(
   url.searchParams.set("key", CONVOR_METAFIELD_KEY);
   url.searchParams.set("scope_in", "store");
 
-  const res = await fetch(url, { headers: authHeaders(clientId, accessToken) });
+  const res = await fetch(url, {headers: authHeaders(clientId, accessToken)});
   if (res.status === 404) return null;
   if (!res.ok) throw await readError(res);
 
@@ -94,7 +94,7 @@ export async function upsertConvorMetafield(
   clientId: string,
   accessToken: string,
   value: string,
-  description: string,
+  description: string
 ): Promise<BcMetafield> {
   // Resolve the existing metafield id so we PUT (update) rather than create
   // a duplicate on each save.
@@ -106,8 +106,8 @@ export async function upsertConvorMetafield(
       {
         method: "PUT",
         headers: authHeaders(clientId, accessToken),
-        body: JSON.stringify({ value, description, permission_set: "write" }),
-      },
+        body: JSON.stringify({value, description, permission_set: "write"}),
+      }
     );
     if (!res.ok) throw await readError(res);
     const data = (await res.json()) as BcMetafieldResponse;
@@ -189,7 +189,7 @@ export async function createScript(
   storeHash: string,
   clientId: string,
   accessToken: string,
-  input: CreateScriptInput,
+  input: CreateScriptInput
 ): Promise<BcScript> {
   const res = await fetch(
     `${API_HOST}/stores/${storeHash}/v3/content/scripts`,
@@ -197,7 +197,7 @@ export async function createScript(
       method: "POST",
       headers: authHeaders(clientId, accessToken),
       body: JSON.stringify(input),
-    },
+    }
   );
   if (!res.ok) throw await readError(res);
   const data = (await res.json()) as BcScriptResponse;
@@ -210,13 +210,13 @@ export async function createScript(
 export async function listScripts(
   storeHash: string,
   clientId: string,
-  accessToken: string,
+  accessToken: string
 ): Promise<BcScript[]> {
   const res = await fetch(
     `${API_HOST}/stores/${storeHash}/v3/content/scripts`,
     {
       headers: authHeaders(clientId, accessToken),
-    },
+    }
   );
   if (!res.ok) throw await readError(res);
   const data = (await res.json()) as BcScriptListResponse;
@@ -227,16 +227,16 @@ export async function deleteScript(
   storeHash: string,
   clientId: string,
   accessToken: string,
-  uuid: string,
+  uuid: string
 ): Promise<void> {
   const res = await fetch(
     `${API_HOST}/stores/${storeHash}/v3/content/scripts/${encodeURIComponent(
-      uuid,
+      uuid
     )}`,
     {
       method: "DELETE",
       headers: authHeaders(clientId, accessToken),
-    },
+    }
   );
   // 204 No Content on success; 404 if it was already gone.
   if (res.status === 404) return;
@@ -247,7 +247,7 @@ export async function deleteScript(
 export async function findConvorScript(
   storeHash: string,
   clientId: string,
-  accessToken: string,
+  accessToken: string
 ): Promise<BcScript | null> {
   const scripts = await listScripts(storeHash, clientId, accessToken);
   return scripts.find((s) => s.name.toLowerCase() === "convor widget") ?? null;

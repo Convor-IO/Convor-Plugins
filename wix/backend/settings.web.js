@@ -25,7 +25,7 @@
  *   https://dev.wix.com/docs/api-reference/app-management/embedded-scripts/embed-script
  *   https://dev.wix.com/docs/api-reference/app-management/embedded-scripts/get-current
  */
-import { embeddedScripts } from "@wix/app-management";
+import {embeddedScripts} from "@wix/app-management";
 
 /** The extension id from extensions/embedded-script/config.json. */
 const SCRIPT_ID = "convor-widget-loader";
@@ -57,7 +57,7 @@ function validateSlug(raw) {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) {
     throw new Error(
       "Slug must contain only lowercase letters, numbers, and single dashes " +
-        "(e.g. 'acme-store').",
+        "(e.g. 'acme-store')."
     );
   }
   return slug;
@@ -74,7 +74,7 @@ export async function getSettings() {
     return null;
   }
   const slug = current.parameters?.slug ?? "";
-  return slug ? { slug } : null;
+  return slug ? {slug} : null;
 }
 
 /**
@@ -91,10 +91,10 @@ export async function saveSettings(input) {
   // the parameters in place (no duplicate script on the site).
   await embeddedScripts.embedScript({
     scriptId: SCRIPT_ID,
-    parameters: { slug },
+    parameters: {slug},
   });
 
-  return { slug };
+  return {slug};
 }
 
 /**
@@ -108,5 +108,5 @@ export async function clearSettings() {
   if (current?.scriptId === SCRIPT_ID) {
     await embeddedScripts.removeScript(SCRIPT_ID);
   }
-  return { ok: true };
+  return {ok: true};
 }

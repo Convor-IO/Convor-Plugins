@@ -1,4 +1,4 @@
-import { json, type LinksFunction } from "@remix-run/node";
+import {json, type LinksFunction} from "@remix-run/node";
 import {
   Links,
   Meta,
@@ -19,10 +19,10 @@ import {
 } from "@shopify/polaris";
 import polarisStyles from "@shopify/polaris/build/esm/styles.css?url";
 import polarisTranslations from "@shopify/polaris/locales/en.json";
-import { AppProvider as ShopifyAppProvider } from "@shopify/shopify-app-remix/react";
+import {AppProvider as ShopifyAppProvider} from "@shopify/shopify-app-remix/react";
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: polarisStyles },
+  {rel: "stylesheet", href: polarisStyles},
 ];
 
 export const loader = async () =>
@@ -34,7 +34,7 @@ export const loader = async () =>
 // app renders inside the Shopify admin iframe. The Remix server sets the real
 // headers via addDocumentResponseHeaders (shopify.server.ts); this is the
 // client-side entry that mounts Polaris + App Bridge outlet tree.
-export function Layout({ children }: { children: React.ReactNode }) {
+export function Layout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en">
       <head>
@@ -62,7 +62,7 @@ export default function App() {
   // renders its own <Page> (Polaris), and the App Bridge <TitleBar> /
   // ResourcePicker etc. are pulled in per-route via @shopify/app-bridge-react.
   // The AppProvider i18n is all that's needed at the root.
-  const { apiKey } = useLoaderData<typeof loader>();
+  const {apiKey} = useLoaderData<typeof loader>();
 
   return (
     <ShopifyAppProvider apiKey={apiKey} i18n={polarisTranslations}>

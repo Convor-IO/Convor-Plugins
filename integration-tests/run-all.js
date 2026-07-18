@@ -6,8 +6,8 @@
  * abort the others, and reports a final tally. Exit non-zero if any failed.
  */
 
-const { spawnSync } = require("node:child_process");
-const { join } = require("node:path");
+const {spawnSync} = require("node:child_process");
+const {join} = require("node:path");
 
 // All integration-test suites. Each entry is `<script-name>` (without .js);
 // the file is `<script-name>.test.js` in this directory.
@@ -47,6 +47,6 @@ for (const name of tests) {
 }
 
 console.log(
-  `\n=== summary: ${tests.length - failed}/${tests.length} passed ===`,
+  `\n=== summary: ${tests.length - failed}/${tests.length} passed ===`
 );
 process.exit(failed === 0 ? 0 : 1);

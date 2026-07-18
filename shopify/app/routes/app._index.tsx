@@ -1,9 +1,9 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+import type {LoaderFunctionArgs} from "@remix-run/node";
+import {redirect} from "@remix-run/node";
 
-import { authenticate } from "../shopify.server";
+import {authenticate} from "../shopify.server";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
+export const loader = async ({request}: LoaderFunctionArgs) => {
   // Authenticate so the embedded app installs / refreshes the session, then
   // land the merchant on the only screen that matters: settings.
   await authenticate.admin(request);

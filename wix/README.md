@@ -75,7 +75,7 @@ do **not** keep a second copy in a `wix-data` collection (see
 
 ## Prerequisites
 
-- Node `>=20.19`
+- Node `>=22.12 <23`
 - A **Wix Developers** account and a test site (https://dev.wix.com)
 - The **Wix CLI** — install it globally:
 

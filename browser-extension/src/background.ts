@@ -1,4 +1,4 @@
-import { injectConvorWidget } from "./content-script";
+import {injectConvorWidget} from "./content-script";
 /**
  * MV3 background service worker.
  *
@@ -12,7 +12,7 @@ import { injectConvorWidget } from "./content-script";
  *    `chrome.tabs.onUpdated` listener on sites the user has explicitly opted
  *    into (matches `allowedSites`).
  */
-import { getSettings, isSlugValid, matchesAllowedSites } from "./shared";
+import {getSettings, isSlugValid, matchesAllowedSites} from "./shared";
 
 /**
  * Auto-inject on navigation, but only on hosts the user has explicitly allow-
@@ -22,7 +22,7 @@ import { getSettings, isSlugValid, matchesAllowedSites } from "./shared";
  */
 async function maybeAutoInject(
   tabId: number,
-  tabUrl: string | undefined,
+  tabUrl: string | undefined
 ): Promise<void> {
   if (!tabUrl || !/^https?:/.test(tabUrl)) return;
   const settings = await getSettings();
@@ -31,7 +31,7 @@ async function maybeAutoInject(
 
   try {
     await chrome.scripting.executeScript({
-      target: { tabId },
+      target: {tabId},
       func: injectConvorWidget,
       args: [settings.apiBase, settings.orgSlug.trim()],
     });

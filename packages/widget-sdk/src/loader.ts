@@ -1,5 +1,5 @@
-import { warn } from "./env.js";
-import type { ConvorOptions } from "./types.js";
+import {warn} from "./env.js";
+import type {ConvorOptions} from "./types.js";
 
 /** Default CDN base when `apiBase` is omitted. */
 export const DEFAULT_API_BASE = "https://cdn.convor.io";
@@ -23,7 +23,7 @@ export function buildScriptUrl(apiBase: string): string {
  * the caller set are included — server config still wins for the rest.
  */
 export function buildDataAttrs(options: ConvorOptions): Record<string, string> {
-  const attrs: Record<string, string> = { "data-key": options.slug };
+  const attrs: Record<string, string> = {"data-key": options.slug};
   if (options.primaryColor) attrs["data-primary-color"] = options.primaryColor;
   if (options.position) attrs["data-position"] = options.position;
   if (options.theme) attrs["data-theme"] = options.theme;
@@ -45,7 +45,7 @@ export function findScript(src: string): HTMLScriptElement | null {
  */
 export function injectScript(
   src: string,
-  attrs: Record<string, string>,
+  attrs: Record<string, string>
 ): HTMLScriptElement {
   const existing = findScript(src);
   if (existing) return existing;
@@ -94,8 +94,8 @@ export function waitForReady(timeoutMs: number): Promise<void> {
         clearInterval(timer);
         reject(
           new Error(
-            `[convor] timed out after ${timeoutMs}ms waiting for window.ConvorWidget`,
-          ),
+            `[convor] timed out after ${timeoutMs}ms waiting for window.ConvorWidget`
+          )
         );
       }
     }, POLL_INTERVAL_MS);

@@ -17,14 +17,14 @@
  * jsdom document so the closure picks up the right `document`.
  */
 
-const { existsSync, readFileSync } = require("node:fs");
-const { join } = require("node:path");
-const { execFileSync } = require("node:child_process");
+const {existsSync, readFileSync} = require("node:fs");
+const {join} = require("node:path");
+const {execFileSync} = require("node:child_process");
 const assert = require("node:assert/strict");
 const vm = require("node:vm");
-const { JSDOM } = require("jsdom");
+const {JSDOM} = require("jsdom");
 
-const { assertSnippetMatches } = require("./assert-snippet.js");
+const {assertSnippetMatches} = require("./assert-snippet.js");
 
 const REPO_ROOT = join(__dirname, "..");
 const EXT_DIR = join(REPO_ROOT, "browser-extension");
@@ -36,30 +36,30 @@ const SLUG = "acme";
 async function main() {
   // --- 1. manifest.json structure ---
   const manifest = JSON.parse(
-    readFileSync(join(EXT_DIR, "manifest.json"), "utf8"),
+    readFileSync(join(EXT_DIR, "manifest.json"), "utf8")
   );
   assert.equal(
     manifest.manifest_version,
     3,
-    "manifest_version must be 3 (MV3)",
+    "manifest_version must be 3 (MV3)"
   );
   assert.ok(
     manifest.background?.service_worker,
-    "must declare a service_worker background",
+    "must declare a service_worker background"
   );
   assert.ok(
     manifest.action?.default_popup,
-    "must declare action.default_popup",
+    "must declare action.default_popup"
   );
   const perms = manifest.permissions || [];
   for (const required of ["scripting", "storage"]) {
     assert.ok(
       perms.includes(required),
-      `permissions must include ${required} (got: ${perms.join(", ")})`,
+      `permissions must include ${required} (got: ${perms.join(", ")})`
     );
   }
   console.log(
-    `PASS: manifest is MV3, has service_worker + default_popup, permissions [${perms.join(", ")}]`,
+    `PASS: manifest is MV3, has service_worker + default_popup, permissions [${perms.join(", ")}]`
   );
 
   // --- 2. content-script source inspection ---
@@ -67,20 +67,20 @@ async function main() {
   assert.match(
     src,
     /`\$\{base\}\/widget\.js`/,
-    "content-script must build <apiBase>/widget.js",
+    "content-script must build <apiBase>/widget.js"
   );
   assert.match(
     src,
     /setAttribute\(\s*["']data-key["']/,
-    "content-script must set the data-key attribute",
+    "content-script must set the data-key attribute"
   );
   assert.doesNotMatch(
     src,
     /injectConvorWidget[^;]*\?key=/,
-    "content-script must not pass ?key= on the widget URL",
+    "content-script must not pass ?key= on the widget URL"
   );
   console.log(
-    "PASS: content-script builds <apiBase>/widget.js and sets data-key",
+    "PASS: content-script builds <apiBase>/widget.js and sets data-key"
   );
 
   // --- 3. build dist/ ---
@@ -97,7 +97,7 @@ async function main() {
     assert.ok(existsSync(join(DIST_DIR, f)), `build did not produce dist/${f}`);
   }
   console.log(
-    "PASS: pnpm build produced dist/{background,content-script,popup,options}.js",
+    "PASS: pnpm build produced dist/{background,content-script,popup,options}.js"
   );
 
   // --- 4. jsdom DOM test ---
@@ -106,7 +106,7 @@ async function main() {
     "<!DOCTYPE html><html><head></head><body></body></html>",
     {
       url: "https://example.com/",
-    },
+    }
   );
 
   // The IIFE is `(function(exports){...body...})(<arg>)`; tsup emits the
@@ -121,17 +121,17 @@ async function main() {
   };
   const patched = built.replace(
     /\}\)\(\s*\{\s*\}\s*\)\s*;?\s*$/,
-    "})(globalThis.__convor_exports);",
+    "})(globalThis.__convor_exports);"
   );
   assert.ok(
     patched !== built,
-    "could not patch IIFE invocation — bundle shape changed",
+    "could not patch IIFE invocation — bundle shape changed"
   );
   vm.runInNewContext(patched, sandbox);
   assert.strictEqual(
     typeof exposed.injectConvorWidget,
     "function",
-    "built content-script must export injectConvorWidget",
+    "built content-script must export injectConvorWidget"
   );
 
   // Inject using the host page's document, exactly as
@@ -140,12 +140,12 @@ async function main() {
   assert.strictEqual(
     added,
     true,
-    "injectConvorWidget should report it added the tag",
+    "injectConvorWidget should report it added the tag"
   );
 
   const doc = dom.window.document;
   const injected = doc.head.innerHTML;
-  const tag = assertSnippetMatches(injected, { apiBase: API_BASE, slug: SLUG });
+  const tag = assertSnippetMatches(injected, {apiBase: API_BASE, slug: SLUG});
 
   // Verify the tag was appended to <head> with the right attrs.
   const scriptEl = doc.head.querySelector("script[data-key]");
@@ -154,7 +154,7 @@ async function main() {
   assert.equal(scriptEl.getAttribute("data-key"), SLUG);
   assert.ok(
     scriptEl.hasAttribute("async"),
-    "injected script must carry the async attribute",
+    "injected script must carry the async attribute"
   );
 
   // Idempotency: a second call must NOT add a duplicate.
@@ -163,11 +163,11 @@ async function main() {
   assert.equal(
     doc.head.querySelectorAll("script[data-key]").length,
     1,
-    "duplicate script tag was added",
+    "duplicate script tag was added"
   );
 
   console.log(
-    `PASS: jsdom inject produced canonical tag (${tag.trim().replace(/\s+/g, " ")}) + idempotent`,
+    `PASS: jsdom inject produced canonical tag (${tag.trim().replace(/\s+/g, " ")}) + idempotent`
   );
 
   console.log("\n=== browser-extension: PASS ===");

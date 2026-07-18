@@ -7,15 +7,15 @@ import {
   injectScript,
   waitForReady,
 } from "./loader.js";
-import { createSdk, getState, setState } from "./sdk.js";
-import type { ConvorOptions, ConvorSDK } from "./types.js";
+import {createSdk, getState, setState} from "./sdk.js";
+import type {ConvorOptions, ConvorSDK} from "./types.js";
 
 /** Inline SSR check so the guard is evaluated per-call (testable via stubbing). */
 function hasDOM(): boolean {
   return typeof window !== "undefined" && typeof document !== "undefined";
 }
 
-export { DEFAULT_API_BASE, DEFAULT_TIMEOUT_MS } from "./loader.js";
+export {DEFAULT_API_BASE, DEFAULT_TIMEOUT_MS} from "./loader.js";
 export type {
   ConvorOptions,
   ConvorPosition,
@@ -52,7 +52,7 @@ export async function initConvor(options: ConvorOptions): Promise<ConvorSDK> {
   if (!hasDOM()) {
     throw new Error(
       "[convor] initConvor must be called in a browser environment (window/document are undefined). " +
-        'Guard with a `typeof window !== "undefined"` check when running on the server.',
+        'Guard with a `typeof window !== "undefined"` check when running on the server.'
     );
   }
 
@@ -74,6 +74,6 @@ export async function initConvor(options: ConvorOptions): Promise<ConvorSDK> {
   await waitForReady(timeoutMs);
 
   const sdk = createSdk();
-  setState({ src, script, sdk, destroyed: false });
+  setState({src, script, sdk, destroyed: false});
   return sdk;
 }

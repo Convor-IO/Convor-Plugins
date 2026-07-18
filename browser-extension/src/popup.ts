@@ -1,4 +1,4 @@
-import { injectConvorWidget } from "./content-script";
+import {injectConvorWidget} from "./content-script";
 /**
  * Toolbar popup logic.
  *
@@ -75,7 +75,7 @@ async function getActiveTab(): Promise<chrome.tabs.Tab | undefined> {
  */
 async function renderAutoToggle(
   settings: ConvorSettings,
-  tab: chrome.tabs.Tab | undefined,
+  tab: chrome.tabs.Tab | undefined
 ): Promise<void> {
   const url = tab?.url;
   if (!url || !/^https?:/.test(url)) {
@@ -100,7 +100,7 @@ async function renderAutoToggle(
 /** Toggle the active host in/out of `allowedSites` and request a host grant. */
 async function onAutoToggle(
   checked: boolean,
-  tab: chrome.tabs.Tab | undefined,
+  tab: chrome.tabs.Tab | undefined
 ): Promise<void> {
   const settings = await getSettings();
   if (!tab?.url || !isSlugValid(settings.orgSlug)) return;
@@ -144,7 +144,7 @@ async function onAutoToggle(
     // Revoke the host permission to keep the install footprint minimal.
     const origin = hostToOrigin(normalized);
     if (origin) {
-      chrome.permissions.remove({ origins: [origin] }).catch(() => {});
+      chrome.permissions.remove({origins: [origin]}).catch(() => {});
     }
   }
 
@@ -161,7 +161,7 @@ async function onInject(tab: chrome.tabs.Tab | undefined): Promise<void> {
 
   try {
     const results = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
+      target: {tabId: tab.id},
       func: injectConvorWidget,
       args: [settings.apiBase, settings.orgSlug.trim()],
     });
@@ -185,11 +185,11 @@ async function init(): Promise<void> {
   el.injectBtn.addEventListener("click", () => void onInject(tab));
   el.autoToggle.addEventListener(
     "change",
-    () => void onAutoToggle(el.autoToggle.checked, tab),
+    () => void onAutoToggle(el.autoToggle.checked, tab)
   );
   el.optionsBtn.addEventListener(
     "click",
-    () => void chrome.runtime.openOptionsPage(),
+    () => void chrome.runtime.openOptionsPage()
   );
 
   // Live-update if settings change while the popup is open (rare, but cheap).

@@ -1,12 +1,12 @@
-import { readFile } from "node:fs/promises";
+import {readFile} from "node:fs/promises";
 import {
   createServer,
   type IncomingMessage,
   type Server,
   type ServerResponse,
 } from "node:http";
-import { extname, join, resolve } from "node:path";
-import { expect, test } from "@playwright/test";
+import {extname, join, resolve} from "node:path";
+import {expect, test} from "@playwright/test";
 
 /**
  * Real-browser E2E for @convor/widget-sdk against the real built widget.
@@ -43,12 +43,12 @@ async function startHarnessServer(): Promise<{
           : ext === ".html"
             ? "text/html"
             : "application/octet-stream";
-      res.writeHead(200, { "Content-Type": ct });
+      res.writeHead(200, {"Content-Type": ct});
       res.end(buf);
     } catch {
       // index.html isn't in SDK_DIST — synthesise it on the fly.
       if (url === "/index.html") {
-        res.writeHead(200, { "Content-Type": "text/html" });
+        res.writeHead(200, {"Content-Type": "text/html"});
         res.end(harnessHtml());
         return;
       }
@@ -66,7 +66,7 @@ async function startHarnessServer(): Promise<{
         reject(new Error("Harness server did not expose a TCP address"));
         return;
       }
-      resolve({ server: srv, url: `http://127.0.0.1:${address.port}` });
+      resolve({server: srv, url: `http://127.0.0.1:${address.port}`});
     });
   });
 }
@@ -102,7 +102,7 @@ function harnessHtml(): string {
 test("widget-sdk: real Chromium loads the SDK and mounts the widget iframe", async ({
   page,
 }) => {
-  const { server, url } = await startHarnessServer();
+  const {server, url} = await startHarnessServer();
   try {
     await page.goto(url);
 
@@ -116,13 +116,13 @@ test("widget-sdk: real Chromium loads the SDK and mounts the widget iframe", asy
     // Canonical script tag injected by the SDK into document.head.
     await expect(
       page.locator(
-        `head script[src="${WIDGET_API_BASE}/widget.js"][data-key="acme"]`,
-      ),
+        `head script[src="${WIDGET_API_BASE}/widget.js"][data-key="acme"]`
+      )
     ).toHaveCount(1);
 
     // Trigger-button iframe mounted.
     await expect(page.locator('iframe[src*="widget-iframe.html"]')).toBeVisible(
-      { timeout: 15_000 },
+      {timeout: 15_000}
     );
   } finally {
     await closeServer(server);

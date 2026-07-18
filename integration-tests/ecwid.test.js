@@ -1,12 +1,12 @@
-const { spawn } = require("node:child_process");
-const { existsSync, mkdtempSync, readFileSync } = require("node:fs");
-const { tmpdir } = require("node:os");
-const { join } = require("node:path");
+const {spawn} = require("node:child_process");
+const {existsSync, mkdtempSync, readFileSync} = require("node:fs");
+const {tmpdir} = require("node:os");
+const {join} = require("node:path");
 const http = require("node:http");
 const net = require("node:net");
-const { JSDOM } = require("jsdom");
+const {JSDOM} = require("jsdom");
 
-const { assertSnippetMatches } = require("./assert-snippet.js");
+const {assertSnippetMatches} = require("./assert-snippet.js");
 
 const REPO_ROOT = join(__dirname, "..");
 const ECWID_DIR = join(REPO_ROOT, "ecwid");
@@ -35,13 +35,13 @@ function waitForUp(port, timeoutMs = 8000) {
   const start = Date.now();
   return new Promise(function retry(resolve, reject) {
     const req = http.get(
-      { host: "127.0.0.1", port, path: "/health", timeout: 1000 },
-      () => resolve(),
+      {host: "127.0.0.1", port, path: "/health", timeout: 1000},
+      () => resolve()
     );
     req.on("error", () => {
       if (Date.now() - start > timeoutMs) {
         reject(
-          new Error(`server on :${port} did not come up within ${timeoutMs}ms`),
+          new Error(`server on :${port} did not come up within ${timeoutMs}ms`)
         );
         return;
       }
@@ -61,7 +61,7 @@ function waitForUp(port, timeoutMs = 8000) {
 function get(port, path) {
   return new Promise((resolve, reject) => {
     const req = http.get(
-      { host: "127.0.0.1", port, path, timeout: 5000 },
+      {host: "127.0.0.1", port, path, timeout: 5000},
       (res) => {
         let body = "";
         res.setEncoding("utf8");
@@ -69,9 +69,9 @@ function get(port, path) {
           body += chunk;
         });
         res.on("end", () =>
-          resolve({ status: res.statusCode, headers: res.headers, body }),
+          resolve({status: res.statusCode, headers: res.headers, body})
         );
-      },
+      }
     );
     req.on("error", reject);
     req.on("timeout", () => req.destroy(new Error("request timeout")));
@@ -99,9 +99,9 @@ function runStorefrontInJsdom(appId, publicConfig) {
     {
       runScripts: "outside-only",
       url: "https://store.example.com/",
-    },
+    }
   );
-  const { window } = dom;
+  const {window} = dom;
 
   // Stub the Ecwid global the loader reads from.
   window.Ecwid = {
@@ -116,13 +116,13 @@ function runStorefrontInJsdom(appId, publicConfig) {
   // actually executes and injects the widget script.
   window.eval(js);
   window.document.dispatchEvent(
-    new window.Event("DOMContentLoaded", { bubbles: true }),
+    new window.Event("DOMContentLoaded", {bubbles: true})
   );
 
   // Find the Convor widget script the loader injected into <head>.
   const scripts = Array.from(window.document.querySelectorAll("script"));
   const convor = scripts.find((s) =>
-    /\/widget\.js$/.test(s.getAttribute("src") || ""),
+    /\/widget\.js$/.test(s.getAttribute("src") || "")
   );
   if (!convor) return null;
 
@@ -201,7 +201,7 @@ async function main() {
   }
 
   // --- 1. Storefront loader (JSDOM) ---
-  const publicConfig = JSON.stringify({ slug: SLUG, apiBase: API_BASE });
+  const publicConfig = JSON.stringify({slug: SLUG, apiBase: API_BASE});
   let injectedTag;
   try {
     injectedTag = runStorefrontInJsdom(APP_ID, publicConfig);
@@ -214,7 +214,7 @@ async function main() {
     return;
   }
   try {
-    assertSnippetMatches(injectedTag, { apiBase: API_BASE, slug: SLUG });
+    assertSnippetMatches(injectedTag, {apiBase: API_BASE, slug: SLUG});
   } catch (err) {
     fail(`storefront snippet assertion failed: ${err.message}`);
     return;
@@ -254,7 +254,7 @@ async function main() {
         allOk = false;
       } else {
         console.log(
-          `✅ PASS ecwid GET /health -> HTTP ${health.status} ${health.body.trim()}`,
+          `✅ PASS ecwid GET /health -> HTTP ${health.status} ${health.body.trim()}`
         );
       }
     }
@@ -271,7 +271,7 @@ async function main() {
       allOk = false;
     } else {
       console.log(
-        `✅ PASS ecwid GET /storefront.js -> HTTP ${sf.status} (${sf.headers["content-type"]}, ${sf.body.length} bytes)`,
+        `✅ PASS ecwid GET /storefront.js -> HTTP ${sf.status} (${sf.headers["content-type"]}, ${sf.body.length} bytes)`
       );
     }
 

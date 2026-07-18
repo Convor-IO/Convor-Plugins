@@ -4,8 +4,8 @@
   "private": true,
   "description": "Minimal Next.js app showing <ConvorWidget /> usage.",
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
+    "dev": "next dev",
     "start": "next start"
   },
   "dependencies": {

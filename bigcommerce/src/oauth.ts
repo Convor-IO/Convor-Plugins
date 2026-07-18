@@ -1,5 +1,5 @@
-import { type AppConfig, BC_SCOPES } from "./config.js";
-import type { StoreInstall } from "./token-store.js";
+import {type AppConfig, BC_SCOPES} from "./config.js";
+import type {StoreInstall} from "./token-store.js";
 
 /**
  * BigCommerce single-click-app OAuth helpers.
@@ -36,7 +36,7 @@ export function buildInstallUrl(cfg: AppConfig): string {
 export interface TokenExchangeResponse {
   access_token: string;
   scope: string;
-  user?: { id: number; email: string };
+  user?: {id: number; email: string};
   context: string; // "stores/{hash}"
 }
 
@@ -48,7 +48,7 @@ export async function exchangeCodeForToken(
   cfg: AppConfig,
   code: string,
   context: string,
-  scope: string,
+  scope: string
 ): Promise<StoreInstall> {
   const body = {
     client_id: cfg.clientId,
@@ -72,7 +72,7 @@ export async function exchangeCodeForToken(
   if (!response.ok) {
     const text = await response.text();
     throw new Error(
-      `BC token exchange failed (${response.status}): ${text.slice(0, 500)}`,
+      `BC token exchange failed (${response.status}): ${text.slice(0, 500)}`
     );
   }
 

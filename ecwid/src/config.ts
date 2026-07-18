@@ -8,7 +8,7 @@ function required(name: string): string {
   const value = process.env[name];
   if (!value || value.trim() === "") {
     throw new Error(
-      `Missing required env var ${name}. Copy env.example to .env and fill it in.`,
+      `Missing required env var ${name}. Copy env.example to .env and fill it in.`
     );
   }
   return value.trim();

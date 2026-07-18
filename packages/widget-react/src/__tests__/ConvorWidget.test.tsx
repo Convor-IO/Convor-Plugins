@@ -1,9 +1,9 @@
-import { DEFAULT_API_BASE } from "@convor/widget-sdk";
-import { act, cleanup, render, screen } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ConvorWidget } from "../ConvorWidget.js";
-import { __resetHandle } from "../handle.js";
-import { useConvor } from "../useConvor.js";
+import {DEFAULT_API_BASE} from "@convor/widget-sdk";
+import {act, cleanup, render, screen} from "@testing-library/react";
+import {afterEach, beforeEach, describe, expect, it, vi} from "vitest";
+import {ConvorWidget} from "../ConvorWidget.js";
+import {__resetHandle} from "../handle.js";
+import {useConvor} from "../useConvor.js";
 
 const WIDGET_SRC = `${DEFAULT_API_BASE}/widget.js`;
 
@@ -17,7 +17,7 @@ function resetDom(): void {
 
 /** Pretend the embed loader has booted. */
 function simulateReady(): void {
-  window.ConvorWidget = { ready: true };
+  window.ConvorWidget = {ready: true};
   window.Convor = {
     init: () => {},
     identify: () => {},
@@ -50,7 +50,7 @@ describe("ConvorWidget — mount", () => {
     await flushReady();
 
     const script = document.head.querySelector<HTMLScriptElement>(
-      `script[src="${WIDGET_SRC}"]`,
+      `script[src="${WIDGET_SRC}"]`
     );
     expect(script).not.toBeNull();
     expect(script?.getAttribute("data-key")).toBe("acme");
@@ -63,13 +63,13 @@ describe("ConvorWidget — mount", () => {
         primaryColor="#3b82f6"
         position="bottom-right"
         theme="dark"
-      />,
+      />
     );
     setTimeout(simulateReady, 0);
     await flushReady();
 
     const script = document.head.querySelector<HTMLScriptElement>(
-      `script[src="${WIDGET_SRC}"]`,
+      `script[src="${WIDGET_SRC}"]`
     );
     expect(script?.getAttribute("data-primary-color")).toBe("#3b82f6");
     expect(script?.getAttribute("data-position")).toBe("bottom-right");
@@ -82,24 +82,24 @@ describe("ConvorWidget — unmount cleanup", () => {
   afterEach(cleanup);
 
   it("removes the embed script on unmount", async () => {
-    const { unmount } = render(<ConvorWidget slug="acme" />);
+    const {unmount} = render(<ConvorWidget slug="acme" />);
     setTimeout(simulateReady, 0);
     await flushReady();
 
     expect(
-      document.head.querySelector(`script[src="${WIDGET_SRC}"]`),
+      document.head.querySelector(`script[src="${WIDGET_SRC}"]`)
     ).not.toBeNull();
 
     unmount();
 
     expect(
-      document.head.querySelector(`script[src="${WIDGET_SRC}"]`),
+      document.head.querySelector(`script[src="${WIDGET_SRC}"]`)
     ).toBeNull();
   });
 
   it("destroys the visitor SDK on unmount", async () => {
     const destroy = vi.fn();
-    const { unmount } = render(<ConvorWidget slug="acme" />);
+    const {unmount} = render(<ConvorWidget slug="acme" />);
     setTimeout(() => {
       simulateReady();
     }, 0);
@@ -108,7 +108,7 @@ describe("ConvorWidget — unmount cleanup", () => {
     // reads window.Convor at teardown time, so this lands before unmount.
     const current = window.Convor;
     if (!current) throw new Error("visitor SDK not ready");
-    window.Convor = { ...current, destroy };
+    window.Convor = {...current, destroy};
 
     unmount();
     expect(destroy).toHaveBeenCalled();
@@ -128,7 +128,7 @@ describe("ConvorWidget — idempotency & slug change", () => {
     await flushReady();
 
     const scripts = document.head.querySelectorAll<HTMLScriptElement>(
-      `script[src="${WIDGET_SRC}"]`,
+      `script[src="${WIDGET_SRC}"]`
     );
     expect(scripts.length).toBe(1);
   });
@@ -146,7 +146,7 @@ describe("ConvorWidget — idempotency & slug change", () => {
     render(
       <ConvorWidget slug="acme">
         <Consumer />
-      </ConvorWidget>,
+      </ConvorWidget>
     );
     expect(screen.getByText("idle")).toBeDefined();
 

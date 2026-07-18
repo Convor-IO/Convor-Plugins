@@ -15,11 +15,11 @@
  * WebSocket traffic are all permitted by the policies Magento ships.
  */
 
-const { join } = require("node:path");
+const {join} = require("node:path");
 const assert = require("node:assert/strict");
 
-const { assertSnippetMatches } = require("./assert-snippet.js");
-const { startPhpServer, fetchText } = require("./_helpers.js");
+const {assertSnippetMatches} = require("./assert-snippet.js");
+const {startPhpServer, fetchText} = require("./_helpers.js");
 
 const PORT = 8103;
 const API_BASE = "http://localhost:5173";
@@ -30,21 +30,21 @@ async function main() {
     port: PORT,
     harness: join(__dirname, "_magento-harness.php"),
     docroot: __dirname,
-    env: { CONVOR_ORG_SLUG: SLUG, CONVOR_API_BASE: API_BASE },
+    env: {CONVOR_ORG_SLUG: SLUG, CONVOR_API_BASE: API_BASE},
   });
 
   try {
     // --- 1. Rendered .phtml must match canonical snippet. ---
-    const { status, text } = await fetchText(`http://127.0.0.1:${PORT}/`);
+    const {status, text} = await fetchText(`http://127.0.0.1:${PORT}/`);
     assert.equal(status, 200, `HTTP ${status} from harness`);
 
     console.log("--- Magento widget_script.phtml rendered output ---");
     console.log(JSON.stringify(text));
     console.log("---------------------------------------------------");
 
-    const tag = assertSnippetMatches(text, { apiBase: API_BASE, slug: SLUG });
+    const tag = assertSnippetMatches(text, {apiBase: API_BASE, slug: SLUG});
     console.log(
-      `PASS: magento phtml matches canonical (${tag.trim().replace(/\s+/g, " ")})`,
+      `PASS: magento phtml matches canonical (${tag.trim().replace(/\s+/g, " ")})`
     );
 
     // --- 2. CSP whitelist: script-src MUST whitelist cdn.convor.io. ---
@@ -55,7 +55,7 @@ async function main() {
     const scriptSrc = policies["script-src"] || [];
     assert.ok(
       scriptSrc.includes("https://cdn.convor.io"),
-      `CSP script-src does not whitelist cdn.convor.io (got: ${scriptSrc.join(", ")})`,
+      `CSP script-src does not whitelist cdn.convor.io (got: ${scriptSrc.join(", ")})`
     );
     console.log("PASS: magento CSP script-src whitelists cdn.convor.io");
 
@@ -66,23 +66,23 @@ async function main() {
     const hasCdn = connectSrc.includes("https://cdn.convor.io");
     assert.ok(
       hasApi,
-      "CSP connect-src is missing api.convor.io — widget REST calls (config, visitor-token) would be CSP-blocked",
+      "CSP connect-src is missing api.convor.io — widget REST calls (config, visitor-token) would be CSP-blocked"
     );
     assert.ok(
       hasCdn,
-      "CSP connect-src is missing cdn.convor.io — CDN-hosted widget requests would be CSP-blocked",
+      "CSP connect-src is missing cdn.convor.io — CDN-hosted widget requests would be CSP-blocked"
     );
     console.log(
-      `      CSP connect-src = [${connectSrc.join(", ")}] → api.convor.io ${hasApi ? "present" : "MISSING"}, cdn.convor.io ${hasCdn ? "present" : "MISSING"}`,
+      `      CSP connect-src = [${connectSrc.join(", ")}] → api.convor.io ${hasApi ? "present" : "MISSING"}, cdn.convor.io ${hasCdn ? "present" : "MISSING"}`
     );
 
     assert.ok(
       connectSrc.includes("wss://api.convor.io"),
-      "CSP connect-src is missing wss://api.convor.io — API-hosted realtime connections would be blocked",
+      "CSP connect-src is missing wss://api.convor.io — API-hosted realtime connections would be blocked"
     );
     assert.ok(
       connectSrc.includes("wss://*.convor.io"),
-      "CSP connect-src is missing wss://*.convor.io — per-org Centrifugo connections from remote config would be blocked",
+      "CSP connect-src is missing wss://*.convor.io — per-org Centrifugo connections from remote config would be blocked"
     );
     console.log("PASS: magento CSP connect-src permits Convor realtime WSS");
 

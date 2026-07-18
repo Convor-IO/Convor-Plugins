@@ -1,4 +1,4 @@
-import { useConvor } from "@convor/widget-react";
+import {useConvor} from "@convor/widget-react";
 
 /**
  * Minimal landing page. Shows how a child component can trigger the chat
@@ -7,7 +7,7 @@ import { useConvor } from "@convor/widget-react";
 export default function HomePage() {
   const convor = useConvor();
   return (
-    <main style={{ fontFamily: "system-ui", padding: "2rem" }}>
+    <main style={{fontFamily: "system-ui", padding: "2rem"}}>
       <h1>Convor + Next.js</h1>
       <p>The chat bubble should appear in the bottom-right corner.</p>
       <button type="button" onClick={() => convor?.openChat()}>

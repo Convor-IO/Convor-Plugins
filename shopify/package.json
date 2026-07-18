@@ -4,19 +4,33 @@
   "description": "Convor live-chat widget for Shopify — Theme App Extension + embedded settings app.",
   "license": "MIT",
   "type": "module",
+  "workspaces": {
+    "packages": ["extensions/*"]
+  },
   "scripts": {
     "build": "remix vite:build",
     "dev": "shopify app dev",
-    "start": "remix-serve ./build/server/index.js",
-    "setup": "prisma generate && prisma migrate deploy",
-    "lint": "biome check .",
     "format": "biome format --write .",
-    "shopify": "shopify",
+    "lint": "biome check .",
     "prisma": "prisma",
+    "setup": "prisma generate && prisma migrate deploy",
+    "shopify": "shopify",
+    "start": "remix-serve ./build/server/index.js",
     "vite": "vite"
   },
-  "engines": {
-    "node": ">=20.19 <22 || >=22.12"
+  "resolutions": {
+    "@graphql-codegen/client-preset": "4.7.0",
+    "@graphql-codegen/typescript-operations": "4.5.0",
+    "@graphql-tools/url-loader": "8.0.16",
+    "minimatch": "9.0.5",
+    "vite": "^6.2.2"
+  },
+  "overrides": {
+    "@graphql-codegen/client-preset": "4.7.0",
+    "@graphql-codegen/typescript-operations": "4.5.0",
+    "@graphql-tools/url-loader": "8.0.16",
+    "minimatch": "9.0.5",
+    "vite": "^6.2.2"
   },
   "dependencies": {
     "@prisma/client": "^6.2.1",
@@ -37,32 +51,15 @@
   },
   "devDependencies": {
     "@remix-run/route-config": "^2.16.1",
-    "@types/node": "^22.2.0",
-    "@types/react": "^18.2.31",
-    "@types/react-dom": "^18.2.14",
-    "typescript": "^5.2.2",
+    "@types/node": "22.20.1",
+    "@types/react": "18.2.31",
+    "@types/react-dom": "18.2.14",
+    "typescript": "6.0.3",
     "vite": "^6.2.2"
   },
-  "workspaces": {
-    "packages": [
-      "extensions/*"
-    ]
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22.12 <23"
   },
-  "trustedDependencies": [
-    "@shopify/plugin-cloudflare"
-  ],
-  "resolutions": {
-    "@graphql-tools/url-loader": "8.0.16",
-    "@graphql-codegen/client-preset": "4.7.0",
-    "@graphql-codegen/typescript-operations": "4.5.0",
-    "minimatch": "9.0.5",
-    "vite": "^6.2.2"
-  },
-  "overrides": {
-    "@graphql-tools/url-loader": "8.0.16",
-    "@graphql-codegen/client-preset": "4.7.0",
-    "@graphql-codegen/typescript-operations": "4.5.0",
-    "minimatch": "9.0.5",
-    "vite": "^6.2.2"
-  }
+  "trustedDependencies": ["@shopify/plugin-cloudflare"]
 }

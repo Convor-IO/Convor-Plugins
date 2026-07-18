@@ -14,7 +14,7 @@
  * or, with the monorepo's copy:
  *   node -e "process.env.NODE_PATH='<playwright pkg parent>'; require('module').Module._initPaths(); require('./bubble-check.js')"
  */
-const { chromium } = require("playwright");
+const {chromium} = require("playwright");
 
 const TARGETS = [
   ["opencart", "http://localhost:8084/"],
@@ -26,7 +26,7 @@ const TARGETS = [
 const BUBBLE_TIMEOUT = 30000;
 
 (async () => {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({headless: true});
   let anyFail = false;
 
   for (const [name, url] of TARGETS) {
@@ -38,7 +38,7 @@ const BUBBLE_TIMEOUT = 30000;
     });
 
     try {
-      await page.goto(url, { waitUntil: "load", timeout: 30000 });
+      await page.goto(url, {waitUntil: "load", timeout: 30000});
 
       const html = await page.content();
       if (!html.includes("widget.js")) {
@@ -62,7 +62,7 @@ const BUBBLE_TIMEOUT = 30000;
         // Snippet correct but bubble didn't mount — a widget-runtime concern,
         // not a plugin defect (the plugin's job is to emit the snippet).
         console.log(
-          `NOTE  ${name}: snippet emitted correctly, but .convor-trigger did not mount within ${BUBBLE_TIMEOUT / 1000}s (widget-runtime/CSS timing, not a plugin defect)`,
+          `NOTE  ${name}: snippet emitted correctly, but .convor-trigger did not mount within ${BUBBLE_TIMEOUT / 1000}s (widget-runtime/CSS timing, not a plugin defect)`
         );
       }
       if (errors.length) {

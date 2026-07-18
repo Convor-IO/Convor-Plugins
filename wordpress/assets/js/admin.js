@@ -16,7 +16,7 @@
         // Keep the caret position sane after stripping characters.
         slug.setSelectionRange(
           Math.min(start, cleaned.length),
-          Math.min(end, cleaned.length),
+          Math.min(end, cleaned.length)
         );
       }
     });
