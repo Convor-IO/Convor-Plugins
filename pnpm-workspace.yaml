@@ -1,3 +1,6 @@
 packages:
   - "packages/*"
   - "segment"
+
+allowBuilds:
+  esbuild: true
