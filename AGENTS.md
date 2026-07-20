@@ -50,8 +50,12 @@ settings** — they create drift.
    added solely to preserve old behavior.
 5. **Worktree-first.** Real changes happen in `.worktrees/` branches off the
    default branch (`main` here). Trivial docs/typo fixes may go straight to
-   `main`. When green, open a PR into `main` by default; the user merges.
-   Agents don't self-merge unless explicitly asked.
+   `main`. **Don't open PRs** — when green, rebase onto `main`, run an
+   independent subagent review of the diff, fix every finding (looping until
+   clean), then ask the user whether to merge into `main` and push. Do not
+   perform that merge-and-push on your own; do not self-approve. (Pushing the
+   worktree branch so the pre-push hook runs the gate is still expected — see
+   tenet 6.)
 6. **Don't double-run the gate.** This repo has husky hooks — don't manually
    re-run the repo-wide check a hook already runs for your change. Commit/push
    and let the hook run it. Targeted checks while iterating are fine.
