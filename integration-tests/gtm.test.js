@@ -5,7 +5,7 @@
  * `<script data-key=...>` tag — GTM's sandboxed `injectScript` only takes a
  * URL. So this test verifies the *semantic* equivalent: the template loads
  * widget.js from the clean canonical URL and delivers the org slug through
- * the widget's supported `ConvorWidget.init({ key })` API.
+ * the widget's supported `Convor.init({ key })` API.
  *
  * WHY THIS MATTERS — the previous template was BROKEN:
  *   The widget loader (saas/apps/widget/src/embed.ts → config.ts:resolveConfig)
@@ -18,7 +18,7 @@
  *
  * THE FIX:
  *   The template now loads widget.js from a clean URL (no ?key=) and, in the
- *   script's onSuccess callback, calls `window.ConvorWidget.init({ key, ... })`
+ *   script's onSuccess callback, calls `window.Convor.init({ key, ... })`
  *   via callInWindow — the widget's other documented entry point.
  *
  * This test:
@@ -27,7 +27,7 @@
  *      are GONE from the source.
  *   3. Runs the template through a stubbed GTM sandbox and asserts:
  *      - injectScript is called with `<apiBase>/widget.js` (clean, no query).
- *      - callInWindow('ConvorWidget.init', { key: slug, ... }) fires.
+ *      - callInWindow('Convor.init', { key: slug, ... }) fires.
  *      - gtmOnSuccess is reported.
  *   4. Reconstructs the canonical snippet from the captured URL + init key
  *      and asserts it matches canonical.
@@ -93,8 +93,8 @@ async function main() {
   );
   assert.match(
     codeOnly,
-    /callInWindow\s*\(\s*['"]ConvorWidget\.init['"]/,
-    "template must call window.ConvorWidget.init via callInWindow",
+    /callInWindow\s*\(\s*['"]Convor\.init['"]/,
+    "template must call window.Convor.init via callInWindow",
   );
   assert.match(
     codeOnly,
@@ -102,16 +102,16 @@ async function main() {
     "template must call injectScript(url, onSuccess, onFailure)",
   );
   console.log(
-    "PASS: broken mechanisms removed (?key=, ConvorConfig) — now uses injectScript + ConvorWidget.init",
+    "PASS: broken mechanisms removed (?key=, ConvorConfig) — now uses injectScript + Convor.init",
   );
 
   // --- 2. Run the template in the stubbed sandbox. ---
-  // Simulate the page state AFTER widget.js loads: ConvorWidget.init is
-  // registered. The sandbox's injectScript merges that in and fires
+  // Simulate the page state AFTER widget.js loads: Convor.init is registered.
+  // The sandbox's injectScript merges that in and fires
   // onSuccess inline, so the template's callInWindow runs in the same tick.
   let initReceived = null;
   const loadedWindowState = {
-    ConvorWidget: {
+    Convor: {
       init: (opts) => {
         initReceived = opts;
       },
@@ -146,14 +146,8 @@ async function main() {
     "injectScript URL must NOT carry a query string",
   );
 
-  const initCalls = calls.callInWindow.filter(
-    (c) => c.path === "ConvorWidget.init",
-  );
-  assert.equal(
-    initCalls.length,
-    1,
-    "expected exactly one ConvorWidget.init call",
-  );
+  const initCalls = calls.callInWindow.filter((c) => c.path === "Convor.init");
+  assert.equal(initCalls.length, 1, "expected exactly one Convor.init call");
   const initArg = initCalls[0].args[0];
   assert.equal(initArg.key, SLUG, "init() must be passed the org slug as key");
   assert.notEqual(
@@ -163,7 +157,7 @@ async function main() {
   );
   assert.ok(calls.gtmOnSuccess >= 1, "gtmOnSuccess should fire after init");
   console.log(
-    `PASS: injectScript("${inj.url}") → ConvorWidget.init({ key: "${initArg.key}", … }) → gtmOnSuccess`,
+    `PASS: injectScript("${inj.url}") → Convor.init({ key: "${initArg.key}", … }) → gtmOnSuccess`,
   );
 
   // --- 4. Reconstruct the canonical snippet from the captured URL + key. ---

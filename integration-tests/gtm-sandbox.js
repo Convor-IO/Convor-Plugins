@@ -9,7 +9,7 @@
  *
  * The stubs capture calls (injectScript url + callbacks, callInWindow path +
  * args) so the test can assert the template loads the canonical widget.js URL
- * and then invokes ConvorWidget.init({ key }) — the supported equivalent of
+ * and then invokes Convor.init({ key }) — the supported equivalent of
  * the data-key attribute the canonical snippet carries.
  */
 
@@ -18,7 +18,7 @@
  *
  * @param {object} templateData      The `data` object the tag would see.
  * @param {object} loadedWindowState The `window` contents that loading
- *                                   widget.js registers (ConvorWidget). The
+ *                                   widget.js registers (Convor). The
  *                                   sandbox merges these into the simulated
  *                                   window AT the moment injectScript fires
  *                                   onSuccess — modelling "the script loaded
@@ -48,7 +48,7 @@ function makeSandbox(templateData, loadedWindowState = {}) {
       calls.injectScript.push({ url, onSuccess, onFailure, attrs });
       // Simulate the script loading synchronously: widget.js parses and
       // registers its globals onto window, THEN GTM fires onSuccess. Merge
-      // the loaded state in first so copyFromWindow('ConvorWidget') inside
+      // the loaded state in first so copyFromWindow('Convor') inside
       // onSuccess sees it.
       Object.assign(win, loadedWindowState);
       if (typeof onSuccess === "function") {

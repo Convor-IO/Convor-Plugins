@@ -73,10 +73,8 @@ export interface AnalyticsJS extends AnalyticsEmitter {
  */
 declare global {
   interface Window {
-    /** The visitor SDK global, exposed by the Convor embed loader once ready. */
+    /** The canonical browser API exposed by the Convor embed loader. */
     Convor?: ConvorVisitorSDK;
-    /** Set by the embed loader once it has bootstrapped the visitor SDK. */
-    ConvorWidget?: unknown;
     /** Segment's analytics.js global. */
     analytics?: AnalyticsJS;
   }

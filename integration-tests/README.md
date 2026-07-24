@@ -21,8 +21,8 @@ single source of truth — every test uses it.
 ## Layer 2: real-browser E2E (`e2e/`, Playwright)
 
 Goes further: boots a real WordPress install in Docker and loads pages in
-real Chromium, asserting the widget `<script>` loads, `window.ConvorWidget`
-becomes defined, and the trigger-button iframe mounts.
+real Chromium, asserting the widget `<script>` loads, `window.Convor` becomes
+defined, and the trigger-button iframe mounts.
 
 ### Prerequisites
 
@@ -68,7 +68,7 @@ WIDGET_API_BASE=http://localhost:5173 pnpm exec playwright test \
 
 - `wordpress.spec.ts` — real Chromium loads the WP home page; the canonical
   `<script src="…/widget.js" data-key="acme" async>` is present; the browser
-  fetches `/widget.js` (200); `window.ConvorWidget` is defined (loader ran);
+  fetches `/widget.js` (200); `window.Convor` is defined (loader ran);
   the trigger-button iframe is mounted.
 - `sdk.spec.ts` — a static HTML page imports `@convor/widget-sdk`'s ESM
   bundle, calls `initConvor({slug, apiBase})`, and the same assertions hold.

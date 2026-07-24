@@ -8,15 +8,12 @@ const WIDGET_SRC = `${DEFAULT_API_BASE}/widget.js`;
 function resetDom(): void {
   document.head.innerHTML = "";
   document.body.innerHTML = "";
-  window.ConvorWidget = undefined;
   window.Convor = undefined;
   __resetSingleton();
 }
 
 /** Pretend the embed loader has booted, then resolve the next ready-poll. */
 function simulateReady(): void {
-  // Define ConvorWidget as a truthy marker; provide a Convor visitor SDK stub.
-  window.ConvorWidget = { ready: true };
   window.Convor = {
     init: () => {},
     identify: () => {},

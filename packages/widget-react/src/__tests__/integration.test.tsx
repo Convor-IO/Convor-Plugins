@@ -6,15 +6,15 @@ import { __resetHandle } from "../handle.js";
 /**
  * Integration tests — render `<ConvorWidget>` and assert the REAL script-tag
  * injection path against the local widget dev server URL
- * (`http://localhost:5173`), instead of the faked `window.ConvorWidget` the
- * unit tests use.
+ * (`http://localhost:5173`), instead of the faked `window.Convor` the unit
+ * tests use.
  *
  * Scope note (same compromise as the widget-sdk integration suite):
  *   - The sandbox cannot reach `http://localhost:5173/widget.js` (connection
  *     refused), so URL reachability is intentionally skipped.
  *   - happy-dom does not execute fetched external scripts, so the embed
- *     loader's `window.ConvorWidget` global is released via
- *     `simulateReady()` to unblock the SDK readiness poll — the same
+ *     loader's `window.Convor` global is released via `simulateReady()` to
+ *     unblock the SDK readiness poll — the same
  *     technique the unit tests use, just driven through the real React
  *     effect lifecycle against the local URL.
  *
@@ -29,14 +29,12 @@ const LOCAL_WIDGET_SRC = `${LOCAL_API_BASE}/widget.js`;
 function resetDom(): void {
   document.head.innerHTML = "";
   document.body.innerHTML = "";
-  window.ConvorWidget = undefined;
   window.Convor = undefined;
   __resetHandle();
 }
 
 /** Release the SDK's `waitForReady` poll (the embed loader owns this global). */
 function simulateReady(): void {
-  window.ConvorWidget = { ready: true };
   window.Convor = {
     init: () => {},
     identify: () => {},

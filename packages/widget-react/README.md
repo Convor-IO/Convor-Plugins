@@ -43,7 +43,7 @@ export interface ConvorWidgetProps {
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left" | "center";
   /** Theme override. Server config wins for unset fields. */
   theme?: "light" | "dark" | "auto";
-  /** Max ms to wait for window.ConvorWidget. */
+  /** Max ms to wait for window.Convor. */
   timeoutMs?: number;
   /** Rendered into the host component; the widget itself injects an iframe. */
   children?: React.ReactNode;

@@ -24,7 +24,7 @@ pnpm add @convor/widget-sdk
 ### `initConvor(options): Promise<ConvorSDK>`
 
 Injects the Convor embed script (`<apiBase>/widget.js`) into `document.head`,
-waits for `window.ConvorWidget` to be ready, and resolves a typed handle.
+waits for `window.Convor` to be ready, and resolves a typed handle.
 
 ```ts
 export interface ConvorOptions {
@@ -38,7 +38,7 @@ export interface ConvorOptions {
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left" | "center";
   /** Theme override, passed as data-theme. Server config wins. */
   theme?: "light" | "dark" | "auto";
-  /** Max ms to wait for window.ConvorWidget. Default 10000. */
+  /** Max ms to wait for window.Convor. Default 10000. */
   timeoutMs?: number;
 }
 ```
@@ -55,7 +55,7 @@ export interface ConvorOptions {
 - **Idempotent.** Calling `initConvor` twice reuses the existing embed script
   tag (matched by `src`) and resolves the cached handle.
 - **Pass-through.** The methods on the returned handle (`identify`, `track`, …)
-  forward to the visitor SDK global `window.Convor`. If that global isn't ready
+  forward to the canonical browser API `window.Convor`. If that global isn't ready
   yet — or has been destroyed — they **no-op and log a warning in dev**.
 
 ### `ConvorSDK`

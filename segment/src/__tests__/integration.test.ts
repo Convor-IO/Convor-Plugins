@@ -53,7 +53,6 @@ function resetDom(): void {
   document.head.innerHTML = "";
   document.body.innerHTML = "";
   window.Convor = undefined;
-  window.ConvorWidget = undefined;
   window.analytics = undefined;
   __resetBridge();
 }

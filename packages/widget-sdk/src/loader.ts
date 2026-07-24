@@ -4,10 +4,10 @@ import type { ConvorOptions } from "./types.js";
 /** Default CDN base when `apiBase` is omitted. */
 export const DEFAULT_API_BASE = "https://cdn.convor.io";
 
-/** Default timeout for the `window.ConvorWidget` readiness poll. */
+/** Default timeout for the `window.Convor` readiness poll. */
 export const DEFAULT_TIMEOUT_MS = 10_000;
 
-/** Poll interval for `window.ConvorWidget` readiness. */
+/** Poll interval for `window.Convor` readiness. */
 const POLL_INTERVAL_MS = 50;
 
 /**
@@ -70,8 +70,8 @@ export function removeScript(script: HTMLScriptElement | null): void {
 }
 
 /**
- * Resolve once `window.ConvorWidget` is defined, or reject on timeout. The embed
- * loader sets this global as soon as it has bootstrapped the visitor SDK.
+ * Resolve once `window.Convor` is defined, or reject on timeout. The embed
+ * loader sets this canonical API global synchronously when the script runs.
  */
 export function waitForReady(timeoutMs: number): Promise<void> {
   return new Promise<void>((resolve, reject) => {
@@ -79,13 +79,13 @@ export function waitForReady(timeoutMs: number): Promise<void> {
       reject(new Error("window is not available (SSR environment)"));
       return;
     }
-    if (window.ConvorWidget !== undefined) {
+    if (window.Convor !== undefined) {
       resolve();
       return;
     }
     const start = Date.now();
     const timer = setInterval(() => {
-      if (window.ConvorWidget !== undefined) {
+      if (window.Convor !== undefined) {
         clearInterval(timer);
         resolve();
         return;
@@ -94,7 +94,7 @@ export function waitForReady(timeoutMs: number): Promise<void> {
         clearInterval(timer);
         reject(
           new Error(
-            `[convor] timed out after ${timeoutMs}ms waiting for window.ConvorWidget`,
+            `[convor] timed out after ${timeoutMs}ms waiting for window.Convor`,
           ),
         );
       }

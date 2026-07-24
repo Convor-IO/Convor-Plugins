@@ -32,11 +32,11 @@ export type {
  *   rejects with a clear error rather than touching globals.
  * - Idempotent. A second call reuses the existing embed script tag (matched by
  *   `src`) and resolves the same kind of handle without re-injecting.
- * - On resolve, `window.ConvorWidget` is guaranteed to be defined.
+ * - On resolve, `window.Convor` is guaranteed to be defined.
  *
  * The pass-through methods on the returned handle (`identify`, `track`, …)
- * forward to the visitor SDK global `window.Convor`. If that global isn't ready
- * yet — or has been destroyed — they no-op and log a warning in development.
+ * forward to the canonical browser API `window.Convor`. If that global isn't
+ * ready yet — or has been destroyed — they no-op and log a warning in development.
  *
  * @example
  * ```ts

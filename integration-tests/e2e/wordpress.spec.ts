@@ -11,7 +11,7 @@ import { expect, test } from "@playwright/test";
  *
  * What this proves (that the PHP shim test cannot):
  *   - The script tag actually loads in a real Chromium render.
- *   - `window.ConvorWidget` becomes defined (the loader executed).
+ *   - `window.Convor` becomes defined (the loader executed).
  *   - The trigger-button iframe is injected into the page.
  *
  * What this does NOT prove:
@@ -55,13 +55,13 @@ test("real WordPress: widget <script> loads and the trigger button mounts", asyn
   // 2. The browser actually fetched /widget.js.
   await expect.poll(() => scriptRequests.length, { timeout: 10_000 }).toBe(1);
 
-  // 3. The loader executed: window.ConvorWidget is defined.
+  // 3. The loader executed: window.Convor is defined.
   await expect
     .poll(
       async () =>
         page.evaluate(() => {
-          const w = window as Window & { ConvorWidget?: unknown };
-          return typeof w.ConvorWidget;
+          const w = window as Window & { Convor?: unknown };
+          return typeof w.Convor;
         }),
       { timeout: 10_000 },
     )

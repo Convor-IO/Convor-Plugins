@@ -145,7 +145,7 @@ ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 //
 // The widget loader (embed.ts → resolveConfig) reads the org slug from
 // EXACTLY one place on the host page: the data-key / data-org attribute on
-// its own <script> tag (or an explicit ConvorWidget.init({ key }) call). It
+// its own <script> tag (or an explicit Convor.init({ key }) call). It
 // does NOT read ?key= query params, and it does NOT read a window.ConvorConfig
 // global — so a template that relies on those will load widget.js but the
 // widget will throw `"key" is required` and never mount.
@@ -153,7 +153,7 @@ ___SANDBOXED_JS_FOR_WEB_TEMPLATE___
 // GTM's sandboxed `injectScript(url, onSuccess, onFailure)` can load a script
 // from a URL but CANNOT attach data-* attributes to the injected <script>.
 // So we use the widget's other supported entry point: after the script loads
-// (onSuccess), we call its public API `window.ConvorWidget.init({ key, ... })`
+// (onSuccess), we call its public API `window.Convor.init({ key, ... })`
 // via `callInWindow`. That is the same code path the widget's own auto-init
 // takes when data-key IS present, so behaviour is identical to the canonical
 // snippet.
@@ -214,12 +214,12 @@ const code = () => {
   // page so we don't double-load widget.js).
   const src = apiBase + '/widget.js';
 
-  // If the merchant's page already initialised ConvorWidget (e.g. they have
-  // the canonical snippet AND this tag), don't fight it — report success and
+  // If the merchant's page already initialised Convor (e.g. they have the
+  // canonical snippet AND this tag), don't fight it — report success and
   // leave the existing instance alone.
-  const alreadyLoaded = copyFromWindow('ConvorWidget');
+  const alreadyLoaded = copyFromWindow('Convor');
   if (alreadyLoaded && getType(alreadyLoaded.init) === 'function') {
-    log('Convor: window.ConvorWidget already present on the page — skipping inject.');
+    log('Convor: window.Convor already present on the page — skipping inject.');
     data.gtmOnSuccess();
     return;
   }
@@ -229,17 +229,17 @@ const code = () => {
     data.gtmOnFailure();
   };
 
-  // Once widget.js has loaded it registers window.ConvorWidget. We then call
-  // its public init({ key, ... }) — the supported equivalent of data-key.
+  // Once widget.js has loaded it registers window.Convor. We then call its
+  // public init({ key, ... }) — the supported equivalent of data-key.
   const onSuccess = () => {
-    const ConvorWidget = copyFromWindow('ConvorWidget');
-    if (!ConvorWidget || getType(ConvorWidget.init) !== 'function') {
-      log('Convor: widget.js loaded but window.ConvorWidget.init is missing — '
+    const Convor = copyFromWindow('Convor');
+    if (!Convor || getType(Convor.init) !== 'function') {
+      log('Convor: widget.js loaded but window.Convor.init is missing — '
           + 'the script may have failed to parse. Tag will not fire init.');
       data.gtmOnFailure();
       return;
     }
-    callInWindow('ConvorWidget.init', buildInitOptions(orgSlug));
+    callInWindow('Convor.init', buildInitOptions(orgSlug));
     data.gtmOnSuccess();
   };
 
@@ -305,7 +305,7 @@ ___WEB_PERMISSIONS___
                   { "type": 1, "string": "execute" }
                 ],
                 "mapValue": [
-                  { "type": 1, "string": "ConvorWidget" },
+                  { "type": 1, "string": "Convor" },
                   { "type": 8, "boolean": true },
                   { "type": 8, "boolean": false },
                   { "type": 8, "boolean": false }
@@ -320,7 +320,7 @@ ___WEB_PERMISSIONS___
                   { "type": 1, "string": "execute" }
                 ],
                 "mapValue": [
-                  { "type": 1, "string": "ConvorWidget.init" },
+                  { "type": 1, "string": "Convor.init" },
                   { "type": 8, "boolean": false },
                   { "type": 8, "boolean": false },
                   { "type": 8, "boolean": true }
@@ -372,10 +372,10 @@ Convor live-chat widget — GTM custom tag template.
 Semantically injects `<script src="https://cdn.convor.io/widget.js"
 data-key="SLUG" async>`. GTM's sandboxed `injectScript` API cannot attach
 data-* attributes to the injected tag, and the widget loader reads the org
-slug ONLY from the data-key attribute (or an explicit ConvorWidget.init call)
+slug ONLY from the data-key attribute (or an explicit Convor.init call)
 — it does NOT honor ?key= query params or a window.ConvorConfig global. So
 this template loads widget.js with a clean URL and then calls the widget's
-public `window.ConvorWidget.init({ key, ... })` API from the script's
+public `window.Convor.init({ key, ... })` API from the script's
 onSuccess callback (via callInWindow). That is the same code path the widget's
 own auto-init takes when data-key IS present, so end-user behaviour matches
 the canonical snippet exactly.

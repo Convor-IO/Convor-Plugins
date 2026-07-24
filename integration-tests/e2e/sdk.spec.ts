@@ -90,7 +90,7 @@ function harnessHtml(): string {
         apiBase: "${WIDGET_API_BASE}",
       });
       document.getElementById("result").textContent =
-        "sdk-ready:" + typeof window.ConvorWidget;
+        "sdk-ready:" + typeof window.Convor;
       window.__CONVOR_SDK = sdk;
     } catch (e) {
       document.getElementById("result").textContent = "sdk-error:" + e.message;

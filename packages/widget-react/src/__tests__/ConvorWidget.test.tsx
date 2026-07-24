@@ -10,14 +10,12 @@ const WIDGET_SRC = `${DEFAULT_API_BASE}/widget.js`;
 function resetDom(): void {
   document.head.innerHTML = "";
   document.body.innerHTML = "";
-  window.ConvorWidget = undefined;
   window.Convor = undefined;
   __resetHandle();
 }
 
 /** Pretend the embed loader has booted. */
 function simulateReady(): void {
-  window.ConvorWidget = { ready: true };
   window.Convor = {
     init: () => {},
     identify: () => {},

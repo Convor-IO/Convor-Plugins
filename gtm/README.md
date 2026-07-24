@@ -31,7 +31,7 @@ stays minimal.
 
 The widget loader reads the org slug from **only one place** on the host page:
 the `data-key` attribute on its own `<script>` tag (or an explicit
-`ConvorWidget.init({ key })` call). It does **not** read `?key=` query params
+`Convor.init({ key })` call). It does **not** read `?key=` query params
 or a `window.ConvorConfig` global.
 
 GTM's sandboxed `injectScript()` API can load a script from a URL but **cannot
@@ -41,8 +41,8 @@ template:
 
 1. Loads `widget.js` from a clean URL via `injectScript()` — no `?key=`
    (so GTM can also dedupe against any canonical snippet already on the page).
-2. Once the script has loaded and registered `window.ConvorWidget`, calls its
-   public **`ConvorWidget.init({ key, ... })`** API from the `onSuccess`
+2. Once the script has loaded and registered `window.Convor`, calls its public
+   **`Convor.init({ key, ... })`** API from the `onSuccess`
    callback (via GTM's `callInWindow`).
 
 That `init({ key })` call is the same code path the widget's own auto-init
@@ -66,7 +66,7 @@ Convor dashboard.
 
 > Permissions are pre-configured: the template may inject scripts from
 > `https://cdn.convor.io/*` (and `https://*.convor.io/*`) and read the
-> `window.ConvorWidget` global + execute `ConvorWidget.init`. No other
+> `window.Convor` global + execute `Convor.init`. No other
 > permissions are requested.
 
 ## Create a tag from the template
@@ -99,7 +99,7 @@ Convor dashboard.
 - **Widget doesn't appear.** Confirm the tag fired in Preview mode, the slug is
   correct, and your site's domain is listed under *Allowed domains* in the Convor
   dashboard. Check the browser console for `[ConvorWidget] "key" is required` —
-  if you see it, the `ConvorWidget.init({ key })` call did not run (most likely
+  if you see it, the `Convor.init({ key })` call did not run (most likely
   the tag's org-slug field is blank or the script failed to load).
 - **`injectScript` blocked by permissions.** This happens if you changed the
   *Widget script base URL* to a host not in the allowlist. Open the template in

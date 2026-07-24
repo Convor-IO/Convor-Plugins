@@ -27,13 +27,13 @@ export interface ConvorOptions {
   position?: ConvorPosition;
   /** Theme override, passed as `data-theme`. Server config wins if unset. */
   theme?: ConvorTheme;
-  /** Max time (ms) to wait for the embed loader to expose `window.ConvorWidget`. Default `10000`. */
+  /** Max time (ms) to wait for the embed loader to expose `window.Convor`. Default `10000`. */
   timeoutMs?: number;
 }
 
 /**
- * The shape of the visitor SDK global exposed by the embed loader, once ready.
- * The Convor SDK is a thin, typed pass-through over these methods.
+ * The shape of the canonical browser API exposed by the embed loader.
+ * The npm SDK is a thin, typed pass-through over these methods.
  */
 export interface ConvorVisitorSDK {
   init(options: Record<string, unknown>): void;
@@ -72,13 +72,11 @@ export interface ConvorSDK {
 }
 
 /**
- * Augment the global window so we can read the embed loader's markers safely.
+ * Augment the global window with the canonical browser API.
  */
 declare global {
   interface Window {
-    /** Set by the embed loader once it has bootstrapped the visitor SDK. */
-    ConvorWidget?: unknown;
-    /** The visitor SDK global, exposed by the embed loader. */
+    /** The canonical browser API exposed by the embed loader. */
     Convor?: ConvorVisitorSDK;
   }
 }

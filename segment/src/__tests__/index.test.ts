@@ -41,14 +41,12 @@ function resetDom(): void {
   document.head.innerHTML = "";
   document.body.innerHTML = "";
   window.Convor = undefined;
-  window.ConvorWidget = undefined;
   window.analytics = undefined;
   __resetBridge();
 }
 
 /** Pretend the Convor embed loader has booted. */
 function simulateConvorReady(impl: Partial<ConvorVisitorSDK> = {}): void {
-  window.ConvorWidget = { ready: true };
   window.Convor = {
     identify: impl.identify ?? (() => {}),
     track: impl.track ?? (() => {}),
