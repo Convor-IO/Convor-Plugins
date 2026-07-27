@@ -16,7 +16,7 @@
     "node": ">=20.11"
   },
   "dependencies": {
-    "@fastify/cookie": "^11.0.2",
+    "@fastify/cookie": "^11.1.2",
     "dotenv": "^17.4.2",
     "fastify": "^5.2.1",
     "jsonwebtoken": "^9.0.2",
