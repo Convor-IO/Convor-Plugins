@@ -45,8 +45,8 @@ importers:
         specifier: ^19.2.3
         version: 19.2.3(@types/react@19.2.17)
       happy-dom:
-        specifier: ^20.10.6
-        version: 20.10.6
+        specifier: ^20.11.2
+        version: 20.11.2
       react:
         specifier: ^19.2.7
         version: 19.2.7
@@ -64,7 +64,7 @@ importers:
         version: 7.3.6(@types/node@26.1.0)
       vitest:
         specifier: ^4.1.10
-        version: 4.1.10(@types/node@26.1.0)(happy-dom@20.10.6)(vite@7.3.6(@types/node@26.1.0))
+        version: 4.1.10(@types/node@26.1.0)(happy-dom@20.11.2)(vite@7.3.6(@types/node@26.1.0))
 
   packages/widget-sdk:
     devDependencies:
@@ -75,8 +75,8 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
       happy-dom:
-        specifier: ^20.10.6
-        version: 20.10.6
+        specifier: ^20.11.2
+        version: 20.11.2
       tsup:
         specifier: ^8.3.5
         version: 8.5.1(postcss@8.5.16)(typescript@6.0.3)
@@ -88,7 +88,7 @@ importers:
         version: 7.3.6(@types/node@26.1.0)
       vitest:
         specifier: ^4.1.10
-        version: 4.1.10(@types/node@26.1.0)(happy-dom@20.10.6)(vite@7.3.6(@types/node@26.1.0))
+        version: 4.1.10(@types/node@26.1.0)(happy-dom@20.11.2)(vite@7.3.6(@types/node@26.1.0))
 
   segment:
     devDependencies:
@@ -99,8 +99,8 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
       happy-dom:
-        specifier: ^20.10.6
-        version: 20.10.6
+        specifier: ^20.11.2
+        version: 20.11.2
       tsup:
         specifier: ^8.3.5
         version: 8.5.1(postcss@8.5.16)(typescript@6.0.3)
@@ -112,7 +112,7 @@ importers:
         version: 7.3.6(@types/node@26.1.0)
       vitest:
         specifier: ^4.1.10
-        version: 4.1.10(@types/node@26.1.0)(happy-dom@20.10.6)(vite@7.3.6(@types/node@26.1.0))
+        version: 4.1.10(@types/node@26.1.0)(happy-dom@20.11.2)(vite@7.3.6(@types/node@26.1.0))
 
 packages:
 
@@ -679,8 +679,8 @@ packages:
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
 
-  happy-dom@20.10.6:
-    resolution: {integrity: sha512-6QD0ilzDDt93tX44y8tbmZdAcdTRYDhUP+Asgi6pC8Pp5IA3cvaZGyoVN/EGtlq9ziT65iPuBBn3ASLr6hCgVw==}
+  happy-dom@20.11.2:
+    resolution: {integrity: sha512-7MB+bJLkxu3SowAfBJbjW+c55kNz5tkR45gu2qzrxznezhLeN5YIlJbwUgSzlGc+qWoZ8Ykg71H5ezz69xixrw==}
     engines: {node: '>=20.0.0'}
 
   husky@9.1.7:
@@ -995,8 +995,8 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
-  ws@8.21.0:
-    resolution: {integrity: sha512-Vsp28b7DRcimFQvrqu2Wek3z1iYxDCWqHYB8Qsnk/S4RfaCQzPGPyBNuVjJV3cd6UiKtUtp6sNM77gWvzcCH+g==}
+  ws@8.21.3:
+    resolution: {integrity: sha512-201TZ/kPWxoPr/OKWjquZR1SWKXcvxdH+e1xrx89b3YbmzLMFCLfnaG1HFIgWzJOEWZ7MvpK++odZufgYR50Rw==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -1422,7 +1422,7 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  happy-dom@20.10.6:
+  happy-dom@20.11.2:
     dependencies:
       '@types/node': 26.1.0
       '@types/whatwg-mimetype': 3.0.2
@@ -1430,7 +1430,7 @@ snapshots:
       buffer-image-size: 0.6.4
       entities: 7.0.1
       whatwg-mimetype: 3.0.0
-      ws: 8.21.0
+      ws: 8.21.3
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -1653,7 +1653,7 @@ snapshots:
       '@types/node': 26.1.0
       fsevents: 2.3.3
 
-  vitest@4.1.10(@types/node@26.1.0)(happy-dom@20.10.6)(vite@7.3.6(@types/node@26.1.0)):
+  vitest@4.1.10(@types/node@26.1.0)(happy-dom@20.11.2)(vite@7.3.6(@types/node@26.1.0)):
     dependencies:
       '@vitest/expect': 4.1.10
       '@vitest/mocker': 4.1.10(vite@7.3.6(@types/node@26.1.0))
@@ -1677,7 +1677,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 26.1.0
-      happy-dom: 20.10.6
+      happy-dom: 20.11.2
     transitivePeerDependencies:
       - msw
 
@@ -1688,4 +1688,4 @@ snapshots:
       siginfo: 2.0.0
       stackback: 0.0.2
 
-  ws@8.21.0: {}
+  ws@8.21.3: {}
