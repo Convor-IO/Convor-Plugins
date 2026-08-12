@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: drupal
       POSTGRES_PASSWORD: drupal
     tmpfs:
-      - /var/lib/postgresql/data
+      - /var/lib/postgresql
   drupal:
     image: drupal:php8.3-apache
     depends_on: [db]
