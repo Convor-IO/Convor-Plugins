@@ -16,7 +16,7 @@
     "test:e2e": "playwright test --config integration-tests/playwright.config.ts"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.2",
+    "@biomejs/biome": "^2.5.8",
     "@playwright/test": "^1.60.0",
     "husky": "^9.1.7",
     "nano-staged": "^1.0.2",
