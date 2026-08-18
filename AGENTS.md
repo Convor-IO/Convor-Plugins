@@ -53,12 +53,12 @@ settings** — they create drift.
    `main`. **Don't open PRs** — when green, rebase onto `main`, run an
    independent subagent review of the diff, fix every finding (looping until
    clean), then ask the user whether to merge into `main` and push. Do not
-   perform that merge-and-push on your own; do not self-approve. (Pushing the
-   worktree branch so the pre-push hook runs the gate is still expected — see
-   tenet 6.)
+   perform that merge-and-push on your own; do not self-approve. (Never push
+   the worktree branch — branches stay local; see tenet 6.)
 6. **Don't double-run the gate.** This repo has husky hooks — don't manually
-   re-run the repo-wide check a hook already runs for your change. Commit/push
-   and let the hook run it. Targeted checks while iterating are fine.
+   re-run the repo-wide check a hook already runs for your change. Commit and
+   let the pre-commit hook run; the pre-push gate runs when the default branch
+   is pushed. Targeted checks while iterating are fine.
    - **pre-commit** runs `pnpm nano-staged` (biome on staged TS/JS files).
    - **pre-push** runs `pnpm gate` (= `lint && typecheck && test` — the 12
      integration suites under `integration-tests/` cover the PHP plugins via
