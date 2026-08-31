@@ -48,7 +48,7 @@
     "react-dom": ">=18"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.2",
+    "@biomejs/biome": "^2.5.11",
     "@convor/widget-sdk": "workspace:*",
     "@testing-library/react": "^16.1.0",
     "@types/react": "^19.2.17",
