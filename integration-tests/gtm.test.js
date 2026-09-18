@@ -21,17 +21,13 @@
  *   script's onSuccess callback, calls `window.Convor.init({ key, ... })`
  *   via callInWindow — the widget's other documented entry point.
  *
- * This test:
- *   1. Extracts the ___SANDBOXED_JS_FOR_WEB_TEMPLATE___ section.
- *   2. Asserts the OLD broken mechanisms (?key= URL, setInWindow/ConvorConfig)
- *      are GONE from the source.
- *   3. Runs the template through a stubbed GTM sandbox and asserts:
- *      - injectScript is called with `<apiBase>/widget.js` (clean, no query).
- *      - callInWindow('Convor.init', { key: slug, ... }) fires.
- *      - gtmOnSuccess is reported.
- *   4. Reconstructs the canonical snippet from the captured URL + init key
- *      and asserts it matches canonical.
- *   5. Regression guard: empty slug must NOT inject (fails safe).
+ * This test extracts and executes the real sandboxed template code, then
+ * asserts observable GTM behavior:
+ *   1. injectScript receives `<apiBase>/widget.js` (clean, no query).
+ *   2. callInWindow('Convor.init', { key: slug, ... }) fires.
+ *   3. gtmOnSuccess is reported.
+ *   4. The captured URL + key form the canonical embed contract.
+ *   5. Empty slug must NOT inject (fails safe).
  */
 
 const { readFileSync } = require("node:fs");
@@ -69,43 +65,7 @@ async function main() {
   const tpl = readFileSync(TPL_PATH, "utf8");
   const js = extractSandboxedJs(tpl);
 
-  // --- 1. The OLD broken delivery mechanisms must be GONE from the code. ---
-  // (Strip comments first so explanatory mentions of "?key=" in prose don't
-  // trip the assertions.)
-  const codeOnly = js
-    .replace(/\/\*[\s\S]*?\*\//g, " ")
-    .replace(/\/\/[^\n]*/g, "");
-
-  assert.doesNotMatch(
-    codeOnly,
-    /['"`][^'"`]*widget\.js\?[^'"`]*/,
-    "template must NOT build a widget.js URL with a query string (the widget ignores ?key=)",
-  );
-  assert.doesNotMatch(
-    codeOnly,
-    /setInWindow/,
-    "template must NOT call setInWindow",
-  );
-  assert.doesNotMatch(
-    codeOnly,
-    /ConvorConfig/,
-    "template must NOT reference ConvorConfig",
-  );
-  assert.match(
-    codeOnly,
-    /callInWindow\s*\(\s*['"]Convor\.init['"]/,
-    "template must call window.Convor.init via callInWindow",
-  );
-  assert.match(
-    codeOnly,
-    /injectScript\s*\(\s*\w+\s*,\s*\w+\s*,\s*\w+/,
-    "template must call injectScript(url, onSuccess, onFailure)",
-  );
-  console.log(
-    "PASS: broken mechanisms removed (?key=, ConvorConfig) — now uses injectScript + Convor.init",
-  );
-
-  // --- 2. Run the template in the stubbed sandbox. ---
+  // --- 1. Run the real template in the stubbed sandbox. ---
   // Simulate the page state AFTER widget.js loads: Convor.init is registered.
   // The sandbox's injectScript merges that in and fires
   // onSuccess inline, so the template's callInWindow runs in the same tick.
@@ -129,7 +89,7 @@ async function main() {
   );
   const calls = sandbox.run(js);
 
-  // --- 3. Assert the behaviour. ---
+  // --- 2. Assert the behaviour. ---
   assert.equal(
     calls.injectScript.length,
     1,
@@ -160,7 +120,7 @@ async function main() {
     `PASS: injectScript("${inj.url}") → Convor.init({ key: "${initArg.key}", … }) → gtmOnSuccess`,
   );
 
-  // --- 4. Reconstruct the canonical snippet from the captured URL + key. ---
+  // --- 3. Reconstruct the canonical snippet from the captured URL + key. ---
   // The template emits a load+init behaviour rather than HTML; the semantic
   // equivalent, as a snippet, is the canonical tag — build it from what the
   // template actually did and assert it matches canonical.
@@ -173,7 +133,7 @@ async function main() {
     `PASS: behaviour-equivalent snippet matches canonical (${tag.trim().replace(/\s+/g, " ")})`,
   );
 
-  // --- 5. Empty-slug regression guard: must fail safe, not load keyless. ---
+  // --- 4. Empty-slug regression guard: must fail safe, not load keyless. ---
   const badCalls = makeSandbox(
     {
       orgSlug: "   ",

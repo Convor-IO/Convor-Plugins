@@ -70,6 +70,27 @@ settings** — they create drift.
    strings of their own to localize (the widget's strings are owned by the SaaS
    i18n packages).
 
+### Test quality
+
+- Test the behavior customers actually receive: generated embed tags, SDK/API
+  calls, idempotency, platform callbacks, and built/runtime integration.
+- Do not assert hard-coded CSS/class tokens or copy static class lists from UI
+  source. Runtime classes may be asserted only when the class transition is the
+  behavior and no semantic state is available.
+- Do not read plugin/SDK source and regex for implementation tokens when the
+  real code can be imported, built, served, or executed. Do not manually
+  reproduce a production transform in a helper and test that duplicate instead
+  of the production path.
+- Documentation wording and repository layout are not runtime tests. Put
+  source/docs synchronization rules in dedicated validators when they are
+  genuinely required.
+- Shipped artifacts are a deliberate exception when their structure is the
+  external contract: browser-extension manifests, importable platform
+  templates, and copy/paste embed snippets may be parsed and validated. Assert
+  the platform contract, not incidental formatting or source-code mechanics.
+- Avoid tautologies, mock-only tests, redundant cases, and snapshots/exact
+  markup with no stable external contract.
+
 ### Repo-specific
 
 - **Biome** for lint/format on TS packages (mirrors the broader Convor

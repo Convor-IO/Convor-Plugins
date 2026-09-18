@@ -1,15 +1,12 @@
 /**
  * Browser extension integration test.
  *
- * Can't load the unpacked extension into Chrome here, so this does static +
- * structural + DOM-level validation:
+ * Can't load the unpacked extension into Chrome here, so this validates the
+ * externally consumed package and executes the built content script:
  *
- *   1. manifest.json — assert MV3, service_worker background, action popup,
- *      and permissions include scripting + storage.
- *   2. content-script source — assert it builds `<apiBase>/widget.js` and
- *      sets data-key (NOT ?key= / window global).
- *   3. Build (pnpm build) and confirm dist/ files exist.
- *   4. Load dist/content-script.js in jsdom, call injectConvorWidget, and
+ *   1. manifest.json — assert the required MV3 platform contract.
+ *   2. Build (pnpm build) and confirm required dist/ entry points exist.
+ *   3. Load dist/content-script.js in jsdom, call injectConvorWidget, and
  *      assert the injected <script> tag matches canonical — plus idempotency.
  *
  * The content-script is bundled as an IIFE that attaches its export to an
@@ -62,28 +59,7 @@ async function main() {
     `PASS: manifest is MV3, has service_worker + default_popup, permissions [${perms.join(", ")}]`,
   );
 
-  // --- 2. content-script source inspection ---
-  const src = readFileSync(join(EXT_DIR, "src", "content-script.ts"), "utf8");
-  assert.match(
-    src,
-    /`\$\{base\}\/widget\.js`/,
-    "content-script must build <apiBase>/widget.js",
-  );
-  assert.match(
-    src,
-    /setAttribute\(\s*["']data-key["']/,
-    "content-script must set the data-key attribute",
-  );
-  assert.doesNotMatch(
-    src,
-    /injectConvorWidget[^;]*\?key=/,
-    "content-script must not pass ?key= on the widget URL",
-  );
-  console.log(
-    "PASS: content-script builds <apiBase>/widget.js and sets data-key",
-  );
-
-  // --- 3. build dist/ ---
+  // --- 2. build dist/ ---
   execFileSync("pnpm", ["build"], {
     cwd: EXT_DIR,
     stdio: ["ignore", "pipe", "pipe"],
@@ -100,7 +76,7 @@ async function main() {
     "PASS: pnpm build produced dist/{background,content-script,popup,options}.js",
   );
 
-  // --- 4. jsdom DOM test ---
+  // --- 3. jsdom DOM test ---
   const built = readFileSync(join(DIST_DIR, "content-script.js"), "utf8");
   const dom = new JSDOM(
     "<!DOCTYPE html><html><head></head><body></body></html>",

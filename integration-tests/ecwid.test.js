@@ -1,5 +1,5 @@
 const { spawn } = require("node:child_process");
-const { existsSync, mkdtempSync, readFileSync } = require("node:fs");
+const { existsSync, mkdtempSync } = require("node:fs");
 const { tmpdir } = require("node:os");
 const { join } = require("node:path");
 const http = require("node:http");
@@ -79,21 +79,10 @@ function get(port, path) {
 }
 
 // ---------------------------------------------------------------------------
-// 1. JSDOM test of the storefront loader.
+// Execute the JavaScript returned by the real /storefront.js route in JSDOM.
 // ---------------------------------------------------------------------------
 
-/**
- * Reproduce what the Fastify /storefront.js handler does: read the source
- * file and bake in the appId by replacing the first occurrence of the
- * placeholder with JSON.stringify(appId). This mirrors src/index.ts exactly.
- */
-function buildServedStorefrontJs(appId) {
-  const src = readFileSync(join(ECWID_DIR, "public/storefront.js"), "utf8");
-  return src.replace("window.__CONVOR_ECWID_APP_ID__", JSON.stringify(appId));
-}
-
-function runStorefrontInJsdom(appId, publicConfig) {
-  const js = buildServedStorefrontJs(appId);
+function runStorefrontInJsdom(js, appId, publicConfig) {
   const dom = new JSDOM(
     "<!DOCTYPE html><html><head></head><body></body></html>",
     {
@@ -200,28 +189,7 @@ async function main() {
     return;
   }
 
-  // --- 1. Storefront loader (JSDOM) ---
   const publicConfig = JSON.stringify({ slug: SLUG, apiBase: API_BASE });
-  let injectedTag;
-  try {
-    injectedTag = runStorefrontInJsdom(APP_ID, publicConfig);
-  } catch (err) {
-    fail(`storefront JSDOM test failed: ${err.message}`);
-    return;
-  }
-  if (!injectedTag) {
-    fail("storefront loader did not inject a Convor widget <script> tag");
-    return;
-  }
-  try {
-    assertSnippetMatches(injectedTag, { apiBase: API_BASE, slug: SLUG });
-  } catch (err) {
-    fail(`storefront snippet assertion failed: ${err.message}`);
-    return;
-  }
-  console.log(`✅ PASS ecwid/storefront.js inject -> ${injectedTag}`);
-
-  // --- 2. Boot + HTTP smoke ---
   const port = await freePort();
   // Ensure a writable DATA_DIR exists (the app defaults to ./data).
   mkdtempSync(join(tmpdir(), "convor-ecwid-"));
@@ -273,6 +241,29 @@ async function main() {
       console.log(
         `✅ PASS ecwid GET /storefront.js -> HTTP ${sf.status} (${sf.headers["content-type"]}, ${sf.body.length} bytes)`,
       );
+
+      let injectedTag;
+      try {
+        injectedTag = runStorefrontInJsdom(sf.body, APP_ID, publicConfig);
+      } catch (err) {
+        fail(`served storefront JSDOM execution failed: ${err.message}`);
+        allOk = false;
+      }
+
+      if (!injectedTag) {
+        fail("served storefront did not inject a Convor widget <script> tag");
+        allOk = false;
+      } else {
+        try {
+          assertSnippetMatches(injectedTag, { apiBase: API_BASE, slug: SLUG });
+          console.log(
+            `✅ PASS served ecwid/storefront.js inject -> ${injectedTag}`,
+          );
+        } catch (err) {
+          fail(`served storefront snippet assertion failed: ${err.message}`);
+          allOk = false;
+        }
+      }
     }
 
     const root = await get(port, "/");

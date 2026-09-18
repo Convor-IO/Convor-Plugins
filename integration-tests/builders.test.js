@@ -2,16 +2,14 @@
  * Builders integration test.
  *
  * Each website-builder package (webflow, framer, squarespace, duda) ships a
- * `snippet.html` the merchant pastes into their builder's "custom code" box,
- * plus a README documenting the same snippet. Both must carry the canonical
- * Convor widget tag:
+ * `snippet.html` the merchant pastes into their builder's "custom code" box.
+ * The shipped snippet must carry the canonical Convor widget tag:
  *
  *   <script src="<apiBase>/widget.js" data-key="<slug>" async></script>
  *
  * The snippet ships with a YOUR_ORG_SLUG placeholder; we substitute `acme`
- * and assert the result matches canonical. The README keeps the placeholder
- * (that's what the merchant copies) so we assert it matches with slug
- * `YOUR_ORG_SLUG`.
+ * and assert the actual customer-facing artifact matches the canonical embed
+ * contract. Documentation prose is intentionally not duplicated into tests.
  */
 
 const { readFileSync } = require("node:fs");
@@ -41,16 +39,8 @@ async function main() {
     });
     assert.ok(tag, `${builder}: assertSnippetMatches returned no tag`);
 
-    // README must document the canonical snippet (with the placeholder).
-    const readmePath = join(dir, "README.md");
-    const readme = readFileSync(readmePath, "utf8");
-    assertSnippetMatches(readme, {
-      apiBase: API_BASE,
-      slug: "YOUR_ORG_SLUG",
-    });
-
     console.log(
-      `PASS: ${builder} snippet.html + README match canonical (${tag.trim().replace(/\s+/g, " ")})`,
+      `PASS: ${builder} snippet.html matches canonical (${tag.trim().replace(/\s+/g, " ")})`,
     );
   }
 
