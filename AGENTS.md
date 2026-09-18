@@ -72,24 +72,32 @@ settings** — they create drift.
 
 ### Test quality
 
-- Test the behavior customers actually receive: generated embed tags, SDK/API
-  calls, idempotency, platform callbacks, and built/runtime integration.
-- Do not assert hard-coded CSS/class tokens or copy static class lists from UI
-  source. Runtime classes may be asserted only when the class transition is the
-  behavior and no semantic state is available.
-- Do not read plugin/SDK source and regex for implementation tokens when the
-  real code can be imported, built, served, or executed. Do not manually
-  reproduce a production transform in a helper and test that duplicate instead
-  of the production path.
-- Documentation wording and repository layout are not runtime tests. Put
-  source/docs synchronization rules in dedicated validators when they are
-  genuinely required.
-- Shipped artifacts are a deliberate exception when their structure is the
-  external contract: browser-extension manifests, importable platform
-  templates, and copy/paste embed snippets may be parsed and validated. Assert
-  the platform contract, not incidental formatting or source-code mechanics.
-- Avoid tautologies, mock-only tests, redundant cases, and snapshots/exact
-  markup with no stable external contract.
+Tests MUST verify behavior and supported contracts, not implementation details.
+
+- NEVER assert static Tailwind/CSS classes, exact markup, or incidental DOM
+  structure.
+- NEVER read tracked source, config, workflows, docs, migrations, or generated
+  files just to grep/regex literal implementation details.
+- NEVER assert current file/route/guide counts, filenames, ordering, or
+  repository layout unless they are an external contract.
+- NEVER test exact documentation wording.
+- NEVER copy production algorithms, parsers, transforms, formatters, or
+  matchers into tests.
+- NEVER modify tracked repository files during tests and restore them
+  afterward. Use in-memory or temporary fixtures.
+- REMOVE mock-only tests, tautologies, and duplicate tests that prove no
+  additional contract.
+- AVOID snapshots and exact-output assertions unless the exact output is
+  externally consumed and intentionally stable.
+- Prefer tests that fail when behavior, accessibility, state, data flow,
+  persistence, networking, or public API contracts break.
+- If a repository invariant matters but is not runtime behavior, enforce it
+  with a dedicated validator/lint script instead of a unit test.
+
+Shipped artifacts are a deliberate exception when their structure is the
+external contract: browser-extension manifests, importable platform templates,
+and copy/paste embed snippets may be parsed and validated. Assert the external
+platform contract, not incidental formatting or implementation mechanics.
 
 ### Repo-specific
 
