@@ -1,5 +1,9 @@
 # Convor-Plugins — Agent Knowledge Base
 
+## Push policy (workspace-wide)
+
+After implementation, review, and required checks are complete, check the current repository's CI/CD state. If no CI/CD run is active, merge the reviewed change into the repository's default branch and push it immediately; no separate user approval is required. If a CI/CD run is active, wait for it to finish successfully before pushing. Explicit user instructions to stop, wait, or not push override this rule. Never push a worktree/feature branch unless explicitly requested; push the default branch. This rule supersedes older wording that requires separate merge/push approval.
+
 This repo holds installable plugins and SDKs that embed the Convor live-chat
 widget on third-party platforms. It's composed into `convor-dev` as a
 submodule at `plugins/`.
