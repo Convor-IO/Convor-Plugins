@@ -46,10 +46,9 @@ updates:
       default-days: 2
       semver-major-days: 7
     groups:
-      react:
-        patterns: ["react", "react-dom", "@types/react", "@types/react-dom"]
-      testing:
-        patterns: ["@playwright/*", "playwright", "vitest", "@vitest/*"]
+      routine-dependencies:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   # ── npm (npm-locked platform subdirs) ──────────────────────────────────
   # Each of these ships its own package-lock.json and is NOT part of the pnpm
@@ -67,8 +66,9 @@ updates:
       default-days: 2
       semver-major-days: 7
     groups:
-      fastify:
-        patterns: ["fastify", "@fastify/*"]
+      routine-dependencies:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: "npm"
     directory: "/ecwid"
@@ -83,8 +83,9 @@ updates:
       default-days: 2
       semver-major-days: 7
     groups:
-      fastify:
-        patterns: ["fastify", "@fastify/*"]
+      routine-dependencies:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: "npm"
     directory: "/integration-tests"
@@ -97,6 +98,10 @@ updates:
     cooldown:
       default-days: 2
       semver-major-days: 7
+    groups:
+      routine-dependencies:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   # ── GitHub Actions ─────────────────────────────────────────────────────
   # No .github/workflows yet — this block is a no-op until CI is added, at
@@ -107,6 +112,10 @@ updates:
       interval: "weekly"
       day: "tuesday"
     open-pull-requests-limit: 10
+    groups:
+      routine-actions:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
     commit-message:
       prefix: "chore(ci)"
 
