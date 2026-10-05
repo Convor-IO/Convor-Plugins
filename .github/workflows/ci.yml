@@ -11,7 +11,10 @@ permissions:
 
 jobs:
   gate:
-    runs-on: self-hosted
+    # Plugin validation is hermetic and does not need Docker or private host
+    # services. Keep it on GitHub-hosted capacity so dependency PRs can still
+    # validate when the shared self-hosted machine is offline.
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
       - name: Checkout
@@ -29,21 +32,8 @@ jobs:
           node-version: 22
           cache: pnpm
 
-      - name: Acquire shared CI host lock
-        uses: ./.github/actions/ci-host-lock
-        with:
-          mode: acquire
-          owner: ${{ github.run_id }}:${{ github.job }}
-
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
       - name: Gate
         run: pnpm gate
-
-      - name: Release shared CI host lock
-        if: always()
-        uses: ./.github/actions/ci-host-lock
-        with:
-          mode: release
-          owner: ${{ github.run_id }}:${{ github.job }}
