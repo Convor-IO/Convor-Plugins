@@ -35,10 +35,5 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # widget-react resolves widget-sdk through its package exports, which point
-      # at dist/. A clean runner has no local dist artifacts until the SDK is built.
-      - name: Build workspace packages
-        run: pnpm -r --if-present build
-
       - name: Gate
         run: pnpm gate
