@@ -35,9 +35,13 @@ jobs:
       - name: Install workspace dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install integration-test dependencies
-        working-directory: integration-tests
-        run: npm ci
+      - name: Install standalone plugin dependencies
+        shell: bash
+        run: |
+          npm ci --prefix integration-tests
+          npm ci --prefix bigcommerce
+          npm ci --prefix ecwid
+          pnpm --dir browser-extension install --frozen-lockfile
 
       - name: Gate
         run: pnpm gate
