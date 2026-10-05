@@ -3,8 +3,9 @@
 #
 # Coverage:
 #   npm            — root pnpm-lock.yaml (packages/* + segment workspace)
-#                    + three npm-locked platform subdirs that carry their own
-#                      package-lock.json: /bigcommerce, /ecwid, /integration-tests
+#                    + standalone platform/test directories: /bigcommerce,
+#                      /ecwid, /integration-tests (bigcommerce + integration-tests
+#                      carry package-lock.json; ecwid is package.json-only)
 #   github-actions — .github/workflows/*.yml (no workflows yet; block is in
 #                    place so bumps are proposed as soon as CI lands)
 #   docker-compose — integration-test fixture stacks under
@@ -50,9 +51,10 @@ updates:
         patterns: ["*"]
         update-types: ["minor", "patch"]
 
-  # ── npm (npm-locked platform subdirs) ──────────────────────────────────
-  # Each of these ships its own package-lock.json and is NOT part of the pnpm
-  # workspace, so each needs a dedicated entry. Same schedule/prefix as root.
+  # ── npm (standalone platform/test directories) ─────────────────────────
+  # These are outside the pnpm workspace, so each needs a dedicated entry.
+  # bigcommerce + integration-tests carry package-lock.json; ecwid currently
+  # has package.json only. Same schedule/prefix as root.
   - package-ecosystem: "npm"
     directory: "/bigcommerce"
     schedule:
