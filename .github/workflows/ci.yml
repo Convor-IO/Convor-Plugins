@@ -40,7 +40,7 @@ jobs:
         run: |
           npm ci --prefix integration-tests
           npm ci --prefix bigcommerce
-          npm ci --prefix ecwid
+          npm install --prefix ecwid --no-package-lock --no-audit --no-fund
           pnpm --dir browser-extension install --frozen-lockfile
 
       - name: Gate
