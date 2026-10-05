@@ -167,7 +167,11 @@ function bootServer(port) {
     FASTIFY_LOG_LEVEL: "error",
   };
   return new Promise((resolve, reject) => {
-    const child = spawn("npx", ["tsx", "src/index.ts"], {
+    // Spawn the real Node process directly. Using `npx tsx` leaves a child
+    // server process behind when the npx wrapper is terminated, which keeps
+    // stdout/stderr pipes open and makes the integration runner hang until the
+    // CI job timeout. Node 22 can preload tsx without an intermediary wrapper.
+    const child = spawn(process.execPath, ["--import", "tsx", "src/index.ts"], {
       cwd: BC_DIR,
       env,
       stdio: ["ignore", "pipe", "pipe"],
