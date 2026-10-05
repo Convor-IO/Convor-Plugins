@@ -6,8 +6,6 @@
 #                    + standalone platform/test directories: /bigcommerce,
 #                      /ecwid, /integration-tests (bigcommerce + integration-tests
 #                      carry package-lock.json; ecwid is package.json-only)
-#   github-actions — .github/workflows/*.yml (no workflows yet; block is in
-#                    place so bumps are proposed as soon as CI lands)
 #   docker-compose — integration-test fixture stacks under
 #                    /integration-tests/fixtures/<platform>/docker-compose.yml
 #                    (wordpress, drupal, joomla, magento, opencart, prestashop)
@@ -104,22 +102,6 @@ updates:
       routine-dependencies:
         patterns: ["*"]
         update-types: ["minor", "patch"]
-
-  # ── GitHub Actions ─────────────────────────────────────────────────────
-  # No .github/workflows yet — this block is a no-op until CI is added, at
-  # which point it will pick up pinned actions automatically. Schedule: Tue.
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "tuesday"
-    open-pull-requests-limit: 10
-    groups:
-      routine-actions:
-        patterns: ["*"]
-        update-types: ["minor", "patch"]
-    commit-message:
-      prefix: "chore(ci)"
 
   # ── Docker Compose (integration-test fixtures) ─────────────────────────
   # Six platform fixture stacks, each its own docker-compose.yml. One entry
