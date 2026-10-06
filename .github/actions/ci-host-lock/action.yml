@@ -1,0 +1,49 @@
+name: Shared CI host lock
+description: Serialize CPU-heavy jobs across repositories sharing one self-hosted machine.
+inputs:
+  mode:
+    description: acquire or release
+    required: true
+  owner:
+    description: Unique owner token for this job
+    required: true
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      env:
+        CI_HOST_LOCK_MODE: ${{ inputs.mode }}
+        CI_HOST_LOCK_OWNER: ${{ inputs.owner }}
+      run: |
+        set -euo pipefail
+        lock_dir="/tmp/convor-ci-global.lock"
+        owner_file="$lock_dir/owner"
+        stale_after_seconds=$((6 * 60 * 60))
+
+        if [ "$CI_HOST_LOCK_MODE" = "release" ]; then
+          if [ -f "$owner_file" ] && [ "$(cat "$owner_file")" = "$CI_HOST_LOCK_OWNER" ]; then
+            rm -rf "$lock_dir"
+            echo "Released shared CI host lock"
+          fi
+          exit 0
+        fi
+
+        if [ "$CI_HOST_LOCK_MODE" != "acquire" ]; then
+          echo "Unsupported mode: $CI_HOST_LOCK_MODE" >&2
+          exit 2
+        fi
+
+        echo "Waiting for shared CI host capacity..."
+        while ! mkdir "$lock_dir" 2>/dev/null; do
+          now=$(date +%s)
+          mtime=$(stat -c %Y "$lock_dir" 2>/dev/null || echo "$now")
+          if [ $((now - mtime)) -gt "$stale_after_seconds" ]; then
+            echo "Recovering stale CI host lock older than 6 hours"
+            rm -rf "$lock_dir"
+            continue
+          fi
+          sleep 5
+        done
+
+        printf '%s\n' "$CI_HOST_LOCK_OWNER" > "$owner_file"
+        echo "Acquired shared CI host lock"
