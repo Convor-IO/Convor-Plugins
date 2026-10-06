@@ -148,7 +148,9 @@ function executeLoaderWrapper(html) {
     throw new Error("loader wrapper did not append the widget script");
   }
   const asyncAttr = widgetScript.async ? " async" : "";
-  return `<script src="${widgetScript.src}" data-key="${widgetScript.getAttribute("data-key")}"${asyncAttr}></script>`;
+  const rendered = `<script src="${widgetScript.src}" data-key="${widgetScript.getAttribute("data-key")}"${asyncAttr}></script>`;
+  dom.window.close();
+  return rendered;
 }
 
 // ---------------------------------------------------------------------------
@@ -194,17 +196,27 @@ function bootServer(port) {
       stop: () =>
         new Promise((res) => {
           child.removeAllListeners("close");
+          let settled = false;
+          let hardKillTimer;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            if (hardKillTimer) clearTimeout(hardKillTimer);
+            res();
+          };
+          child.once("close", finish);
           child.kill("SIGTERM");
-          child.on("close", () => res());
-          // Hard kill if it lingers.
-          setTimeout(() => {
+          // Hard kill if it lingers, but do not keep the parent test alive
+          // after the child has already exited cleanly.
+          hardKillTimer = setTimeout(() => {
             try {
               child.kill("SIGKILL");
             } catch {
               /* ignore */
             }
-            res();
+            finish();
           }, 3000);
+          hardKillTimer.unref();
         }),
     });
   });

@@ -124,7 +124,9 @@ function runStorefrontInJsdom(js, appId, publicConfig) {
   const src = convor.getAttribute("src");
   const dataKey = convor.getAttribute("data-key");
   const asyncAttr = convor.async ? " async" : "";
-  return `<script src="${src}" data-key="${dataKey}"${asyncAttr}></script>`;
+  const rendered = `<script src="${src}" data-key="${dataKey}"${asyncAttr}></script>`;
+  dom.window.close();
+  return rendered;
 }
 
 // ---------------------------------------------------------------------------
@@ -170,16 +172,25 @@ function bootServer(port) {
       stop: () =>
         new Promise((res) => {
           child.removeAllListeners("close");
+          let settled = false;
+          let hardKillTimer;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            if (hardKillTimer) clearTimeout(hardKillTimer);
+            res();
+          };
+          child.once("close", finish);
           child.kill("SIGTERM");
-          child.on("close", () => res());
-          setTimeout(() => {
+          hardKillTimer = setTimeout(() => {
             try {
               child.kill("SIGKILL");
             } catch {
               /* ignore */
             }
-            res();
+            finish();
           }, 3000);
+          hardKillTimer.unref();
         }),
     });
   });

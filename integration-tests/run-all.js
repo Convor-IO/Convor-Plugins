@@ -37,10 +37,17 @@ for (const name of tests) {
   console.log(`\n=== ${name} ===`);
   const res = spawnSync("node", [join(__dirname, `${name}.test.js`)], {
     stdio: "inherit",
+    timeout: 60_000,
+    killSignal: "SIGKILL",
   });
-  if (res.status !== 0) {
+  if (res.error || res.status !== 0) {
     failed++;
-    console.error(`✗ ${name} FAILED (exit ${res.status})`);
+    const reason = res.error
+      ? res.error.message
+      : res.signal
+        ? `signal ${res.signal}`
+        : `exit ${res.status}`;
+    console.error(`✗ ${name} FAILED (${reason})`);
   } else {
     console.log(`✓ ${name} PASSED`);
   }
