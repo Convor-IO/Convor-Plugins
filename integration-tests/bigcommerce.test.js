@@ -148,7 +148,9 @@ function executeLoaderWrapper(html) {
     throw new Error("loader wrapper did not append the widget script");
   }
   const asyncAttr = widgetScript.async ? " async" : "";
-  return `<script src="${widgetScript.src}" data-key="${widgetScript.getAttribute("data-key")}"${asyncAttr}></script>`;
+  const rendered = `<script src="${widgetScript.src}" data-key="${widgetScript.getAttribute("data-key")}"${asyncAttr}></script>`;
+  dom.window.close();
+  return rendered;
 }
 
 // ---------------------------------------------------------------------------
@@ -167,7 +169,11 @@ function bootServer(port) {
     FASTIFY_LOG_LEVEL: "error",
   };
   return new Promise((resolve, reject) => {
-    const child = spawn("npx", ["tsx", "src/index.ts"], {
+    // Spawn the real Node process directly. Using `npx tsx` leaves a child
+    // server process behind when the npx wrapper is terminated, which keeps
+    // stdout/stderr pipes open and makes the integration runner hang until the
+    // CI job timeout. Node 22 can preload tsx without an intermediary wrapper.
+    const child = spawn(process.execPath, ["--import", "tsx", "src/index.ts"], {
       cwd: BC_DIR,
       env,
       stdio: ["ignore", "pipe", "pipe"],
@@ -190,17 +196,27 @@ function bootServer(port) {
       stop: () =>
         new Promise((res) => {
           child.removeAllListeners("close");
+          let settled = false;
+          let hardKillTimer;
+          const finish = () => {
+            if (settled) return;
+            settled = true;
+            if (hardKillTimer) clearTimeout(hardKillTimer);
+            res();
+          };
+          child.once("close", finish);
           child.kill("SIGTERM");
-          child.on("close", () => res());
-          // Hard kill if it lingers.
-          setTimeout(() => {
+          // Hard kill if it lingers, but do not keep the parent test alive
+          // after the child has already exited cleanly.
+          hardKillTimer = setTimeout(() => {
             try {
               child.kill("SIGKILL");
             } catch {
               /* ignore */
             }
-            res();
+            finish();
           }, 3000);
+          hardKillTimer.unref();
         }),
     });
   });
