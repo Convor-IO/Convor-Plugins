@@ -24,3 +24,4 @@ integration-tests/playwright-report/
 
 # Local git worktrees (project-local .worktrees/) — never commit
 .worktrees/
+**/.devspace/
