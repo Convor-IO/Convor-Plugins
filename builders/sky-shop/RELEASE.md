@@ -111,7 +111,9 @@ PASS or FAIL and observed evidence for each storefront case when it runs.
 | 2026-11-24 | Cart entry | BLOCKED. Available sample product controls did not yield an actionable add-to-cart path in the browser. No order was placed. |
 | 2026-11-24 | Block the CDN loader in the shopper browser | PASS. The storefront and product link remained available, with no Convor iframe after the script was blocked. |
 | 2026-11-24 | Platform announcement banner on Sky-Shop | FAIL in production. The storefront's request to `GET /api/banner` returned HTTP 200 without `Access-Control-Allow-Origin` and the browser rejected it. The widget config and visitor token each returned HTTP 200 with the expected origin. A route-only Convor Server fix passed 30 maintenance and CORS tests locally. The production endpoint still needs deployment and a new browser check. |
-| 2026-11-24 | Two-way conversation in automated Chromium | BLOCKED. Convor's tracking endpoint returned HTTP 200 with an automated-client rejection. The host received `api-unavailable` after `iframe-ready`. The test requires a shopper in a regular browser. |
+| 2026-11-24 | Two-way conversation in automated Chromium | BLOCKED. Convor's tracking endpoint returned HTTP 200 with an automated-client rejection. The host received `api-unavailable` after `iframe-ready`. This result applies to automated Chromium. The regular Chrome run below used the live shopper flow. |
+| 2026-11-24 | Live two-way conversation, refresh and session isolation | PASS in regular Chrome on the published trial. The shopper message and operator reply both returned HTTP 201 from the live backend. The shopper received the reply and both messages persisted after refresh. A second browser context opened an independent conversation without either message. The same thread was visible at a 390 px mobile viewport. |
+| 2026-11-24 | Native Sky-Shop consent refusal with direct HEAD embed | FAIL for installations that require opt-in. The loader was present before consent. After clicking Wyłącz wszystkie in a fresh session, the loader and chat launcher remained active. Configure and verify consent gating separately when it is required. |
 | 2026-11-24 | Contact data in the trial storefront | PASS after clearing the public phone fields in shop data and Schema settings. Independent browser requests to Home and Contact returned 200 without the submitted number in HTML. |
 | 2026-11-24 | Uninstall and restore on the technical hostname | PASS for removal. Saved the empty global HEAD field and a cache-busted storefront request returned HTTP 200 with no Convor loader. Reapplied the original site snippet. Sky-Shop confirmed `{"success":true}` and separate public requests to Home, Category and Product showed one loader each. |
 | 2026-11-24 | Actual administrator screen | PASS. Checked the Polish `Integracje → Własny kod JavaScript/HTML/CSS → W nagłówku <HEAD>` path and verified the redacted screenshot and zoom in both localized guides. |
@@ -120,18 +122,16 @@ The remaining storefront cases below still require recorded outcomes.
 
 | Case | Evidence to collect |
 | --- | --- |
-| Client message and operator reply | Real request statuses, message in the selected Convor inbox, reply delivered to the storefront |
-| Reload and separate visitor | First visitor retains their conversation after refresh; second visitor sees only their own session |
 | Homepage, category, product, search and cart | A separate URL and result for every page, including interaction with the launcher |
 | Checkout and confirmation | Page-by-page result on a test order, including any platform restrictions and interference with payment controls |
 | Desktop, mobile and two themes | Captures and interaction checks per theme and viewport |
 | Custom hostname and domain change | Correct allowed-domain behavior on both hostnames and the same conversation flow on the custom domain |
-| Consent, refusal and revocation | Fresh-session network traces and CMP configuration for all three paths |
+| Consent-gated installation and revocation | Fresh-session traces with a configured consent manager. The direct embed loads before consent and after refusal. |
 | Inactive site | Widget fails safely, with no private site or visitor data in the response |
 | CSP, unavailable CDN and script blockers | Browser diagnostics and a working storefront when the widget cannot load |
 | GTM conflict and duplicate embed | Observable request and launcher counts before and after keeping one installation method |
 | Customer and order data | Synthetic storefront order and no customer/order credential or record sent by the embed |
-| Guide and screenshots | Compare the exact panel labels with PL/EN docs and capture the required real storefront and inbox states |
+| Guide and screenshots | Save evidence of the remaining storefront and configuration cases alongside the live conversation captures. |
 
 Record the operator's formal submission reference after sending the reviewed
 QA package. Verify a public catalog URL before marking the listing published.
