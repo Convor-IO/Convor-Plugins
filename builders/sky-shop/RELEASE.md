@@ -1,10 +1,25 @@
 # Sky-Shop launch and partner handoff
 
-This is **not** evidence of a native Sky-Shop app being published. Convor's
-existing browser widget is installed through Sky-Shop's global script field.
-Sky-Shop's official directory and any native install UI are controlled by
-Sky-Shop. Keep the marketplace submission status as **unsubmitted** until
-a platform ticket or written response exists.
+Convor uses Sky-Shop's global script field for manual installation. Sky-Shop
+owns the directory and any native installation screen. Verify directory status
+against the operator's response and the public catalog.
+
+## Operator contact and access
+
+| Date | Action | Observed result |
+| --- | --- | --- |
+| 2026-11-24 | Sign in with the credentials from the earlier trial attempt | HTTP 401. The sign-in message covers both an unknown email and an incorrect password. |
+| 2026-11-24 | Submit one free-trial request as `integrations@convor.io` | The registration UI sent `POST /order/` and received HTTP 302 with an HTML content type. The client reported a JSON parse error. The reason for the redirect is unconfirmed. |
+| 2026-11-24 | Sign in with the new trial credentials and check the integrations mailbox | HTTP 401 and no Sky-Shop activation message in Inbox or Junk at the time of the check. No administrator access. The credential is in Vaultwarden. |
+| 2026-11-24 | Ask the operator to check account provisioning, provide an admin QA store, and explain directory requirements | Email accepted by the sending mail server. Message ID `sky-shop-convor-1809-20261124@convor.io`. Awaiting operator response. |
+
+Sky-Shop documents [a free trial and a partner test store](https://sky-shop.pl/program-partnerski/).
+The [public catalog](https://sky-shop.pl/integracje-pozostale/) lists live-chat
+integrations such as [SmartSupp](https://sky-shop.pl/integracja-z-smartsupp/).
+Convor's formal listing submission follows storefront QA. Sky-Shop has yet to
+confirm the required materials, fees, agreement, review schedule, or support
+for a dedicated public-key field. See [Convor #1809](https://github.com/Convor-IO/Convor/issues/1809)
+for the contact history.
 
 ## Submission package for Sky-Shop
 
@@ -75,23 +90,32 @@ company details.** Do not send the inquiry from an unrelated personal account.
 
 ## Real-world QA ledger
 
-Use exactly one actual Sky-Shop merchant account. Record only a non-sensitive
-test domain; put passwords in the team vault. Enter observed results into issue
-[Convor #1809](https://github.com/Convor-IO/Convor/issues/1809).
+Use a real Sky-Shop merchant test account and synthetic customer and order data.
+Record only public test URLs and redacted evidence in
+[Convor #1809](https://github.com/Convor-IO/Convor/issues/1809). Keep credentials
+in the vault. Save status codes and console events with keys, tokens and
+customer data removed.
 
-| Case | Expected | Evidence to attach |
-| --- | --- | --- |
-| New installation on technical hostname | Exactly one Convor script, real two-way conversation in selected site | Redacted Network/Console and storefront/inbox screenshot |
-| Custom shop hostname | Allowed domain, same result after domain switch | Config and network statuses, no keys |
-| Storefront pages | Homepage, category, product, search, cart, checkout and thank-you tested individually | Actual URLs and PASS/FAIL; disclose Sky-Shop script restrictions |
-| Desktop/mobile and themes | Launcher usable without blocking payment controls | Redacted 1440px and 390px screenshots across 2 themes |
-| Consent | No remote widget load on refusal, loads after permitted opt-in | Fresh-session network trace and CMP configuration |
-| Wrong key, blocked domain, network down | Safe failure and no customer data leakage | Negative assertions/network |
-| Duplicate GTM embed | Merchant informed to remove one installation; one final launcher | Script count |
-| Removal | Only Convor script removed, no requests after clearing cache | Public storefront network proof |
+The following cases were blocked on 2026-11-24 by missing test-store admin
+access. The access attempts above are the evidence for the blocked status.
+Record PASS or FAIL and the observed evidence after each case runs.
 
-**Owner approval or a working Sky-Shop trial/partner shop is required for the
-external QA and listing**. Code and local screenshot unit tests cannot replace
-those checks. Only tick submission/published after Sky-Shop returns a ticket or
-public listing URL, respectively. Do not infer publication from an outgoing
-message alone.
+| Case | Evidence to collect |
+| --- | --- |
+| Global HEAD install on Sky-Shop technical hostname | Selected Convor website, saved Sky-Shop field and one launcher on the published store |
+| Client message and operator reply | Real request statuses, message in the selected Convor inbox, reply delivered to the storefront |
+| Reload and separate visitor | First visitor retains their conversation after refresh; second visitor sees only their own session |
+| Homepage, category, product, search and cart | A separate URL and result for every page, including interaction with the launcher |
+| Checkout and confirmation | Page-by-page result on a test order, including any platform restrictions and interference with payment controls |
+| Desktop, mobile and two themes | Captures and interaction checks per theme and viewport |
+| Custom hostname and domain change | Correct allowed-domain behavior on both hostnames and the same conversation flow on the custom domain |
+| Consent, refusal and revocation | Fresh-session network traces and CMP configuration for all three paths |
+| Wrong key, inactive site and disallowed domain | Widget fails safely, with no private site or visitor data in the response |
+| CSP, unavailable CDN and script blockers | Browser diagnostics and a working storefront when the widget cannot load |
+| GTM conflict and duplicate embed | Observable request and launcher counts before and after keeping one installation method |
+| Customer and order data | Synthetic storefront order and no customer/order credential or record sent by the embed |
+| Removal | Save after deleting the Convor tag, then confirm no Convor requests on public pages after cache invalidation |
+| Guide and screenshots | Compare the exact panel labels with PL/EN docs and capture the required real storefront and inbox states |
+
+Record the operator's formal submission reference after sending the reviewed
+QA package. Verify a public catalog URL before marking the listing published.
