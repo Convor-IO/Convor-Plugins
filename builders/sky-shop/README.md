@@ -40,15 +40,35 @@ a placeholder from this README, the widget cannot initialize.
   **not** automatically give Convor access to Sky-Shop customers, orders,
   passwords, or cart details. Do not paste private Sky-Shop or Convor tokens
   in the global code field.
-- If your store requires cookie/third-party-script consent, arrange for your
-  consent manager to control when the Convor script loads. A static global
-  script loads immediately; Convor's widget settings alone do not turn a
-  Sky-Shop custom-script field into a consent-gated loader. Test both accept
-  and reject in a fresh visitor session. Check that withdrawing consent also
-  removes a widget that is already open. Update your privacy notice.
+- A direct embed loads when the page opens. If your store requires consent to
+  load chat, use the Sky-Shop popup setup below or connect your own consent
+  manager. Update your privacy notice.
 - The local browser, advertising blockers, content-security policies and
   Sky-Shop's own checkout restrictions can prevent display. Verify on the
   actual public domain, including mobile, before promoting the setup.
+
+## Use the Sky-Shop cookie popup
+
+1. In Sky-Shop, enable the popup under **Konfiguracja → Ustawienia sklepu →
+   Informacja o cookies**.
+2. Open [the consent snippet](./consent-snippet.html). Replace
+   `YOUR_WIDGET_KEY` with your site's public `convor_wpk_` key. If the code
+   copied from Convor contains `data-convor-verification`, keep it on the
+   same tag as `data-key`.
+3. Set `data-convor-sky-shop-category` to the popup category you use for Convor.
+   `analytics` corresponds to **Statystyczne** and `marketing` to
+   **Marketingowe**.
+4. Replace the direct Convor embed in **W nagłówku &lt;HEAD&gt;** with both tags
+   from the snippet. Leave the other scripts in place and save.
+5. Open the store in a private window. Refuse consent and check that Convor
+   stays hidden. Then grant consent, open the chat, and withdraw consent in
+   **Zgody cookies**. The chat closes in the current tab. Grant consent again
+   to confirm that the chat returns.
+
+This snippet reads the choice saved by the Sky-Shop popup on the current
+domain. It checks for updates while the page is open and when a tab becomes
+visible. If you use a different consent manager, connect its acceptance and
+withdrawal callbacks to the widget instead.
 
 ## Troubleshooting
 
@@ -63,14 +83,15 @@ a placeholder from this README, the widget cannot initialize.
 
 ## Remove or move the installation
 
-Delete **only** Convor's `<script ...widget.js ...>` tag from the global custom
-code field and save, leaving unrelated scripts intact. Clear cache and verify
-the storefront no longer requests Convor. Moving the shop to another domain
-requires updating the allowed-domain list.
+Delete the Convor tag from the global code field. If you used the cookie popup
+snippet, delete both of its script tags. Save and verify in a fresh storefront
+session that the browser no longer requests Convor. Update the allowed-domain
+list if you move the shop to another domain.
 
 ## Verified platform references
 
 - [Sky-Shop: custom HTML/JavaScript/CSS](https://sky-shop.pl/pomoc-faq/integracje/wlasny-kod-i-api/jak-dodac-wlasny-kod-html-javascript-css/)
+- [Sky-Shop: cookie popup settings](https://sky-shop.pl/pomoc-faq/konfiguracja/ustawienia-sklepu/jak-zarzadzac-informacja-o-plikach-cookies-w-sklepie/)
 - [Sky-Shop: LiveChat dedicated field (comparison)](https://sky-shop.pl/pomoc-faq/konfiguracja/jak-dodac-widget-livechat-na-strone-sklepu/)
 - [Smartsupp: Sky-Shop installation](https://help.smartsupp.com/en/articles/12647792-sky-shop)
 

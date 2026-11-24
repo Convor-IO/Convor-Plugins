@@ -30,6 +30,7 @@ const tests = [
   "gtm",
   "browser-extension",
   "builders",
+  "sky-shop-consent",
 ];
 
 let failed = 0;

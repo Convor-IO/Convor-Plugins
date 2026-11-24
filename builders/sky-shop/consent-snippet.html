@@ -1,0 +1,79 @@
+<!--
+  Use with the Sky-Shop cookie popup. Replace YOUR_WIDGET_KEY with the
+  public site key and choose analytics or marketing to match your popup.
+  Keep any data-convor-verification attribute from the Convor embed code.
+  This replaces the direct widget embed in W nagłówku <HEAD>.
+-->
+<script
+  type="text/plain"
+  src="https://cdn.convor.io/widget.js"
+  data-key="YOUR_WIDGET_KEY"
+  data-convor-sky-shop-category="analytics"
+></script>
+<script>
+  (() => {
+    const config = document.currentScript.previousElementSibling;
+    if (!config || config !== document.querySelector("script[data-convor-sky-shop-category]")) return;
+
+    const category = config.dataset.convorSkyShopCategory;
+    const key = config.dataset.key;
+    if (!["analytics", "marketing"].includes(category) || !key?.startsWith("convor_wpk_")) return;
+
+    let requested = false;
+    let active = false;
+    let widget;
+
+    function hasConsent() {
+      try {
+        const cookie = document.cookie.split(/;\s*/).find((part) => part.startsWith("cc_cookie="));
+        if (!cookie) return false;
+        const value = cookie.slice("cc_cookie=".length);
+        const { categories } = JSON.parse(value.startsWith("{") ? value : decodeURIComponent(value));
+        return Array.isArray(categories) && categories.includes(category);
+      } catch {
+        return false;
+      }
+    }
+
+    function syncConsent() {
+      if (!hasConsent()) {
+        if (active) {
+          active = false;
+          widget.destroy();
+        }
+        return;
+      }
+      if (active) return;
+      if (widget) {
+        active = true;
+        widget.init({ key, widgetUrl: new URL("widget-iframe.html", config.src).href }).catch(() => {});
+        return;
+      }
+      if (requested) return;
+
+      requested = true;
+      const loader = document.createElement("script");
+      loader.src = config.src;
+      loader.addEventListener("load", () => {
+        widget = window.Convor;
+        syncConsent();
+      }, { once: true });
+      document.head.append(loader);
+    }
+
+    function watchConsent() {
+      syncConsent();
+      // The Sky-Shop popup keeps its consent callbacks private. Read the
+      // current cookie so a withdrawal works in the same document.
+      window.setInterval(syncConsent, 500);
+      document.addEventListener("visibilitychange", syncConsent);
+      window.addEventListener("pageshow", syncConsent);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", watchConsent, { once: true });
+    } else {
+      watchConsent();
+    }
+  })();
+</script>
