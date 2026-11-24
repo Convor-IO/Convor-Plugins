@@ -65,37 +65,35 @@ lookup, conversion analytics, a native app, or one-click install.
 **Source files:** `builders/sky-shop/README.md`, `snippet.html` and
 Convor-Website `content/docs/integrations/sky-shop-integration*.mdx`.
 
-## Suggested partner inquiry (PL)
+## Follow-up for the account owner (PL)
 
-Temat: Convor w katalogu integracji Sky-Shop
+Odpowiedź w dotychczasowym wątku dotyczącym integracji Convor.
 
 Dzień dobry,
 
-rozwijamy Convor, narzędzie do obsługi rozmów z klientami sklepów internetowych.
-Przygotowaliśmy integrację czatu ze Sky-Shop za pomocą globalnego pola
-Integracje → Własny kod JavaScript/HTML/CSS, bez przekazywania kluczy WebAPI
-i bez dostępu do prywatnych zamówień. Chcielibyśmy doprowadzić tę integrację
-do oficjalnej dostępności dla klientów Sky-Shop.
+rejestracja udała się przy drugiej próbie. Mamy dostęp do sklepu testowego
+`pv333.mysky-shop.pl` i potwierdziliśmy, że czat Convor działa w obie strony.
+Kod instalujemy w globalnym polu JavaScript/HTML w panelu Sky-Shop.
 
-Prosimy o informację:
-1. Jaka jest procedura dodania Convor do oficjalnego katalogu integracji?
-   Czy jest możliwy natywny ekran z publicznym kluczem witryny zamiast ręcznego
-   wklejania JavaScript?
-2. Jakie są wymagania dotyczące testów, dokumentacji, bezpieczeństwa,
-   oznaczeń graficznych, cen i zgód na użycie logo Sky-Shop?
-3. Testujemy czat na aktywnym sklepie próbnym. Czy na potrzeby odbioru
-   i utrzymania integracji udostępniacie długoterminowy sklep testowy?
-4. Czy istnieje opłata, umowa partnerska lub proces przeglądu aplikacji?
+Sklep próbny wygasa 8 grudnia. Czy mogą Państwo przedłużyć jego ważność lub
+udostępnić sklep partnerski z możliwością podpięcia naszej domeny z HTTPS
+i aktywacji drugiego szablonu obok Flex? Jeśli taki dostęp wymaga zakupu,
+prosimy o najkrótszy dostępny okres, cenę oraz potwierdzenie, że obejmuje te
+dwie funkcje.
 
-Możemy dostarczyć polsko- i anglojęzyczną instrukcję oraz pełne wyniki testów
-instalacji i rozmowy z naszym systemem. Chętnie uzgodnimy najbardziej
-przyjazny proces instalacji dla użytkowników Sky-Shop.
+Chcemy też zgłosić ręczną instalację Convor do katalogu integracji. Prosimy
+o numer sprawy i kontakt do osoby, która prowadzi takie zgłoszenia, oraz
+o listę wymaganych materiałów, koszty, ewentualną umowę i przewidywany czas
+weryfikacji. Czy katalog może opisywać instalację w globalnym polu kodu?
+Jeśli przewidują Państwo także dedykowane pole na publiczny klucz Convor,
+chętnie poznamy warunki jego dodania.
 
 Zespół Convor
 https://convor.io
 
-**Send only after verifying live URLs, the appropriate sender identity and
-company details.** Do not send the inquiry from an unrelated personal account.
+The account owner sends this follow-up and any subsequent submission. The manual
+Convor release requires full technical acceptance, including the real order
+confirmation screen. The external listing has its own approval and public URL.
 
 ## Real-world QA ledger
 
