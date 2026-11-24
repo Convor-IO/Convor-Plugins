@@ -4,8 +4,10 @@
   Paste this entire block into:
     Site Settings → Custom Code → End of <body> tag
 
-  Replace YOUR_ORG_SLUG with your organization's public slug from the Convor
-  dashboard (Settings → Widget). All appearance (color, position, greeting)
+  Replace YOUR_WIDGET_KEY with your selected site's public widget key from the Convor
+  dashboard (Settings → Widget → Installation and security).
+  The key begins with convor_wpk_ and identifies the selected website, not an
+  organization slug or a secret API key. All appearance (color, position, greeting)
   is configured in the dashboard — do not edit it here.
 -->
-<script src="https://cdn.convor.io/widget.js" data-key="YOUR_ORG_SLUG" async></script>
+<script src="https://cdn.convor.io/widget.js" data-key="YOUR_WIDGET_KEY" async></script>

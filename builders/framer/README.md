@@ -16,15 +16,15 @@ Convor dashboard.
 ## Prerequisites
 
 - A **Convor** account (sign up at https://convor.io).
-- Your organization's public **slug**. Find it in the Convor dashboard under
-  **Settings → Widget**. It looks like `acme-inc`.
+- Your selected site's public **widget key**. Find it in the Convor dashboard under
+  **Settings → Widget → Installation and security**. It begins with `convor_wpk_`.
 - A **Framer** site on any paid plan. Custom Code is available on all paid
   plans (it is not available on the free Hobby tier).
 
 ## Step-by-step
 
-1. **Copy your Convor slug** from the Convor dashboard
-   (**Settings → Widget**).
+1. **Copy your Convor widget key** from the Convor dashboard
+   (**Settings → Widget → Installation and security**).
 2. Open your site in the **Framer editor**.
 3. Click **Site Settings** (top-right). In recent Framer versions this opens a
    panel with a **Custom Code** section in the left sidebar; on older builds
@@ -33,7 +33,7 @@ Convor dashboard.
    correct slot for the widget (it loads after page content). Do **not** use
    "Start of `<head>`" — that can race with the DOM.
 5. **Paste the snippet** below into the **End of `<body>` tag** box, replacing
-   `YOUR_ORG_SLUG` with your real slug.
+   `YOUR_WIDGET_KEY` with your selected Convor website's public widget key.
 6. Click **Save** (or **Publish** — Framer applies Custom Code on the next
    publish).
 7. **Publish** your site (top-right **Publish** → **Update**). Custom Code
@@ -42,10 +42,10 @@ Convor dashboard.
 ## The snippet
 
 ```html
-<script src="https://cdn.convor.io/widget.js" data-key="YOUR_ORG_SLUG" async></script>
+<script src="https://cdn.convor.io/widget.js" data-key="YOUR_WIDGET_KEY" async></script>
 ```
 
-> Replace `YOUR_ORG_SLUG` with the exact slug from the Convor dashboard. It is
+> Replace `YOUR_WIDGET_KEY` with the exact public widget key from the Convor dashboard. It is
 > case-sensitive. A standalone, copy-ready version is in
 > [`snippet.html`](./snippet.html).
 
@@ -63,7 +63,7 @@ Convor dashboard.
 |---|---|
 | No bubble appears | You saved but didn't **Publish**. Framer only serves Custom Code on the published site. |
 | Bubble shows in `framer.website` staging but not your domain | You need to publish to the custom domain. Open **Publish** and confirm the domain is connected. |
-| Console error `404` on `widget.js` or config 404 | The `YOUR_ORG_SLUG` placeholder wasn't replaced, or it has a typo. Slugs are **case-sensitive**. Re-check Settings → Widget in Convor. |
+| Console error `404` on `widget.js` or config 404 | The `YOUR_WIDGET_KEY` placeholder wasn't replaced, or it has a typo. Keys are **case-sensitive**. Re-check Settings → Widget in Convor. |
 | Widget blocked / flickers | A browser **ad blocker** or **privacy extension** (uBlock, Brave Shields) may block third-party scripts. Test in an incognito window with extensions off. |
 | Content-Security-Policy error | If you added a CSP via Framer, allow `script-src https://cdn.convor.io` and `frame-src https://cdn.convor.io`. |
 | Old appearance after editing dashboard | Hard-refresh, or wait ~60 seconds for the Convor config cache to expire. |

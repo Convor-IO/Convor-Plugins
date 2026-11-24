@@ -17,8 +17,8 @@ from the Convor dashboard.
 ## Prerequisites
 
 - A **Convor** account (sign up at https://convor.io).
-- Your organization's public **slug**. Find it in the Convor dashboard under
-  **Settings → Widget**. It looks like `acme-inc`.
+- Your selected site's public **widget key**. Find it in the Convor dashboard under
+  **Settings → Widget → Installation and security**. It begins with `convor_wpk_`.
 - A **Squarespace** site on a plan that supports **Code Injection**.
   - ✅ **Business**, **Commerce Basic**, **Commerce Advanced** (and the newer
     **Core / Plus / Advanced** commercial plans) all support Code Injection.
@@ -28,15 +28,15 @@ from the Convor dashboard.
 
 ## Step-by-step (Code Injection — recommended)
 
-1. **Copy your Convor slug** from the Convor dashboard
-   (**Settings → Widget**).
+1. **Copy your Convor widget key** from the Convor dashboard
+   (**Settings → Widget → Installation and security**).
 2. In Squarespace, open your site's **Home Menu**.
 3. Go to **Settings → Advanced → Code Injection**.
    - If **Code Injection** is missing under Advanced, your plan doesn't
      include it — see the plan note above.
 4. Scroll to the **Footer** field. (The **Header** field also exists; for the
    widget, **Footer** is correct so it loads after page content.)
-5. **Paste the snippet** below, replacing `YOUR_ORG_SLUG` with your real slug.
+5. **Paste the snippet** below, replacing `YOUR_WIDGET_KEY` with your selected Convor website's public widget key.
 6. Click **Save**.
 7. Code Injection takes effect on the live site after save — no separate
    publish required, but a hard refresh may be needed to bypass cache.
@@ -44,10 +44,10 @@ from the Convor dashboard.
 ## The snippet
 
 ```html
-<script src="https://cdn.convor.io/widget.js" data-key="YOUR_ORG_SLUG" async></script>
+<script src="https://cdn.convor.io/widget.js" data-key="YOUR_WIDGET_KEY" async></script>
 ```
 
-> Replace `YOUR_ORG_SLUG` with the exact slug from the Convor dashboard. It is
+> Replace `YOUR_WIDGET_KEY` with the exact public widget key from the Convor dashboard. It is
 > case-sensitive. A standalone, copy-ready version is in
 > [`snippet.html`](./snippet.html).
 
@@ -64,9 +64,9 @@ from the Convor dashboard.
 | Symptom | Likely cause / fix |
 |---|---|
 | **Code Injection menu is missing** | Your plan is **Personal**, which doesn't include it. Upgrade to Business+, or use the [Code Block workaround](#alternative-code-block-on-personal). |
-| No bubble appears after save | Hard-refresh to bypass Squarespace's CDN cache. If still missing, confirm the slug is correct. |
+| No bubble appears after save | Hard-refresh to bypass Squarespace's CDN cache. If still missing, confirm the public widget key is correct. |
 | `<!-- Sqs modules not loaded -->` or script stripped | Make sure you pasted into the **Footer** of **Code Injection** (not into a text field that escapes HTML). |
-| Console error `404` on config | The `YOUR_ORG_SLUG` placeholder wasn't replaced, or it has a typo. Slugs are **case-sensitive**. |
+| Console error `404` on config | The `YOUR_WIDGET_KEY` placeholder wasn't replaced, or it has a typo. Keys are **case-sensitive**. |
 | Widget blocked / flickers | A browser **ad blocker** or **privacy extension** (uBlock, Brave Shields) may block third-party scripts. Test in incognito with extensions off. |
 | Content-Security-Policy error | Squarespace's default CSP is permissive; this only happens if you added a custom one. Allow `script-src https://cdn.convor.io` and `frame-src https://cdn.convor.io`. |
 | Old appearance after editing dashboard | Hard-refresh, or wait ~60 seconds for the Convor config cache to expire. |

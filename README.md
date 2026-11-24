@@ -4,7 +4,7 @@ Installable plugins and SDKs for the [Convor](https://convor.io) live-chat widge
 
 Each package lets users embed the Convor widget on a specific platform with
 minimal setup — install from the marketplace (or paste the snippet), enter
-your org slug, and you're live.
+the public key for your selected Convor website, and you're live.
 
 ## Packages
 
@@ -36,6 +36,7 @@ your org slug, and you're live.
 | [`builders/framer/`](./builders/framer) | Framer | Custom Code guide |
 | [`builders/squarespace/`](./builders/squarespace) | Squarespace | Code Injection guide |
 | [`builders/duda/`](./builders/duda) | Duda | Custom Code guide |
+| [`builders/sky-shop/`](./builders/sky-shop) | Sky-Shop | Global custom JavaScript/HTML guide (not a native marketplace app) |
 
 ### Tier D — Developer SDKs & adjacent surfaces
 
@@ -53,13 +54,14 @@ Every package injects the same canonical snippet, sourced from the Convor
 widget CDN:
 
 ```html
-<script src="https://cdn.convor.io/widget.js" data-key="YOUR_ORG_SLUG" async></script>
+<script src="https://cdn.convor.io/widget.js" data-key="YOUR_WIDGET_KEY" async></script>
 ```
 
-`data-key` is your organization's public slug (visible in the dashboard under
-Settings → Widget). All appearance customization is fetched at runtime from
-the Convor API (`GET /api/widget/config?key=<slug>`), so the snippet stays
-minimal — plugins must not duplicate appearance settings.
+`data-key` is the public key for the selected Convor **website** (shown in
+Settings → Widget → Installation and security). It begins with `convor_wpk_`.
+Use the complete snippet copied from Convor, never an organization slug or a
+secret API key. Appearance is fetched from Convor at runtime, so plugins must
+not duplicate it.
 
 ## Development
 

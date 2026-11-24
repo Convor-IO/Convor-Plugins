@@ -1,14 +1,14 @@
 /**
  * Builders integration test.
  *
- * Each website-builder package (webflow, framer, squarespace, duda) ships a
+ * Each website-builder package (webflow, framer, squarespace, duda, sky-shop) ships a
  * `snippet.html` the merchant pastes into their builder's "custom code" box.
  * The shipped snippet must carry the canonical Convor widget tag:
  *
- *   <script src="<apiBase>/widget.js" data-key="<slug>" async></script>
+ *   <script src="<apiBase>/widget.js" data-key="<public site key>" async></script>
  *
- * The snippet ships with a YOUR_ORG_SLUG placeholder; we substitute `acme`
- * and assert the actual customer-facing artifact matches the canonical embed
+ * The snippet ships with a YOUR_WIDGET_KEY placeholder; we substitute a
+ * per-website public key and assert the customer-facing artifact matches the embed
  * contract. Documentation prose is intentionally not duplicated into tests.
  */
 
@@ -20,10 +20,10 @@ const { assertSnippetMatches } = require("./assert-snippet.js");
 
 const REPO_ROOT = join(__dirname, "..");
 const BUILDERS_DIR = join(REPO_ROOT, "builders");
-const BUILDERS = ["webflow", "framer", "squarespace", "duda"];
+const BUILDERS = ["webflow", "framer", "squarespace", "duda", "sky-shop"];
 
 const API_BASE = "https://cdn.convor.io";
-const SLUG = "acme";
+const WIDGET_KEY = "convor_wpk_testsite00000000000000000000000000000000000000000000";
 
 async function main() {
   for (const builder of BUILDERS) {
@@ -32,12 +32,18 @@ async function main() {
     // snippet.html — substitute the placeholder and assert canonical form.
     const snippetPath = join(dir, "snippet.html");
     const raw = readFileSync(snippetPath, "utf8");
-    const substituted = raw.replaceAll("YOUR_ORG_SLUG", SLUG);
+    assert.ok(raw.includes("YOUR_WIDGET_KEY"), `${builder}: must request a public site key`);
+    assert.ok(!raw.includes("YOUR_ORG_SLUG"), `${builder}: must not request an org slug`);
+    const substituted = raw.replaceAll("YOUR_WIDGET_KEY", WIDGET_KEY);
     const tag = assertSnippetMatches(substituted, {
       apiBase: API_BASE,
-      slug: SLUG,
+      slug: WIDGET_KEY,
     });
     assert.ok(tag, `${builder}: assertSnippetMatches returned no tag`);
+    assert.equal((substituted.match(/<script\b/gi) ?? []).length, 1,
+      `${builder}: must load the widget exactly once`);
+    assert.ok(!/data-(?:api|token|secret|locale)=/i.test(tag),
+      `${builder}: must not expose a private key or override visitor locale`);
 
     console.log(
       `PASS: ${builder} snippet.html matches canonical (${tag.trim().replace(/\s+/g, " ")})`,

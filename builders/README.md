@@ -11,19 +11,21 @@ Code** panel, so each guide walks through pasting the canonical Convor snippet.
 | **Framer** | Site Settings → Custom Code → End of `<body>` tag | Any paid plan | [`framer/`](./framer) |
 | **Squarespace** | Settings → Advanced → Code Injection → Footer | Business / Commerce (not Personal) | [`squarespace/`](./squarespace) |
 | **Duda** | Site → Settings → Custom Code → Body-end HTML | Team plan or higher | [`duda/`](./duda) |
+| **Sky-Shop** | Integracje → Własny kod JavaScript/HTML → HEAD | Store administrator | [`sky-shop/`](./sky-shop) |
 
 ## The snippet
 
 Every builder uses the same one-line loader, sourced from the Convor CDN:
 
 ```html
-<script src="https://cdn.convor.io/widget.js" data-key="YOUR_ORG_SLUG" async></script>
+<script src="https://cdn.convor.io/widget.js" data-key="YOUR_WIDGET_KEY" async></script>
 ```
 
-`data-key` is your organization's public slug (visible in the Convor dashboard
-under **Settings → Widget**). All appearance customization — color, position,
-greeting, hours — is fetched at runtime from the Convor API, so the snippet
-stays minimal. **Do not duplicate appearance settings in each builder** — it
+`data-key` is the public key of the selected **website** in Convor (copy the full
+code in **Settings → Widget → Installation and security**). It begins with
+`convor_wpk_` and is not the organization slug or an API secret.
+Appearance (color, position, greeting, hours) is fetched at runtime from
+Convor. Keep the script unchanged. **Do not duplicate appearance settings in each builder** — it
 creates drift.
 
 ## Per-builder layout
@@ -33,7 +35,7 @@ Each `builders/<builder>/` folder contains:
 ```
 <builder>/
 ├── README.md       # copy-paste-ready install guide
-└── snippet.html    # standalone snippet with YOUR_ORG_SLUG placeholder
+└── snippet.html    # standalone snippet with YOUR_WIDGET_KEY placeholder
 ```
 
 > `screenshots/` are TBD — none are fabricated here.

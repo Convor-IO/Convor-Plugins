@@ -17,16 +17,16 @@ Convor dashboard.
 ## Prerequisites
 
 - A **Convor** account (sign up at https://convor.io).
-- Your organization's public **slug**. Find it in the Convor dashboard under
-  **Settings → Widget**. It looks like `acme-inc`.
+- Your selected site's public **widget key**. Find it in the Convor dashboard under
+  **Settings → Widget → Installation and security**. It begins with `convor_wpk_`.
 - A **Duda** site on a **Team** plan or higher. Custom Code (the Head/Body-end
   HTML fields) is available on Team plans and above; it is not available on the
   entry-level Solo/Studio tiers.
 
 ## Step-by-step (Custom Code — recommended)
 
-1. **Copy your Convor slug** from the Convor dashboard
-   (**Settings → Widget**).
+1. **Copy your Convor widget key** from the Convor dashboard
+   (**Settings → Widget → Installation and security**).
 2. Open your site in the **Duda editor**.
 3. In the left side panel, click **Settings** (under the **More** / `•••` menu
    in some layouts).
@@ -36,7 +36,7 @@ Convor dashboard.
    the script to load before the DOM is ready, and some Duda Consent Management
    Platforms (CMP) gate `<head>` scripts behind the cookie banner.
 6. **Paste the snippet** below into **Body-end HTML**, replacing
-   `YOUR_ORG_SLUG` with your real slug.
+   `YOUR_WIDGET_KEY` with your selected Convor website's public widget key.
 7. Click **Save**.
 8. **Publish** the site (top-right **Publish** → **Publish to all devices**).
    Custom Code renders on the published site; in the editor preview it appears
@@ -45,10 +45,10 @@ Convor dashboard.
 ## The snippet
 
 ```html
-<script src="https://cdn.convor.io/widget.js" data-key="YOUR_ORG_SLUG" async></script>
+<script src="https://cdn.convor.io/widget.js" data-key="YOUR_WIDGET_KEY" async></script>
 ```
 
-> Replace `YOUR_ORG_SLUG` with the exact slug from the Convor dashboard. It is
+> Replace `YOUR_WIDGET_KEY` with the exact public widget key from the Convor dashboard. It is
 > case-sensitive. A standalone, copy-ready version is in
 > [`snippet.html`](./snippet.html).
 
@@ -67,7 +67,7 @@ Convor dashboard.
 | **Custom Code menu is missing** | Your plan is below **Team**. Upgrade, or use the HTML-widget workaround (see [Alternative below](#alternative-html-widget)). |
 | No bubble appears | You saved but didn't **Publish**. Duda serves Custom Code on the published site. |
 | Widget appears only after accepting the cookie banner | The snippet is in **Head HTML** and a CMP is gating it. Move it to **Body-end HTML**. |
-| Console error `404` on config | The `YOUR_ORG_SLUG` placeholder wasn't replaced, or it has a typo. Slugs are **case-sensitive**. |
+| Console error `404` on config | The `YOUR_WIDGET_KEY` placeholder wasn't replaced, or it has a typo. Keys are **case-sensitive**. |
 | Widget blocked / flickers | A browser **ad blocker** or **privacy extension** (uBlock, Brave Shields) may block third-party scripts. Test in incognito with extensions off. |
 | Content-Security-Policy error | Allow `script-src https://cdn.convor.io` and `frame-src https://cdn.convor.io` in any custom CSP you've added. |
 | Old appearance after editing dashboard | Hard-refresh, or wait ~60 seconds for the Convor config cache to expire. |

@@ -16,16 +16,16 @@ from the Convor dashboard.
 ## Prerequisites
 
 - A **Convor** account (sign up at https://convor.io).
-- Your organization's public **slug**. Find it in the Convor dashboard under
-  **Settings → Widget**. It looks like `acme-inc`.
+- Your selected site's public **widget key**. Find it in the Convor dashboard under
+  **Settings → Widget → Installation and security**. It begins with `convor_wpk_`.
 - A published (or publishable) **Webflow** site on any paid Workspace plan.
   Custom Code requires a paid site plan — it is disabled on the free Starter
   workspace.
 
 ## Step-by-step
 
-1. **Copy your Convor slug** from the Convor dashboard
-   (**Settings → Widget**).
+1. **Copy your Convor widget key** from the Convor dashboard
+   (**Settings → Widget → Installation and security**).
 2. In Webflow, open your project and go to **Site settings** (the gear icon in
    the left sidebar of the Designer, or from your Dashboard hover the project
    and click the gear).
@@ -33,7 +33,7 @@ from the Convor dashboard.
 4. Scroll to the **Footer code** section (this is site-wide — it runs on every
    page). The **Head code** section also exists; for the widget, **Footer code**
    is correct so the script loads after page content.
-5. **Paste the snippet** below, replacing `YOUR_ORG_SLUG` with your real slug.
+5. **Paste the snippet** below, replacing `YOUR_WIDGET_KEY` with your selected Convor website's public widget key.
 6. Click **Save changes**.
 7. **Publish** your site (top-right **Publish** → choose your domains →
    **Publish to selected domains**). Custom Code only takes effect on a
@@ -42,10 +42,10 @@ from the Convor dashboard.
 ## The snippet
 
 ```html
-<script src="https://cdn.convor.io/widget.js" data-key="YOUR_ORG_SLUG" async></script>
+<script src="https://cdn.convor.io/widget.js" data-key="YOUR_WIDGET_KEY" async></script>
 ```
 
-> Replace `YOUR_ORG_SLUG` with the exact slug from the Convor dashboard. It is
+> Replace `YOUR_WIDGET_KEY` with the exact public widget key from the Convor dashboard. It is
 > case-sensitive. A standalone, copy-ready version is in
 > [`snippet.html`](./snippet.html).
 
@@ -65,7 +65,7 @@ from the Convor dashboard.
 |---|---|
 | No bubble appears | You didn't **Publish** after saving — Custom Code is ignored until the next publish. |
 | Bubble appears in preview but not on the live domain | You published to `webflow.io` but not your custom domain. Re-publish and select the right domain. |
-| Console error `404` on `widget.js` or config 404 | The `YOUR_ORG_SLUG` placeholder wasn't replaced, or it has a typo. Slugs are **case-sensitive**. Re-check Settings → Widget in Convor. |
+| Console error `404` on `widget.js` or config 404 | The `YOUR_WIDGET_KEY` placeholder wasn't replaced, or it has a typo. Keys are **case-sensitive**. Re-check Settings → Widget in Convor. |
 | Widget blocked / flickers | A browser **ad blocker** or **privacy extension** (uBlock, Brave Shields) may block third-party scripts. Test in an incognito window with extensions off. |
 | Content-Security-Policy error in console | If you added a CSP via Header code, you must allow `script-src https://cdn.convor.io` and `frame-src https://cdn.convor.io`. |
 | Changes not visible after editing the dashboard | Convor appearance is cached briefly. Hard-refresh, or wait ~60 seconds for the config cache to expire. |
