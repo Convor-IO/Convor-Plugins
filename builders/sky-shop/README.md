@@ -1,10 +1,8 @@
 # Convor live chat on Sky-Shop
 
-Sky-Shop supports a site-wide **custom JavaScript/HTML** section. Use it to
-install Convor without WordPress, a theme-code editor, or a Sky-Shop WebAPI
-credential. This is a **manual widget embed**, not a native Sky-Shop app or an
-approved marketplace listing. An official directory listing requires Sky-Shop's
-approval.
+Install Convor through Sky-Shop's global **custom JavaScript/HTML** field. The
+widget uses your Convor website's public key. An official directory listing
+requires Sky-Shop's approval.
 
 ## Install
 
@@ -56,7 +54,7 @@ a placeholder from this README, the widget cannot initialize.
 | Symptom | Check |
 | --- | --- |
 | No launcher | Confirm Save, correct global HEAD field, browser network request for `https://cdn.convor.io/widget.js`, and extensions. Verify the public key, intended Convor website and allowed domain. |
-| Launcher appears twice | Remove duplicate installs from GTM, theme integrations or another code field. One storefront should normally inject one Convor script. |
+| Launcher appears twice | Keep one copy of the Convor script in the global HEAD field. |
 | Chat goes to the wrong inbox | Recheck which website is selected in Convor before copying the embed code. |
 | Works in preview but not on storefront | Check actual published domain, cached pages, allowlist, CSP and cookie consent. |
 | Checkout has no widget | Sky-Shop may isolate payment/checkout templates. Do not place the chat script in the finalization/conversion field to compensate. Document the limitation discovered in real testing. |
