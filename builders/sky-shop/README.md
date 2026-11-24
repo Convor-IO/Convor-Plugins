@@ -44,7 +44,8 @@ a placeholder from this README, the widget cannot initialize.
   consent manager to control when the Convor script loads. A static global
   script loads immediately; Convor's widget settings alone do not turn a
   Sky-Shop custom-script field into a consent-gated loader. Test both accept
-  and reject in a fresh visitor session. Update your privacy notice.
+  and reject in a fresh visitor session. Check that withdrawing consent also
+  removes a widget that is already open. Update your privacy notice.
 - The local browser, advertising blockers, content-security policies and
   Sky-Shop's own checkout restrictions can prevent display. Verify on the
   actual public domain, including mobile, before promoting the setup.
@@ -73,6 +74,6 @@ requires updating the allowed-domain list.
 - [Sky-Shop: LiveChat dedicated field (comparison)](https://sky-shop.pl/pomoc-faq/konfiguracja/jak-dodac-widget-livechat-na-strone-sklepu/)
 - [Smartsupp: Sky-Shop installation](https://help.smartsupp.com/en/articles/12647792-sky-shop)
 
-This guide follows Sky-Shop's **public documentation**. Administrative labels
-and live conversations still require verification on a real Sky-Shop account
-before the release can be marked externally tested.
+The installation steps and chat exchange were verified on a published Sky-Shop
+trial. See the [QA ledger](./RELEASE.md#real-world-qa-ledger) for coverage and
+release status.

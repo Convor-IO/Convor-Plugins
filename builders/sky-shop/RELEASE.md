@@ -23,6 +23,13 @@ confirm the required materials, fees, agreement, review schedule, or support
 for a dedicated public-key field. See [Convor #1809](https://github.com/Convor-IO/Convor/issues/1809)
 for the contact history.
 
+On 2026-11-24 the public catalog still had no Convor entry. The public partner
+application covers referrals and reseller benefits. The operator has not confirmed
+a submission form for software vendors or any fees, contract, required materials,
+technical review, turnaround time, or dedicated Convor field. An initial inquiry
+was acknowledged. The trial is already available and further correspondence is
+handled by the account owner.
+
 ## Submission package for Sky-Shop
 
 **Name (PL):** Convor – czat na żywo dla Sky-Shop
@@ -60,7 +67,7 @@ Convor-Website `content/docs/integrations/sky-shop-integration*.mdx`.
 
 ## Suggested partner inquiry (PL)
 
-Temat: Convor — propozycja integracji live chat z Sky-Shop i sklep testowy
+Temat: Convor w katalogu integracji Sky-Shop
 
 Dzień dobry,
 
@@ -76,8 +83,8 @@ Prosimy o informację:
    wklejania JavaScript?
 2. Jakie są wymagania dotyczące testów, dokumentacji, bezpieczeństwa,
    oznaczeń graficznych, cen i zgód na użycie logo Sky-Shop?
-3. Czy możemy uzyskać dostęp do sklepu testowego na czas integracji i testów
-   E2E, najlepiej w trybie partnerskim?
+3. Testujemy czat na aktywnym sklepie próbnym. Czy na potrzeby odbioru
+   i utrzymania integracji udostępniacie długoterminowy sklep testowy?
 4. Czy istnieje opłata, umowa partnerska lub proces przeglądu aplikacji?
 
 Możemy dostarczyć polsko- i anglojęzyczną instrukcję oraz pełne wyniki testów
@@ -92,7 +99,7 @@ company details.** Do not send the inquiry from an unrelated personal account.
 
 ## Real-world QA ledger
 
-Use a real Sky-Shop merchant test account and synthetic customer and order data.
+Use a real Sky-Shop merchant test account and synthetic shopper messages.
 Record only public test URLs and redacted evidence in
 [Convor #1809](https://github.com/Convor-IO/Convor/issues/1809). Keep credentials
 in the vault. Save status codes and console events with keys, tokens and
@@ -104,33 +111,38 @@ PASS or FAIL and observed evidence for each storefront case when it runs.
 | Date | Case | Result and evidence |
 | --- | --- | --- |
 | 2026-11-24 | Technical hostname installation | PASS. Copied the production site's generated snippet. Sky-Shop returned 200 on Save and reopening the global HEAD editor showed the exact snippet. The published storefront contained one loader. |
-| 2026-11-24 | Home, category and product × desktop and mobile | PASS for installation and public configuration, 6/6. At 1440 and 390 px all three real page types returned 200, loaded one CDN script and received HTTP 200 from the widget configuration endpoint. No CSP response header was present on these pages. |
-| 2026-11-24 | Storefront search | PASS for script placement. Submitting the search form opened the storefront's `/category/` route with one Convor loader. Chat interaction on the results page is pending. |
+| 2026-11-24 | Home, category and product × desktop and mobile | PASS for installation and public configuration, 6/6. At 1440 and 390 px all three real page types returned 200, loaded one CDN script and received HTTP 200 from the widget configuration endpoint. The launcher opened and closed the chat input on Home in the conversation test and on Category and Product at both widths in regular Chrome. No CSP response header was present. |
+| 2026-11-24 | Storefront search | PASS. Searching for a sample product opened `/category/` with one loader and one chat frame. In regular Chrome the launcher opened the message field and closed the chat. |
 | 2026-11-24 | Invalid public key | PASS in a separate browser session on the live storefront. Substituting a synthetic invalid key in that browser prevented the widget iframe from mounting. The shop settings were untouched. |
 | 2026-11-24 | Domain restriction | PASS. Before switching policies, a browser on a Convor-owned HTTPS hostname outside the QA site's list received HTTP 200. After saving Only listed domains and reloading the dashboard, the same browser received HTTP 403 and the real Sky-Shop hostname continued to receive HTTP 200. |
-| 2026-11-24 | Cart entry | BLOCKED. Available sample product controls did not yield an actionable add-to-cart path in the browser. No order was placed. |
+| 2026-11-24 | Cart with a sample product | PASS. Added the sample backpack to the cart and verified its row at `/cart/`. The page loaded one Convor script and the launcher opened and closed the message field. |
+| 2026-11-24 | Checkout entry | PASS for chat availability on `/order`. Used the cart's Przejdź do kasy action and opened and closed the chat. The browser did not submit an order or start a payment. |
+| 2026-11-24 | Request audit with a sample cart | PASS within the browsing scope. Inspected URL parameter names and structured POST field names for Convor API and CDN requests on product, cart and checkout entry. Across 19 distinct paths, none matched the tested Sky-Shop customer, order, address, cart or payment field names. This check used an unsigned shopper with an empty checkout form. |
 | 2026-11-24 | Block the CDN loader in the shopper browser | PASS. The storefront and product link remained available, with no Convor iframe after the script was blocked. |
+| 2026-11-24 | Restrictive CSP in the shopper browser | PASS for graceful failure. Added `script-src 'self' 'unsafe-inline'` to the real shop's response in an isolated browser. Chrome blocked the Convor CDN script. The storefront returned HTTP 200, a product link remained visible, and no Convor frame mounted. |
 | 2026-11-24 | Platform announcement banner on Sky-Shop | FAIL in production. The storefront's request to `GET /api/banner` returned HTTP 200 without `Access-Control-Allow-Origin` and the browser rejected it. The widget config and visitor token each returned HTTP 200 with the expected origin. A route-only Convor Server fix passed 30 maintenance and CORS tests locally. The production endpoint still needs deployment and a new browser check. |
 | 2026-11-24 | Two-way conversation in automated Chromium | BLOCKED. Convor's tracking endpoint returned HTTP 200 with an automated-client rejection. The host received `api-unavailable` after `iframe-ready`. This result applies to automated Chromium. The regular Chrome run below used the live shopper flow. |
 | 2026-11-24 | Live two-way conversation, refresh and session isolation | PASS in regular Chrome on the published trial. The shopper message and operator reply both returned HTTP 201 from the live backend. The shopper received the reply and both messages persisted after refresh. A second browser context opened an independent conversation without either message. The same thread was visible at a 390 px mobile viewport. |
 | 2026-11-24 | Native Sky-Shop consent refusal with direct HEAD embed | FAIL for installations that require opt-in. The loader was present before consent. After clicking Wyłącz wszystkie in a fresh session, the loader and chat launcher remained active. Configure and verify consent gating separately when it is required. |
+| 2026-11-24 | Native opt-in on the published shop | PASS for initial refusal and acceptance. Temporarily saved `type="text/plain" data-cookiecategory="analytics"` on the snippet in the real HEAD editor. The public page made zero Convor requests before consent and after refusing and reloading. Accepting the category loaded Convor with a live HTTP 200 visitor token and the chat input opened. Restored the original QA snippet after the test. |
+| 2026-11-24 | Native withdrawal on an already open page | FAIL for immediate iframe removal. After saving required-only preferences, the original document still had one Convor frame. A newly loaded page made zero Convor requests and had no launcher. A consent manager must unload the widget or reload the page for immediate withdrawal. |
+| 2026-11-24 | Duplicate embed | PASS for widget deduplication. Repeated the same script in an isolated browser response for the real shop. Two script tags yielded one iframe and one configuration request. The launcher opened and closed the chat. |
 | 2026-11-24 | Contact data in the trial storefront | PASS after clearing the public phone fields in shop data and Schema settings. Independent browser requests to Home and Contact returned 200 without the submitted number in HTML. |
 | 2026-11-24 | Uninstall and restore on the technical hostname | PASS for removal. Saved the empty global HEAD field and a cache-busted storefront request returned HTTP 200 with no Convor loader. Reapplied the original site snippet. Sky-Shop confirmed `{"success":true}` and separate public requests to Home, Category and Product showed one loader each. |
 | 2026-11-24 | Actual administrator screen | PASS. Checked the Polish `Integracje → Własny kod JavaScript/HTML/CSS → W nagłówku <HEAD>` path and verified the redacted screenshot and zoom in both localized guides. |
 
-The remaining storefront cases below still require recorded outcomes.
+Open cases and coverage limits.
 
 | Case | Evidence to collect |
 | --- | --- |
-| Homepage, category, product, search and cart | A separate URL and result for every page, including interaction with the launcher |
-| Checkout and confirmation | Page-by-page result on a test order, including any platform restrictions and interference with payment controls |
-| Desktop, mobile and two themes | Captures and interaction checks per theme and viewport |
-| Custom hostname and domain change | Correct allowed-domain behavior on both hostnames and the same conversation flow on the custom domain |
-| Consent-gated installation and revocation | Fresh-session traces with a configured consent manager. The direct embed loads before consent and after refusal. |
+| Post-order confirmation | Requires a completed Sky-Shop test order. The current QA stops at checkout entry. |
+| Alternate theme | The store uses Flex. The other themes exposed by the trial's theme creator show Kup i aktywuj. Preview uses example content and cannot establish compatibility on the published shop. |
+| Custom hostname and domain change | Blocked by the account portal. It lists pv333 as a trial through 2026-12-08. Its domain requests return HTTP 404 and Add domain opens a message saying there is no active store on the account. No DNS records were changed. |
+| Consent withdrawal | Native gating blocks later loads. Immediate removal from the open document still needs a compatible consent lifecycle. |
 | Inactive site | Widget fails safely, with no private site or visitor data in the response |
-| CSP, unavailable CDN and script blockers | Browser diagnostics and a working storefront when the widget cannot load |
-| GTM conflict and duplicate embed | Observable request and launcher counts before and after keeping one installation method |
-| Customer and order data | Synthetic storefront order and no customer/order credential or record sent by the embed |
+| Script-blocking extension | Browser-side CDN blocking and a restrictive CSP are covered. No extension was installed in the test browser. |
+| GTM conflict | Duplicate script placement is covered. A live container has not been configured on the trial shop. |
+| Customer and order data | Normal browsing and checkout entry are covered. A completed order was outside the tested request audit. |
 | Guide and screenshots | Save evidence of the remaining storefront and configuration cases alongside the live conversation captures. |
 
 Record the operator's formal submission reference after sending the reviewed
