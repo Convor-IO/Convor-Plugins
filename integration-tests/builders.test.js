@@ -23,7 +23,8 @@ const BUILDERS_DIR = join(REPO_ROOT, "builders");
 const BUILDERS = ["webflow", "framer", "squarespace", "duda", "sky-shop"];
 
 const API_BASE = "https://cdn.convor.io";
-const WIDGET_KEY = "convor_wpk_testsite00000000000000000000000000000000000000000000";
+const WIDGET_KEY =
+  "convor_wpk_testsite00000000000000000000000000000000000000000000";
 
 async function main() {
   for (const builder of BUILDERS) {
@@ -32,18 +33,29 @@ async function main() {
     // snippet.html — substitute the placeholder and assert canonical form.
     const snippetPath = join(dir, "snippet.html");
     const raw = readFileSync(snippetPath, "utf8");
-    assert.ok(raw.includes("YOUR_WIDGET_KEY"), `${builder}: must request a public site key`);
-    assert.ok(!raw.includes("YOUR_ORG_SLUG"), `${builder}: must not request an org slug`);
+    assert.ok(
+      raw.includes("YOUR_WIDGET_KEY"),
+      `${builder}: must request a public site key`,
+    );
+    assert.ok(
+      !raw.includes("YOUR_ORG_SLUG"),
+      `${builder}: must not request an org slug`,
+    );
     const substituted = raw.replaceAll("YOUR_WIDGET_KEY", WIDGET_KEY);
     const tag = assertSnippetMatches(substituted, {
       apiBase: API_BASE,
       slug: WIDGET_KEY,
     });
     assert.ok(tag, `${builder}: assertSnippetMatches returned no tag`);
-    assert.equal((substituted.match(/<script\b/gi) ?? []).length, 1,
-      `${builder}: must load the widget exactly once`);
-    assert.ok(!/data-(?:api|token|secret|locale)=/i.test(tag),
-      `${builder}: must not expose a private key or override visitor locale`);
+    assert.equal(
+      (substituted.match(/<script\b/gi) ?? []).length,
+      1,
+      `${builder}: must load the widget exactly once`,
+    );
+    assert.ok(
+      !/data-(?:api|token|secret|locale)=/i.test(tag),
+      `${builder}: must not expose a private key or override visitor locale`,
+    );
 
     console.log(
       `PASS: ${builder} snippet.html matches canonical (${tag.trim().replace(/\s+/g, " ")})`,
