@@ -67,8 +67,9 @@ a placeholder from this README, the widget cannot initialize.
 
 This snippet reads the choice saved by the Sky-Shop popup on the current
 domain. It checks for updates while the page is open and when a tab becomes
-visible. If you use a different consent manager, connect its acceptance and
-withdrawal callbacks to the widget instead.
+visible. It starts and stops only the chat it controls. Keep a single Convor
+installation on the store. If you use a different consent manager, connect
+its acceptance and withdrawal callbacks to the widget instead.
 
 ## Troubleshooting
 

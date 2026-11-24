@@ -20,8 +20,7 @@
     if (!["analytics", "marketing"].includes(category) || !key?.startsWith("convor_wpk_")) return;
 
     let requested = false;
-    let active = false;
-    let widget;
+    let ownedWidget;
 
     function hasConsent() {
       try {
@@ -37,16 +36,22 @@
 
     function syncConsent() {
       if (!hasConsent()) {
-        if (active) {
-          active = false;
-          widget.destroy();
-        }
+        ownedWidget?.destroy();
+        ownedWidget = undefined;
         return;
       }
-      if (active) return;
+      if (ownedWidget) return;
+      const widget = window.Convor;
       if (widget) {
-        active = true;
-        widget.init({ key, widgetUrl: new URL("widget-iframe.html", config.src).href }).catch(() => {});
+        if (!widget.createWidget || widget.getInstances?.().length !== 0) return;
+        const installation = widget.createWidget({
+          key,
+          widgetUrl: new URL("widget-iframe.html", config.src).href,
+        });
+        // The instance is registered before initialization finishes, so a
+        // withdrawal can destroy this instance even during startup.
+        [ownedWidget] = widget.getInstances();
+        installation.catch(() => {});
         return;
       }
       if (requested) return;
@@ -54,10 +59,7 @@
       requested = true;
       const loader = document.createElement("script");
       loader.src = config.src;
-      loader.addEventListener("load", () => {
-        widget = window.Convor;
-        syncConsent();
-      }, { once: true });
+      loader.addEventListener("load", syncConsent, { once: true });
       document.head.append(loader);
     }
 

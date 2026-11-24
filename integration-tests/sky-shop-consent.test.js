@@ -25,10 +25,29 @@ async function openShop(t, html = snippet) {
   });
 
   const calls = [];
+  const instances = new Set();
   const loaders = () =>
     Array.from(window.document.scripts).filter(
       (script) => script.src === loaderUrl && script.type !== "text/plain",
     );
+  const addInstance = (owner) => {
+    const handle = {
+      destroy() {
+        if (instances.delete(handle)) calls.push(["destroy", owner]);
+      },
+    };
+    instances.add(handle);
+    return handle;
+  };
+  const publishWidgetApi = () => {
+    window.Convor = {
+      getInstances: () => [...instances],
+      async createWidget(options) {
+        calls.push(["init", options.key, options.widgetUrl]);
+        return addInstance("native");
+      },
+    };
+  };
 
   return {
     calls,
@@ -42,16 +61,13 @@ async function openShop(t, html = snippet) {
       window.dispatchEvent(new window.Event("pageshow"));
     },
     finishLoading() {
-      window.Convor = {
-        async init(options) {
-          calls.push(["init", options.key, options.widgetUrl]);
-        },
-        destroy() {
-          calls.push(["destroy"]);
-        },
-      };
+      publishWidgetApi();
       const [loader] = loaders();
       loader.dispatchEvent(new window.Event("load"));
+    },
+    startIndependentWidget() {
+      publishWidgetApi();
+      return addInstance("independent");
     },
   };
 }
@@ -70,11 +86,11 @@ test("Sky-Shop only runs chat while the chosen consent category is granted", asy
   assert.deepEqual(shop.calls, [init]);
 
   shop.setConsentCookie("invalid-json");
-  assert.deepEqual(shop.calls, [init, ["destroy"]]);
+  assert.deepEqual(shop.calls, [init, ["destroy", "native"]]);
 
   shop.choose(["required", "analytics"]);
   assert.equal(shop.loaders().length, 1);
-  assert.deepEqual(shop.calls, [init, ["destroy"], init]);
+  assert.deepEqual(shop.calls, [init, ["destroy", "native"], init]);
 });
 
 test("A response arriving after consent withdrawal does not start chat", async (t) => {
@@ -85,4 +101,22 @@ test("A response arriving after consent withdrawal does not start chat", async (
   shop.choose(["required"]);
   shop.finishLoading();
   assert.deepEqual(shop.calls, []);
+});
+
+test("Sky-Shop consent does not replace or destroy an independently installed widget", async (t) => {
+  const shop = await openShop(t);
+  const existing = shop.startIndependentWidget();
+  shop.choose(["required", "analytics"]);
+  shop.choose(["required"]);
+  assert.deepEqual(shop.calls, []);
+  assert.equal(shop.loaders().length, 0);
+
+  existing.destroy();
+  shop.choose(["required", "analytics"]);
+  shop.choose(["required"]);
+  assert.deepEqual(shop.calls, [
+    ["destroy", "independent"],
+    ["init", key, "https://cdn.convor.io/widget-iframe.html"],
+    ["destroy", "native"],
+  ]);
 });
