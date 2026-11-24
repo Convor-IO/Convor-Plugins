@@ -12,6 +12,8 @@ against the operator's response and the public catalog.
 | 2026-11-24 | Submit one free-trial request as `integrations@convor.io` | The registration UI sent `POST /order/` and received HTTP 302 with an HTML content type. The client reported a JSON parse error. The reason for the redirect is unconfirmed. |
 | 2026-11-24 | Sign in with the new trial credentials and check the integrations mailbox | HTTP 401 and no Sky-Shop activation message in Inbox or Junk at the time of the check. No administrator access. The credential is in Vaultwarden. |
 | 2026-11-24 | Ask the operator to check account provisioning, provide an admin QA store, and explain directory requirements | Email accepted by the sending mail server. Message ID `sky-shop-convor-1809-20261124@convor.io`. Sky-Shop acknowledged receipt at 12:37 CET and forwarded the message to the responsible team. Awaiting a substantive response. No ticket number was provided. |
+| 2026-11-24 | Account owner completed registration on the second attempt | Trial provisioned at `pv333.mysky-shop.pl` through 2026-12-08. Confirmed public HTTP 200 and administrator sign-in with the Vaultwarden credential. |
+| 2026-11-24 | Complete the administrator profile and prepare Convor | Sky-Shop accepted the business details with the free trial selected. Verified the separate production Convor QA account and initialized the `Convor Sky-Shop QA` site with the technical hostname as its only allowed domain. |
 
 Sky-Shop documents [a free trial and a partner test store](https://sky-shop.pl/program-partnerski/).
 The [public catalog](https://sky-shop.pl/integracje-pozostale/) lists live-chat
@@ -64,7 +66,7 @@ Dzień dobry,
 
 rozwijamy Convor, narzędzie do obsługi rozmów z klientami sklepów internetowych.
 Przygotowaliśmy integrację czatu ze Sky-Shop za pomocą globalnego pola
-Integracje → Własny kod JavaScript/HTML, bez przekazywania kluczy WebAPI
+Integracje → Własny kod JavaScript/HTML/CSS, bez przekazywania kluczy WebAPI
 i bez dostępu do prywatnych zamówień. Chcielibyśmy doprowadzić tę integrację
 do oficjalnej dostępności dla klientów Sky-Shop.
 
@@ -96,9 +98,19 @@ Record only public test URLs and redacted evidence in
 in the vault. Save status codes and console events with keys, tokens and
 customer data removed.
 
-The following cases were blocked on 2026-11-24 by missing test-store admin
-access. The access attempts above are the evidence for the blocked status.
-Record PASS or FAIL and the observed evidence after each case runs.
+The trial and administrator access were established on 2026-11-24. Record
+PASS or FAIL and observed evidence for each storefront case when it runs.
+
+| Date | Case | Result and evidence |
+| --- | --- | --- |
+| 2026-11-24 | Technical hostname installation | PASS. Copied the production site's generated snippet. Sky-Shop returned 200 on Save and reopening the global HEAD editor showed the exact snippet. The published storefront contained one loader. |
+| 2026-11-24 | Home, category and product × desktop and mobile | PASS for installation and public configuration, 6/6. At 1440 and 390 px all three real page types returned 200, loaded one CDN script and received HTTP 200 from the widget configuration endpoint. No CSP response header was present on these pages. |
+| 2026-11-24 | Block the CDN loader in the shopper browser | PASS. The storefront and product link remained available, with no Convor iframe after the script was blocked. |
+| 2026-11-24 | Two-way conversation in automated Chromium | BLOCKED. Convor's tracking endpoint returned HTTP 200 with an automated-client rejection. The host received `api-unavailable` after `iframe-ready`. The test requires a shopper in a regular browser. |
+| 2026-11-24 | Contact data in the trial storefront | PASS after clearing the public phone fields in shop data and Schema settings. Independent browser requests to Home and Contact returned 200 without the submitted number in HTML. |
+| 2026-11-24 | Actual administrator screen | PASS. Checked the Polish `Integracje → Własny kod JavaScript/HTML/CSS → W nagłówku <HEAD>` path and verified the redacted screenshot and zoom in both localized guides. |
+
+The remaining storefront cases below still require recorded outcomes.
 
 | Case | Evidence to collect |
 | --- | --- |

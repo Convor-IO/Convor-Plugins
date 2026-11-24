@@ -12,7 +12,7 @@ approval.
    Open **Settings → Widget → Installation and security**. Copy the entire
    embed snippet. The public key begins with `convor_wpk_`. Do not use an
    organization slug, secret API key or WebAPI token.
-2. In Sky-Shop administration open **Integracje → Własny kod JavaScript/HTML**
+2. In Sky-Shop administration open **Integracje → Własny kod JavaScript/HTML/CSS**
    and select **W nagłówku &lt;HEAD&gt;**. Sky-Shop's official help also lists global
    BODY code; use the global location rather than checkout/conversion-only
    fields. Preserve any existing unrelated scripts.

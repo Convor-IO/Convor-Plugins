@@ -11,7 +11,7 @@ Code** panel, so each guide walks through pasting the canonical Convor snippet.
 | **Framer** | Site Settings → Custom Code → End of `<body>` tag | Any paid plan | [`framer/`](./framer) |
 | **Squarespace** | Settings → Advanced → Code Injection → Footer | Business / Commerce (not Personal) | [`squarespace/`](./squarespace) |
 | **Duda** | Site → Settings → Custom Code → Body-end HTML | Team plan or higher | [`duda/`](./duda) |
-| **Sky-Shop** | Integracje → Własny kod JavaScript/HTML → HEAD | Store administrator | [`sky-shop/`](./sky-shop) |
+| **Sky-Shop** | Integracje → Własny kod JavaScript/HTML/CSS → HEAD | Store administrator | [`sky-shop/`](./sky-shop) |
 
 ## The snippet
 
