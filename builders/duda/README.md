@@ -25,18 +25,17 @@ Convor dashboard.
 
 ## Step-by-step (Custom Code — recommended)
 
-1. **Copy your Convor widget key** from the Convor dashboard
+1. **Copy the embed code** from the Convor dashboard
    (**Settings → Widget → Installation and security**).
 2. Open your site in the **Duda editor**.
 3. In the left side panel, click **Settings** (under the **More** / `•••` menu
    in some layouts).
 4. Open the **Custom Code** section.
-5. Locate the **Body-end HTML** field. This is the correct slot for the widget
-   (it loads after page content). Avoid the **Head HTML** field — it can cause
-   the script to load before the DOM is ready, and some Duda Consent Management
-   Platforms (CMP) gate `<head>` scripts behind the cookie banner.
-6. **Paste the snippet** below into **Body-end HTML**, replacing
-   `YOUR_WIDGET_KEY` with your selected Convor website's public widget key.
+5. Locate the site-wide **Body-end HTML** field. If your store requires
+   consent before loading the widget, set up your consent manager to control
+   the script. Check acceptance and refusal on the published site.
+6. **Paste the complete code** into **Body-end HTML**. Keep any
+   `data-convor-verification` attribute supplied by Convor.
 7. Click **Save**.
 8. **Publish** the site (top-right **Publish** → **Publish to all devices**).
    Custom Code renders on the published site; in the editor preview it appears
@@ -66,7 +65,7 @@ Convor dashboard.
 |---|---|
 | **Custom Code menu is missing** | Your plan is below **Team**. Upgrade, or use the HTML-widget workaround (see [Alternative below](#alternative-html-widget)). |
 | No bubble appears | You saved but didn't **Publish**. Duda serves Custom Code on the published site. |
-| Widget appears only after accepting the cookie banner | The snippet is in **Head HTML** and a CMP is gating it. Move it to **Body-end HTML**. |
+| Widget appears only after accepting the cookie banner | The consent manager may be controlling the script. Check which consent choice releases it and confirm that refusal leaves it blocked when opt-in is required. |
 | Console error `404` on config | The `YOUR_WIDGET_KEY` placeholder wasn't replaced, or it has a typo. Keys are **case-sensitive**. |
 | Widget blocked / flickers | A browser **ad blocker** or **privacy extension** (uBlock, Brave Shields) may block third-party scripts. Test in incognito with extensions off. |
 | Content-Security-Policy error | Allow `script-src https://cdn.convor.io` and `frame-src https://cdn.convor.io` in any custom CSP you've added. |
