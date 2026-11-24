@@ -11,7 +11,7 @@ against the operator's response and the public catalog.
 | 2026-11-24 | Sign in with the credentials from the earlier trial attempt | HTTP 401. The sign-in message covers both an unknown email and an incorrect password. |
 | 2026-11-24 | Submit one free-trial request as `integrations@convor.io` | The registration UI sent `POST /order/` and received HTTP 302 with an HTML content type. The client reported a JSON parse error. The reason for the redirect is unconfirmed. |
 | 2026-11-24 | Sign in with the new trial credentials and check the integrations mailbox | HTTP 401 and no Sky-Shop activation message in Inbox or Junk at the time of the check. No administrator access. The credential is in Vaultwarden. |
-| 2026-11-24 | Ask the operator to check account provisioning, provide an admin QA store, and explain directory requirements | Email accepted by the sending mail server. Message ID `sky-shop-convor-1809-20261124@convor.io`. Awaiting operator response. |
+| 2026-11-24 | Ask the operator to check account provisioning, provide an admin QA store, and explain directory requirements | Email accepted by the sending mail server. Message ID `sky-shop-convor-1809-20261124@convor.io`. Sky-Shop acknowledged receipt at 12:37 CET and forwarded the message to the responsible team. Awaiting a substantive response. No ticket number was provided. |
 
 Sky-Shop documents [a free trial and a partner test store](https://sky-shop.pl/program-partnerski/).
 The [public catalog](https://sky-shop.pl/integracje-pozostale/) lists live-chat
