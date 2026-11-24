@@ -59,8 +59,16 @@ lookup, conversion analytics, a native app, or one-click install.
 - Polish landing: `https://convor.io/pl/integrations/sky-shop`
 - English guide: `https://convor.io/en/docs/integrations/sky-shop-integration`
 - Polish guide: `https://convor.io/pl/docs/integrations/sky-shop-integration`
-- Support/legal: validate the live Convor contact, pricing, privacy and ToS
-  URLs immediately before submitting.
+
+Supporting links returned HTTP 200 in both locales on 2026-11-24. Recheck
+them with the deployed landing and guide before submitting the package.
+
+| Page | Polish | English |
+| --- | --- | --- |
+| Contact | [Kontakt](https://convor.io/pl/contact) | [Contact](https://convor.io/en/contact) |
+| Pricing | [Cennik](https://convor.io/pl/pricing) | [Pricing](https://convor.io/en/pricing) |
+| Privacy | [Prywatność](https://convor.io/pl/privacy) | [Privacy](https://convor.io/en/privacy) |
+| Terms | [Regulamin](https://convor.io/pl/terms) | [Terms](https://convor.io/en/terms) |
 
 **Source files:** `builders/sky-shop/README.md`, `snippet.html` and
 Convor-Website `content/docs/integrations/sky-shop-integration*.mdx`.
@@ -117,6 +125,8 @@ PASS or FAIL and observed evidence for each storefront case when it runs.
 | 2026-11-24 | Checkout entry | PASS for chat availability on `/order`. Used the cart's Przejdź do kasy action and opened and closed the chat. The browser did not submit an order or start a payment. |
 | 2026-11-24 | Request audit with a sample cart | PASS within the browsing scope. Inspected URL parameter names and structured POST field names for Convor API and CDN requests on product, cart and checkout entry. Across 19 distinct paths, none matched the tested Sky-Shop customer, order, address, cart or payment field names. This check used an unsigned shopper with an empty checkout form. |
 | 2026-11-24 | Synthetic note in the checkout form | PASS. Added a sample product and reached the actual `/order` form. Entered an invented value into Uwagi do zamówienia, then opened chat. One executable widget loader ran and the input was available. No Convor request URL or body contained the test value. The order form stayed unsubmitted. |
+| 2026-11-24 | Real order confirmation and request privacy | PASS on `/order_finish/` in regular Chrome. One synthetic guest order used personal pickup and payment at pickup. The confirmation text appeared, one Convor iframe mounted and its message field opened. Across 19 observed Convor paths, request URLs, bodies and referrers contained none of the synthetic customer fields or order note. No payment service opened. The order list contained exactly one matching QA order and showed it as unpaid. |
+| 2026-11-24 | Order notification isolation | PASS. Before the QA order, verified the blank store email and SMS notification destinations and disabled both applicable customer email templates. The outgoing mail log showed zero records before and after checkout. Reopened the panel and verified restoration of both templates and the original store notification destination. |
 | 2026-11-24 | Block the CDN loader in the shopper browser | PASS. The storefront and product link remained available, with no Convor iframe after the script was blocked. |
 | 2026-11-24 | Restrictive CSP in the shopper browser | PASS for graceful failure. Added `script-src 'self' 'unsafe-inline'` to the real shop's response in an isolated browser. Chrome blocked the Convor CDN script. The storefront returned HTTP 200, a product link remained visible, and no Convor frame mounted. |
 | 2026-11-24 | Platform announcement banner on Sky-Shop | FAIL in production. The storefront's request to `GET /api/banner` returned HTTP 200 without `Access-Control-Allow-Origin` and the browser rejected it. The widget config and visitor token each returned HTTP 200 with the expected origin. A route-only Convor Server fix passed 30 maintenance and CORS tests locally. The production endpoint still needs deployment and a new browser check. |
@@ -137,15 +147,20 @@ PASS or FAIL and observed evidence for each storefront case when it runs.
 | 2026-11-24 | Uninstall and restore the consent snippet | PASS. Saving the empty field removed both tags from the published shop. Recovered the current site's embed code from Convor and reapplied the same consent snippet. The exact save returned HTTP 200 and the independent storefront response contained the consent configuration again. The trial uses this configuration. |
 | 2026-11-24 | Actual administrator screen | PASS. Checked the Polish `Integracje → Własny kod JavaScript/HTML/CSS → W nagłówku <HEAD>` path and verified the redacted screenshot and zoom in both localized guides. |
 
+The controlled checkout left one unpaid QA record marked by the synthetic order
+note. The confirmation screen was verified by Playwright. Screenshot capture
+failed after the assertions and a read-only revisit redirected to the cart.
+The attempt and the order record are documented in #1809. No extra order was
+placed for a screenshot.
+
 Open cases and coverage limits.
 
 | Case | Evidence to collect |
 | --- | --- |
-| Post-order confirmation | Requires a completed Sky-Shop test order. The current QA stops at checkout entry. |
 | Alternate theme | The store uses Flex. The other themes exposed by the trial's theme creator show Kup i aktywuj. Preview uses example content and cannot establish compatibility on the published shop. |
 | Custom hostname and domain change | Blocked by the account portal. It lists pv333 as a trial through 2026-12-08. Its domain requests return HTTP 404 and Add domain opens a message saying there is no active store on the account. No DNS records were changed. |
-| Inactive site | The production QA organization has one of one active sites and no archived site. A separate site with an eligible plan is needed to verify the inactive configuration on the storefront. |
-| Customer and order data | Normal browsing and checkout entry are covered. A completed order was outside the tested request audit. |
+| Inactive site | The production QA organization has one of one active sites and no archived site. A production super-admin needs to raise the QA organization's active site limit to two with custom entitlements, then restore the previous limit after the archived-site test. The QA login in Vaultwarden has no super-admin credentials. |
+| Platform announcement banner | Server patch and 30 passing regression checks were handed off in #1809. The live response to the storefront still has no CORS allow-origin header. Retest after the SaaS deployment. |
 | Guide and screenshots | Save evidence of the remaining storefront and configuration cases alongside the live conversation captures. |
 
 Record the operator's formal submission reference after sending the reviewed
