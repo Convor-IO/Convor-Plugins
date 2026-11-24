@@ -1,4 +1,2 @@
-{if isset($convor_slug) && $convor_slug}
 {* Convor Live Chat *}
-<script src="{$convor_api_base|escape:'htmlall':'UTF-8'}/widget.js" data-key="{$convor_slug|escape:'html':'UTF-8'}" async></script>
-{/if}
+<script src="{$convor_src|escape:'htmlall':'UTF-8'}" data-key="{$convor_key|escape:'htmlall':'UTF-8'}"{if isset($convor_challenge) && $convor_challenge} data-convor-verification="{$convor_challenge|escape:'htmlall':'UTF-8'}"{/if}{if isset($convor_deferred_src) && $convor_deferred_src} data-convor-src="{$convor_deferred_src|escape:'htmlall':'UTF-8'}"{/if}{if isset($convor_consent_required) && $convor_consent_required} data-convor-consent="1"{/if}{if isset($convor_identity) && $convor_identity} data-convor-identity="1"{/if}{if isset($convor_context) && $convor_context} data-convor-context="{$convor_context|escape:'htmlall':'UTF-8'}" data-convor-product="{$convor_product|intval}"{/if} async></script>

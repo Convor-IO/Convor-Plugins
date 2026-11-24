@@ -1,0 +1,52 @@
+name: PrestaShop integration problem
+description: Report a reproducible Convor PrestaShop installation or storefront issue (no private data).
+title: "[PrestaShop] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        GitHub issues are public. Do not include credentials, visitor identifiers,
+        private API keys, signing secrets, pairing codes, screenshots with customer
+        data, raw logs or cookies. For sensitive incidents contact support@convor.io.
+        If checkout is affected, disable Convor and check the native storefront first.
+  - type: input
+    id: versions
+    attributes:
+      label: PrestaShop, PHP, Convor module and theme versions
+      placeholder: "PrestaShop 9.2.1 / PHP 8.5 / Convor 1.1.0 / Hummingbird"
+    validations:
+      required: true
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation method
+      options:
+        - Module
+        - Manual theme code
+        - Tag manager
+    validations:
+      required: true
+  - type: dropdown
+    id: native
+    attributes:
+      label: Does the issue reproduce with Convor disabled?
+      options:
+        - Yes
+        - No
+        - Not tested
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps, expected behavior, actual behavior
+      description: Include consent mode and affected page type, plus sanitized HTTP status/error code if relevant.
+    validations:
+      required: true
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Privacy
+      options:
+        - label: I have removed customer data, credentials, session IDs and other secrets.
+          required: true

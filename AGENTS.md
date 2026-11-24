@@ -8,6 +8,18 @@ This repo holds installable plugins and SDKs that embed the Convor live-chat
 widget on third-party platforms. It's composed into `convor-dev` as a
 submodule at `plugins/`.
 
+## Mandatory publication screenshots and integration pages
+
+Read `convor-dev/docs/marketing-screenshot-standard.md` before any public
+integration screenshot, landing page, guide, Marketplace illustration or seed.
+Use the single SaaS `tests/fixtures/marketing-people/` catalogue (full fictional
+names and supplied portraits). No visible QA/Test/E2E labels, Guest/Gość V-*
+identifiers, placeholder messages or avatar initials in populated public UI.
+Real local seeded data and actual platform UI only; no production data, DOM
+substitutions or generated UI. Inspect every image; verify the official brand
+icon, working inline download links and honest Marketplace status. This is
+mandatory for all current and future agents, not just PrestaShop/GTM.
+
 ## Architecture
 
 The Convor widget is a `<script>` tag that injects an iframe + chat bubble,

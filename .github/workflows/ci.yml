@@ -45,3 +45,17 @@ jobs:
 
       - name: Gate
         run: pnpm gate
+
+      - name: Build PrestaShop module
+        run: |
+          python3 integration-tests/prestashop-package.test.py
+          python3 integration-tests/prestashop-marketplace-package.test.py
+          python3 scripts/build-prestashop.py
+          unzip -t dist/prestashop/convor.zip
+          (cd dist/prestashop && sha256sum -c convor.zip.sha256)
+      - name: Archive PrestaShop release candidate
+        uses: actions/upload-artifact@v6
+        with:
+          name: prestashop-module
+          path: dist/prestashop/
+          if-no-files-found: error

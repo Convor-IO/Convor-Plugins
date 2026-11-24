@@ -1,43 +1,45 @@
-# Real PrestaShop 8 install for E2E snippet verification.
-#
-# The prestashop/prestashop:8 image AUTO-INSTALLS on first boot using the
-# PS_INSTALL_* environment variables below (it spins up the shop, runs the
-# installer, then restarts Apache clean). install.sh then DB-directs the
-# Convor module config into ps_configuration + ps_module.
-#
-# Module source (../../prestashop) is bind-mounted into /modules/convor.
+# Isolated real-shop QA. Install the built ZIP from the actual back office.
 services:
   db:
-    # PINNED: PrestaShop 8 requires MySQL 8.0 (hard cap). Newer MySQL 8.4+
-    # drops the mysql_native_password plugin default that PrestaShop's
-    # installer relies on. Tracked as a pinned exception to "latest mysql".
-    image: mysql:8.0
+    image: mysql:8.0@sha256:7dcddc01f13bab2f15cde676d44d01f61fc9f99fe7785e86196dfc07d358ae2b
     environment:
       MYSQL_ROOT_PASSWORD: prestashop
       MYSQL_DATABASE: prestashop
     command: --default-authentication-plugin=mysql_native_password
-    tmpfs:
-      - /var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-pprestashop"]
+      interval: 3s
+      timeout: 5s
+      retries: 60
+    volumes:
+      - db:/var/lib/mysql
   prestashop:
-    image: prestashop/prestashop:9
-    depends_on: [db]
-    ports: ["8082:80"]
+    image: ${PRESTASHOP_IMAGE:-prestashop/prestashop:9.2.1@sha256:ad8ce05927bb28f5fb4da08a278dea43e10a1fed032e666baa27214303cfc8c9}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${PRESTASHOP_PORT:-18217}:80"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       DB_SERVER: db
       DB_NAME: prestashop
       DB_USER: root
       DB_PASSWD: prestashop
       PS_INSTALL_AUTO: "1"
-      PS_DOMAIN: "localhost:8082"
-      PS_LANGUAGE: en
+      PS_DOMAIN: "localhost:${PRESTASHOP_PORT:-18217}"
+      PS_LANGUAGE: ${PRESTASHOP_LANGUAGE:-en}
       PS_COUNTRY: GB
-      PS_FOLDER_ADMIN: admin
+      # PrestaShop 9.2.1's installer finalizes bundle assets into admin-dev.
+      PS_FOLDER_ADMIN: admin-dev
       PS_FOLDER_INSTALL: install-dev
-      ADMIN_MAIL: admin@example.com
-      ADMIN_PASSWD: adminadmin
-      # The widget is loaded from the local proxy; allow the storefront to
-      # embed it.
+      ADMIN_MAIL: prestashop-qa@example.test
+      ADMIN_PASSWD: ${PRESTASHOP_ADMIN_PASSWORD:-PrestashopQa1807!}
       PS_HTTPS: "0"
+      PS_DEV_MODE: "1"
     volumes:
-      # Bind-mount our real module source read-only.
-      - /tmp/cms-real/prestashop:/var/www/html/modules/convor:ro
+      - shop:/var/www/html
+volumes:
+  db:
+  shop:

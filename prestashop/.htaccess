@@ -1,0 +1,2 @@
+# Prevent directory listing; PHP entry points also guard _PS_VERSION_.
+Options -Indexes

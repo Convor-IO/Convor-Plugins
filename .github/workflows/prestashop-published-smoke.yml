@@ -1,0 +1,41 @@
+name: PrestaShop published artifact smoke
+on:
+  workflow_dispatch:
+    inputs:
+      archive_sha256:
+        description: Approved direct-download ZIP SHA-256
+        required: true
+        type: string
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check deployed installation guides, ZIP aliases and canonical assets
+        env:
+          EXPECTED_SHA: ${{ inputs.archive_sha256 }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$EXPECTED_SHA" =~ ^[a-f0-9]{64}$ ]]
+          cd "$RUNNER_TEMP"
+          for file in convor.zip convor-1.1.0.zip; do
+            curl -fsS --proto '=https' --max-time 60 -o "$file" "https://convor.io/downloads/prestashop/$file"
+            curl -fsS --proto '=https' --max-time 60 -o "$file.sha256" "https://convor.io/downloads/prestashop/$file.sha256"
+            printf '%s  %s\n' "$EXPECTED_SHA" "$file" | sha256sum -c -
+            [[ "$(cat "$file.sha256")" == "$EXPECTED_SHA  $file" ]]
+            unzip -t "$file"
+          done
+          for lang in en pl; do
+            curl -fsSL --proto '=https' --proto-redir '=https' --max-time 60 -o "$lang.html" "https://convor.io/$lang/docs/integrations/prestashop-integration"
+            grep -q 'prestashop' "$lang.html"
+            grep -q '/downloads/prestashop/convor.zip' "$lang.html"
+          done
+          curl -fsS --proto '=https' --max-time 30 -o /dev/null https://api.convor.io/health
+          for asset in widget.js widget-iframe.html; do
+            curl -fsS --proto '=https' --max-time 30 -o "$asset" "https://cdn.convor.io/$asset"
+            test -s "$asset"
+          done
+          echo "PASS published artifacts and public guides; not proof of a two-way chat."

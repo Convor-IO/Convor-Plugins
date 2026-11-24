@@ -1,175 +1,136 @@
 <?php
-/**
- * PrestaShop harness: load the Convor module in isolation, call
- * hookDisplayHeader(), and render the Smarty header.tpl with the assigned
- * vars. Returns the rendered HTML.
- *
- * Serves on `php -S 127.0.0.1:<port> _ps-harness.php`.
- */
-
+/** Test-only PrestaShop boundary shims; never included in the ZIP. */
 declare(strict_types=1);
-
-define('_PS_VERSION_', '8.0.0');
-
-// --- PrestaShop shims -----------------------------------------------------
-
-/**
- * Minimal Smarty-like renderer: captures assign() vars and render()s a .tpl
- * file by interpreting the small subset of Smarty syntax the Convor header
- * template uses: {$var|modifier:args} and {if isset($x) && $x} ... {/if}.
- */
-class FakeSmarty {
-	public $assigned = array();
-	public $tpl_dir = '';
-
-	public function assign($vars) {
-		foreach ($vars as $k => $v) {
-			$this->assigned[$k] = $v;
-		}
-	}
-
-	/**
-	 * Render a Smarty template using only the constructs the Convor template
-	 * relies on. This is NOT a general Smarty implementation.
-	 */
-	public function fetch($template) {
-		$file = rtrim($this->tpl_dir, '/') . '/' . ltrim($template, '/');
-		$src = file_get_contents($file);
-
-		// Evaluate {if isset($x) && $x} ... {/if}.
-		$src = preg_replace_callback(
-			'/{if\s+isset\((\$\w+)\)\s*&&\s*\$\w+\}(.*?)\{\/if\}/s',
-			function ($m) {
-				$var = substr($m[1], 1); // strip $
-				if (!empty($this->assigned[$var])) {
-					return $m[2];
-				}
-				return '';
-			},
-			$src,
-		);
-
-		// Strip Smarty comments {* ... *}.
-		$src = preg_replace('/\{\*.*?\*\}/s', '', $src);
-
-		// Replace {$var|modifier:...} and {$var}.
-		$that = $this;
-		$src = preg_replace_callback(
-			'/\{(\$\w+)((?:\|\w+(?::[^}]*)?)*)\}/',
-			function ($m) use ($that) {
-				$var = substr($m[1], 1);
-				$val = isset($that->assigned[$var]) ? $that->assigned[$var] : '';
-				$modifiers = $m[2];
-				// Apply modifiers. For the Convor template these are escape
-				// modifiers; emulate html/htmlall escaping via htmlspecialchars.
-				if ($modifiers !== '') {
-					$val = htmlspecialchars((string) $val, ENT_QUOTES, 'UTF-8');
-				}
-				return $val;
-			},
-			$src,
-		);
-
-		return $src;
-	}
+$scenario = json_decode(getenv('CONVOR_TEST_SCENARIO') ?: '{}', true, 512, JSON_THROW_ON_ERROR);
+define('_PS_VERSION_', $scenario['version'] ?? '9.2.1');
+foreach (($scenario['endpoints'] ?? array()) as $type => $url) {
+    if (!in_array($type, array('cdn','api','dashboard'), true)) throw new RuntimeException('Unknown fixture type');
+    define('CONVOR_PRESTASHOP_' . strtoupper($type) . '_BASE', $url);
 }
-
-/**
- * Minimal Context with a smarty instance and a Module-aware display().
- */
-class FakeContext {
-	public $smarty;
-
-	public function __construct() {
-		$this->smarty = new FakeSmarty();
-	}
+if (!empty($scenario['localQa'])) define('CONVOR_PRESTASHOP_LOCAL_QA', true);
+define('__PS_BASE_URI__', '/');
+define('_DB_NAME_', 'test');
+define('_DB_PREFIX_', 'ps_');
+error_reporting(E_ALL & ~E_DEPRECATED);
+class FakeSmarty
+{
+    private $vars = array();
+    public function assign($values) { $this->vars = $values; }
+    public function render($file)
+    {
+        $src = file_get_contents($file);
+        $src = preg_replace_callback('/{if isset\(\$(\w+)\) && \$\w+}(.*?){\/if}/s', function ($m) {
+            return !empty($this->vars[$m[1]]) ? $m[2] : '';
+        }, $src);
+        $src = preg_replace('/{\*.*?\*}/s', '', $src);
+        return preg_replace_callback('/{\$(\w+)(?:\|[^}]*)?}/', function ($m) {
+            return htmlspecialchars((string) ($this->vars[$m[1]] ?? ''), ENT_QUOTES, 'UTF-8');
+        }, $src);
+    }
 }
-
-class Context {
-	public static function getContext() {
-		static $ctx = null;
-		if ($ctx === null) {
-			$ctx = new FakeContext();
-		}
-		return $ctx;
-	}
+class Shop
+{
+    const CONTEXT_SHOP = 4;
+    const CONTEXT_GROUP = 2;
+    public static function isFeatureActive() { return true; }
+    public static function getContext() { return !empty($GLOBALS['scenario']['groupContext']) ? self::CONTEXT_GROUP : self::CONTEXT_SHOP; }
 }
-
-class Configuration {
-	public static function get($key, $id_lang = null) {
-		switch ($key) {
-			case 'CONVOR_ENABLED':
-				return '1';
-			case 'CONVOR_ORG_SLUG':
-				return getenv('CONVOR_ORG_SLUG') ?: 'acme';
-			case 'CONVOR_API_BASE':
-				return getenv('CONVOR_API_BASE') ?: 'http://localhost:5173';
-		}
-		return false;
-	}
-
-	public static function updateValue($k, $v) { return true; }
-	public static function deleteByName($k) { return true; }
+class Db {
+    public static function getInstance() { return new self(); }
+    public function getValue($sql, $cache = true) { return 1; }
 }
-
-class Tools {
-	public static function isSubmit($k) { return false; }
-	public static function getValue($k, $d = null) { return $d; }
-	public static function getAdminTokenLite($k) { return 'token'; }
+class Configuration
+{
+    public static function loadConfiguration() {}
+    public static function hasKey($key, $idLang = null, $group = null, $shop = null) {
+        if ($key === 'CONVOR_WIDGET_SETTINGS') return isset($GLOBALS['scenario']['settings'][$shop]);
+        return isset($GLOBALS['scenario']['legacy'][$key]);
+    }
+    public static function get($key, $idLang = null, $group = null, $shop = null) {
+        if ($key === 'CONVOR_WIDGET_SETTINGS') {
+            $settings = $GLOBALS['scenario']['settings'][$shop] ?? null;
+            return $settings === null ? false : json_encode($settings);
+        }
+        return $GLOBALS['scenario']['legacy'][$key] ?? false;
+    }
+    public static function updateValue($key, $value, $html = false, $group = null, $shop = null) {
+        if ($key === 'CONVOR_WIDGET_SETTINGS') $GLOBALS['scenario']['settings'][$shop] = json_decode($value, true);
+        else $GLOBALS['scenario']['legacy'][$key] = $value;
+        return true;
+    }
+    public static function deleteByName($key) { return true; }
 }
-
-class HelperForm {
-	public function generateForm($f) { return ''; }
+class Tools
+{
+    public static function isSubmit($key) { return isset($_POST[$key]); }
+    public static function getValue($key, $default = false) { return $_POST[$key] ?? $default; }
+    public static function getAdminTokenLite($key) { return !empty($GLOBALS['scenario']['maskedToken']) ? 'next-mask' : 'test-csrf'; }
 }
-
-class AdminController {
-	public static $currentIndex = 'index.php';
+class FakeUserTokenManager {
+    public function isTokenValid() { return ($_POST['token'] ?? '') === 'previous-mask'; }
 }
-
-class Module {
-	public $name;
-	public $tab;
-	public $version;
-	public $author;
-	public $need_instance;
-	public $bootstrap;
-	public $ps_versions_compliancy;
-	public $displayName;
-	public $description;
-	public $confirmUninstall;
-
-	/** @var FakeContext */
-	public $context;
-
-	public function __construct() {
-		$this->context = Context::getContext();
-	}
-
-	public function install() { return true; }
-	public function uninstall() { return true; }
-	public function registerHook($h) { return true; }
-
-	/**
-	 * Emulate Module::display(): render the given template relative to the
-	 * module directory using the (fake) smarty.
-	 */
-	public function display($file, $template) {
-		// Module directory = dirname($file).
-		$this->context->smarty->tpl_dir = dirname($file);
-		return $this->context->smarty->fetch($template);
-	}
-
-	public function l($s) { return $s; }
-	public function displayError($s) { return ''; }
-	public function displayConfirmation($s) { return ''; }
+class FakeSymfonyContainer {
+    public static function getInstance() { return new self(); }
+    public function has($name) { return $name === 'PrestaShopBundle\\Security\\Admin\\UserTokenManager'; }
+    public function get($name) { return new FakeUserTokenManager(); }
 }
-
-// --- Load the module ------------------------------------------------------
+if (!empty($scenario['maskedToken'])) {
+    class_alias(FakeSymfonyContainer::class, 'PrestaShop\\PrestaShop\\Adapter\\SymfonyContainer');
+    class_alias(FakeUserTokenManager::class, 'PrestaShopBundle\\Security\\Admin\\UserTokenManager');
+}
+class FakeAdminLink {
+    public function getBaseLink($shop) { return 'https://shop.example.test/'; }
+    public function getAdminLink($controller, $token, $route = array(), $params = array()) {
+        if (!empty($route['route'])) return '/admin/index.php/improve/modules/manage/action/configure/convor?_token=fixture';
+        return '/admin/index.php?controller=AdminModules&configure=convor&token=test-csrf';
+    }
+}
+class HelperForm
+{
+    public function generateForm($forms) {
+        $GLOBALS['scenario']['formAction'] = $this->currentIndex;
+        return '';
+    }
+}
+class AdminController { public static $currentIndex = 'index.php?controller=AdminModules'; }
+class FakeCookie { public function write() {} }
+class Employee {
+    public $id = 1;
+    public function isLoggedBack() { return true; }
+}
+class Module
+{
+    public $context;
+    public function __construct() {
+        $this->context = (object) array(
+            'smarty' => new FakeSmarty(),
+            'shop' => (object) array('id' => $GLOBALS['scenario']['shop'] ?? 1, 'id_shop_group' => 1),
+            'controller' => (object) array('php_self' => $GLOBALS['scenario']['page'] ?? 'index'),
+            'employee' => new Employee(),
+            'cookie' => new FakeCookie(),
+            'link' => !empty($GLOBALS['scenario']['routeTest']) ? new FakeAdminLink() : null,
+        );
+    }
+    public function install() { return true; }
+    public function uninstall() { return true; }
+    public function registerHook($hook) { return true; }
+    public function getPermission($permission, $employee = null) { return true; }
+    public function display($file, $template) {
+        return strpos($template, '/admin/') !== false ? '' : $this->context->smarty->render(dirname($file) . '/' . $template);
+    }
+    public function l($value) { return $value; }
+    public function displayError($value) { return $value; }
+    public function displayConfirmation($value) { return $value; }
+}
 require_once dirname(__DIR__) . '/prestashop/convor.php';
-
-// --- Invoke hookDisplayHeader --------------------------------------------
 $module = new Convor();
-$rendered = $module->hookDisplayHeader(array());
-
-header('Content-Type: text/html; charset=utf-8');
-echo $rendered;
+if (isset($scenario['post'])) {
+    $_SERVER['REQUEST_METHOD'] = 'POST';
+    $_POST = array('submitConvorSettings' => '1', 'token' => !empty($scenario['invalidToken']) ? 'bad' : (!empty($scenario['maskedToken']) ? 'previous-mask' : 'test-csrf'));
+    foreach ($scenario['post'] as $key => $value) $_POST['CONVOR_' . strtoupper($key)] = $value;
+    $module->getContent();
+}
+if (!empty($scenario['routeTest'])) $module->getContent();
+$html = $module->hookDisplayHeader(array());
+echo json_encode(array('html' => $html, 'repeatHtml' => $module->hookDisplayHeader(array()), 'settings' => $scenario['settings'], 'formAction' => $scenario['formAction'] ?? null,
+    'endpoints' => array('cdn'=>Convor::endpoint('cdn'), 'api'=>Convor::endpoint('api'), 'dashboard'=>Convor::endpoint('dashboard'))));

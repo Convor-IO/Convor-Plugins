@@ -16,6 +16,8 @@ const tests = [
   // PHP platforms (server-rendered snippets)
   "wordpress",
   "prestashop",
+  "prestashop-runtime",
+  "prestashop-session",
   "drupal",
   "joomla",
   "magento",

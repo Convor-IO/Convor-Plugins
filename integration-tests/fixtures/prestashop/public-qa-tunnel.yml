@@ -1,0 +1,8 @@
+# Uses the named tunnel created for #1807. Never commit the credential JSON.
+tunnel: 5d8f705d-7dd8-4658-b038-b71585b9009c
+ingress:
+  - hostname: ps-qa-1807.topsoft4u.com
+    service: http://127.0.0.1:18224
+    originRequest:
+      httpHostHeader: ps-qa-1807.topsoft4u.com
+  - service: http_status:404
