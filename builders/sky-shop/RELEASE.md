@@ -118,6 +118,7 @@ PASS or FAIL and observed evidence for each storefront case when it runs.
 | 2026-11-24 | Cart with a sample product | PASS. Added the sample backpack to the cart and verified its row at `/cart/`. The page loaded one Convor script and the launcher opened and closed the message field. |
 | 2026-11-24 | Checkout entry | PASS for chat availability on `/order`. Used the cart's Przejdź do kasy action and opened and closed the chat. The browser did not submit an order or start a payment. |
 | 2026-11-24 | Request audit with a sample cart | PASS within the browsing scope. Inspected URL parameter names and structured POST field names for Convor API and CDN requests on product, cart and checkout entry. Across 19 distinct paths, none matched the tested Sky-Shop customer, order, address, cart or payment field names. This check used an unsigned shopper with an empty checkout form. |
+| 2026-11-24 | Synthetic note in the checkout form | PASS. Added a sample product and reached the actual `/order` form. Entered an invented value into Uwagi do zamówienia, then opened chat. One executable widget loader ran and the input was available. No Convor request URL or body contained the test value. The order form stayed unsubmitted. |
 | 2026-11-24 | Block the CDN loader in the shopper browser | PASS. The storefront and product link remained available, with no Convor iframe after the script was blocked. |
 | 2026-11-24 | Restrictive CSP in the shopper browser | PASS for graceful failure. Added `script-src 'self' 'unsafe-inline'` to the real shop's response in an isolated browser. Chrome blocked the Convor CDN script. The storefront returned HTTP 200, a product link remained visible, and no Convor frame mounted. |
 | 2026-11-24 | Platform announcement banner on Sky-Shop | FAIL in production. The storefront's request to `GET /api/banner` returned HTTP 200 without `Access-Control-Allow-Origin` and the browser rejected it. The widget config and visitor token each returned HTTP 200 with the expected origin. A route-only Convor Server fix passed 30 maintenance and CORS tests locally. The production endpoint still needs deployment and a new browser check. |
@@ -145,7 +146,7 @@ Open cases and coverage limits.
 | Post-order confirmation | Requires a completed Sky-Shop test order. The current QA stops at checkout entry. |
 | Alternate theme | The store uses Flex. The other themes exposed by the trial's theme creator show Kup i aktywuj. Preview uses example content and cannot establish compatibility on the published shop. |
 | Custom hostname and domain change | Blocked by the account portal. It lists pv333 as a trial through 2026-12-08. Its domain requests return HTTP 404 and Add domain opens a message saying there is no active store on the account. No DNS records were changed. |
-| Inactive site | Widget fails safely, with no private site or visitor data in the response |
+| Inactive site | The production QA organization has one of one active sites and no archived site. A separate site with an eligible plan is needed to verify the inactive configuration on the storefront. |
 | Customer and order data | Normal browsing and checkout entry are covered. A completed order was outside the tested request audit. |
 | Guide and screenshots | Save evidence of the remaining storefront and configuration cases alongside the live conversation captures. |
 
