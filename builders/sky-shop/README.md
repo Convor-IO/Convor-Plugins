@@ -34,9 +34,10 @@ a placeholder from this README, the widget cannot initialize.
 
 ## Domains and privacy
 
-- Add the live Sky-Shop storefront hostname to the website's allowed domains
-  in Convor. Add both the technical test domain and the custom domain only if
-  both are actively used. Do not enable arbitrary domains.
+- In Convor, go to **Sites**, select your website and open **Widget and
+  domains**. Add the live Sky-Shop storefront hostname, select **Only listed
+  domains** and save the policy. Include the technical hostname if it is
+  still in use.
 - The widget can send messages and track the current page. Embedding it does
   **not** automatically give Convor access to Sky-Shop customers, orders,
   passwords, or cart details. Do not paste private Sky-Shop or Convor tokens
