@@ -1,49 +1,41 @@
-# WordPress integration-test fixture
+# Real WordPress integration QA
 
-A real WordPress 6.x install in Docker, with the Convor plugin bind-mounted
-from the repo, used by `integration-tests/e2e/wordpress.spec.ts`.
+Use a disposable local Convor dev worktree (API, dashboard, Postgres, Redis and Centrifugo) and a separate WordPress Compose project. The test must use real authentication, persisted messages and a WebSocket-delivered operator reply, not mocked requests.
 
-## Bring it up
+1. Build the release ZIP from the plugins worktree: `python3 scripts/build-wordpress.py`.
+2. From this directory, run `WP_COMPOSE_PROJECT=convor-wordpress-1806 docker compose up -d`. WordPress listens on loopback port 18206 by default. Install WordPress using its normal setup screen. Choose a unique test administrator and never use a customer account.
+3. Install and activate the exact built ZIP in wp-admin (Plugins → Add New → Upload Plugin), or via the CLI service with `docker compose --profile tools run --rm cli plugin install /fixture-repo/dist/convor-1.0.0.zip --activate`. Install and activate WooCommerce in the same disposable fixture for the cart context test. Install the official WP Consent API plugin (tested with 2.1.0) but leave it inactive initially, so both the missing-API and opt-in/withdrawal tests can run. Copy the two directories in `themes/` into the container's `/var/www/html/wp-content/themes/`; install the Twenty Twenty-Five parent theme if absent.
+4. Connect the WordPress container to the isolated SaaS worktree's Compose network. Copy `convor-local-fixture.php` into `/var/www/html/wp-content/mu-plugins/` in the WordPress container. Its test-only configuration resolves the SaaS API inside the network and the widget/dashboard in the host browser. The MU plugin is **not** part of the release ZIP. Set `CONVOR_FIXTURE_DASHBOARD_URL`, `CONVOR_FIXTURE_API_URL`, and `CONVOR_FIXTURE_PUBLIC_API_URL` in the WordPress container if its local endpoints differ from 17204, server:3000 and 17203.
+5. Serve actual compiled widget assets from the isolated API with public API and Centrifugo endpoints for the browser. In the local SaaS Compose override, include both the dashboard origin and the widget iframe origin in `CENTRIFUGO_CLIENT_ALLOWED_ORIGINS` (for the default fixture: `http://localhost:17204 http://localhost:17203`). Do not alter the production origin policy.
+6. Supply an administrator of a test Convor organization and its website, and the disposable WordPress administrator, through the environment: `WP_ADMIN_USER`, `WP_ADMIN_PASSWORD`, `CONVOR_TEST_EMAIL`, `CONVOR_TEST_PASSWORD`, `CONVOR_ORG_ID`, `CONVOR_PROJECT_ID`. The browser test signs in using the actual API. Alternatively, from the plugins worktree, `node integration-tests/fixtures/wordpress/provision-local-qa.mjs` creates synthetic identities in the local isolated test stack and writes a private, ignored `dist/wordpress-qa.env`. Source that file only locally.
+7. Run `bash integration-tests/fixtures/wordpress/run-real-qa.sh` from the plugins worktree. Inspect failures before marking the real QA gate passed. Keep the widget build unchanged for the entire run: the build and bundle-size commands clean and replace served assets, so running them concurrently can produce misleading 404s.
 
-```bash
-cd integration-tests/fixtures/wordpress
-docker compose up -d        # boots MariaDB + WordPress on :8080
+For repeated delivery tests, provision a fresh synthetic tenant before the run. The Free plan allows 50 engaged conversations per month; a repeatedly reused tenant can legitimately return HTTP 403 `PLAN_LIMIT_REACHED`. The real message route also allows 30 POST requests per minute by default (two per round trip); run stress checks in batches of at most 10, allowing the rate-limit window to expire between batches. Do not relax the plan limit or bot/security checks to make QA pass.
 
-# Wait for the install screen to be ready (usually <10s):
-until curl -sf -o /dev/null http://localhost:8080/wp-admin/install.php; do
-  sleep 1
-done
+Set `WP_URL`, `CONVOR_DASHBOARD_URL` and `CONVOR_API_URL` when using different loopback ports. The provisioning script is limited to the disposable local stack; do not use production or staging credentials or databases.
 
-# Run the famous 5-minute install:
-curl -s -o /dev/null -X POST 'http://localhost:8080/wp-admin/install.php?step=2' \
-  -d 'weblog_title=Convor Test' \
-  -d 'user_name=admin' -d 'admin_password=admin' -d 'admin_password2=admin' \
-  -d 'pw_weak=1' -d 'admin_email=admin@example.com' -d 'blog_public=0' -d 'language='
+The full dashboard journey clears the plugin's configuration in the disposable site, authorizes pairing in Convor, verifies the saved key, opens chat as a separate visitor, sends a real message, checks persistence, sends an operator reply through the API and verifies live delivery. For compatibility testing without a running Next.js dashboard, the real pairing callback security test uses the actual WordPress redirect and authenticated Convor API, verifies that an independent WordPress administrator session cannot redeem the grant, verifies the original session succeeds, and checks that replay cannot change the saved key. Select the callback, manual-key, theme and WooCommerce tests with `-g 'Real WordPress pairing callback|Manual widget key|Manual installation in classic|WooCommerce product|WP Consent API opt-in|Installation status observes|Deactivation preserves|Mobile WordPress chat'`. The consent test activates the actual WP Consent API and uses the fixture-only CMP driver to select server-side opt-in; it verifies no Convor request before consent, real loading after consent and no loading after withdrawal and reload. It does not certify every commercial consent manager. The suite also tests actual chat in classic and block themes with the plugin deactivated, and checks persisted WooCommerce product and session cart totals for separate browser contexts. No external production services are required.
 
-# Activate the Convor plugin + configure slug/apiBase:
-./activate.sh
-```
+### Public HTTPS WordPress demo
 
-## Tear it down
+Use a separate Docker project (`convor-wordpress-1809`) instead of exposing the local E2E fixture. It has no access to the SaaS dev network, no test-only MU plugin, and only synthetic WordPress data. From the plugins worktree:
 
-```bash
-docker compose down -v   # -v purges the DB volume so the next run is clean
-```
+1. Run `bash integration-tests/fixtures/wordpress/prepare-public-qa.sh`. It installs the reviewed WordPress core and exact release ZIP with fresh random database and administrator secrets stored in ignored `dist/wordpress-public-qa.env` (mode 0600). It disables registration, indexing, file edits/installations via HTTP, comments on the seeded post, XML-RPC and public cron. The widget is initially disabled.
+2. Start the printed foreground `cloudflared tunnel --config /dev/null --no-autoupdate --url http://127.0.0.1:PORT --protocol http2` command as an owned service. Explicitly ignore the host's default Cloudflare configuration: an existing named-tunnel ingress rule can return 404 even while a new quick tunnel appears connected. Do not change or reuse the owner's other tunnels.
+3. Run `bash integration-tests/fixtures/wordpress/configure-public-qa.sh https://GENERATED.trycloudflare.com`. This sets the actual WordPress home/site URL and validates HTTPS HTTP responses and noindex. The randomly assigned hostname is temporary and must be updated after a tunnel restart.
+4. Run `set -a; source dist/wordpress-public-qa.env; set +a`, then `node integration-tests/fixtures/wordpress/verify-public-qa.mjs https://GENERATED.trycloudflare.com`. This uses real browser login, secure cookies and verifies the plugin's actual redirect and HTTPS callback, without authorizing a customer project or issuing a production grant.
+5. A publicly reachable WordPress is not proof that the candidate Convor release has been deployed. Before a complete public two-way test, verify the matching pairing/status API, widget CDN build and versioned download on the SaaS side. Use a dedicated synthetic test tenant with the actual demo domain allowed. Never copy a customer's key or bypass production auth, domain or consent checks.
 
-## How the plugin gets installed
+For cleanup, stop the owned tunnel process, then run `docker compose --env-file dist/wordpress-public-qa.env -f integration-tests/fixtures/wordpress/docker-compose.public-qa.yml down` from the plugins worktree. Add `-v` only if intentionally discarding the isolated demo's data. A quick tunnel is not permanent hosting; use a controlled named tunnel and maintained WordPress version for long-term review access. Do not commit or publish the administrator password.
 
-The `wp` service bind-mounts `plugins/wordpress/` (the repo source) read-only
-into the container at `/var/www/html/wp-content/plugins/convor/`. WordPress
-sees it as an installed plugin; `activate.sh` flips it on via the
-`active_plugins` option.
+### Minimum-version compatibility
 
-## Why `api_base=http://localhost:5173`
+Run `bash integration-tests/fixtures/wordpress/run-minimum-qa.sh` from the plugins worktree to exercise the oldest declared WordPress/PHP combination in a second isolated project (WordPress 6.0, PHP 8.0, loopback 18207). It installs the release ZIP and tests actual pairing/replay protection and the manual-key conversation path without WooCommerce. It preserves the main fixture environment and writes a separate ignored `dist/wordpress-qa-minimum.env`. PHP 8.0 is end-of-life: this old image is for compatibility testing only, not a production hosting recommendation. To remove this separate fixture, use `WP_COMPOSE_PROJECT=convor-wordpress-1807 WP_IMAGE=wordpress:6.0-php8.0-apache WP_PORT=18207 docker compose down -v` in this directory.
 
-The Playwright browser runs on the host, so it sees `localhost:5173` for the
-widget dev/preview server. The WP container doesn't need to reach the widget
-URL itself — the plugin only emits the snippet, the browser does the fetching.
+### Multisite lifecycle
 
-(If you wanted the WP container to reach the widget too — e.g. for a
-server-side `wp_remote_get` smoke test — use `host.docker.internal:5173`,
-which resolves to the host from inside Docker but not from the host browser.
-The Playwright test uses `localhost:5173` for that reason.)
+Run `bash integration-tests/fixtures/wordpress/run-multisite-qa.sh` from the plugins worktree. This creates a disposable WordPress subdirectory network in the dedicated project `convor-wordpress-1808` on a Docker-allocated loopback port. It installs the exact ZIP, verifies network activation and distinct per-subsite public HTML, deactivates/reactivates, deletes the plugin via WP-CLI, checks options/transients on both sites, reinstalls the ZIP and removes only that fixture. The test uses synthetic public keys for HTML isolation, not real chat credentials. The separate real SaaS browser tests cover chat delivery.
+
+For customer-facing screenshots, provision a separate editorial tenant with `CONVOR_DOCS_FIXTURE=1 node integration-tests/fixtures/wordpress/provision-local-qa.mjs` from the plugins worktree. This names the synthetic organization and website Convor, uses an operator from the canonical fictional publication roster (#1812), configures the actual loopback primary domain and saves separate credentials in ignored `dist/wordpress-docs.env`. Source that environment and run `CONVOR_PUBLICATION_PEOPLE_DIR=/absolute/path/to/saas/tests/fixtures/marketing-people CONVOR_DOCS_SCREENSHOTS=/absolute/path/to/website/public/docs/screenshots DOCS_LOCALE=en node integration-tests/fixtures/wordpress/capture-docs.mjs`. Repeat with `DOCS_LOCALE=pl`; install the Polish WordPress language pack first. Configure the dashboard's snippet generator with the public CDN base for the customer-facing example; the actual fixture still loads the local matching widget. The script configures the disposable WordPress site with the correct live key, localized contact page and administrator locale. It temporarily disables WooCommerce for the WordPress-only example, puts the synthetic operator online with an active site assignment, assigns the real conversation before the visitor's first message, sends and persists the exchange, and verifies actual recent domain activity. Captures use DPR 3 and Europe/Warsaw. The WordPress settings capture shows the real pre-connection state and crops below the actual local address. The installation-card screenshot shortens only the key in the raster image, keeping the DOM and saved key unchanged. The canonical roster helper persists fictional visitor/operator identities and their portraits in the isolated SaaS database and object storage. The script requires the actual visitor and operator portraits to load in the inbox. Actual local URLs, presence, domain observation and message delivery remain intact. The installation capture shows the key and code before the diagnostics section; the inbox capture is a chronological message excerpt with no activity row between the messages. Audit history is not deleted or hidden in the actual application. Inspect the images, use their original PNG dimensions and SHA-derived cache revision in the guide and landing, and keep directory assets separate from the full-resolution Website originals.
+
+To remove **only** this disposable WordPress environment, run `WP_COMPOSE_PROJECT=convor-wordpress-1806 docker compose down -v` from this directory. Do not remove other projects' volumes. Keep screenshots and credentials out of the plugin ZIP.

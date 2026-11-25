@@ -15,6 +15,7 @@ const tests = [
   "assert-snippet",
   // PHP platforms (server-rendered snippets)
   "wordpress",
+  "wordpress-runtime",
   "prestashop",
   "prestashop-runtime",
   "prestashop-session",

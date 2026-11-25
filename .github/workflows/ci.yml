@@ -46,6 +46,17 @@ jobs:
       - name: Gate
         run: pnpm gate
 
+      - name: Build WordPress release candidate
+        run: python3 scripts/build-wordpress.py
+
+      - name: Upload WordPress release candidate
+        uses: actions/upload-artifact@v6
+        with:
+          name: wordpress-release-candidate
+          path: |
+            dist/convor-*.zip
+            dist/convor-*.zip.sha256
+          if-no-files-found: error
       - name: Build PrestaShop module
         run: |
           python3 integration-tests/prestashop-package.test.py

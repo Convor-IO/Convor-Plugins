@@ -1,100 +1,80 @@
 === Convor Live Chat ===
 Contributors: convor
-Tags: live chat, chat, chat widget, customer support, woocommerce, ecommerce
+Tags: live chat, chat widget, customer support, woocommerce, chat
 Requires at least: 6.0
-Tested up to: 6.7
+Tested up to: 7.1
 Requires PHP: 8.0
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Add the Convor live-chat widget to your WordPress site in under a minute. Install, enter your org slug, done.
+Add live chat to your WordPress website or WooCommerce store using your Convor account.
 
 == Description ==
 
-Convor is a multi-tenant live-chat platform. This plugin injects the Convor
-widget on every page of your WordPress site so visitors can chat with you in
-real time.
+Convor lets you chat with visitors from a shared inbox. Connect a website in the Convor dashboard to this plugin, or paste its public widget key manually. Manage the appearance, domain rules and conversations in Convor.
 
-The widget is a single lightweight `<script>` tag that loads a chat bubble and
-an iframe from the Convor CDN. All appearance customization — color,
-position, greeting, agent routing, allowed domains — is managed in the
-[Convor dashboard](https://convor.io) and fetched at runtime, so the plugin
-stays minimal and never goes out of sync.
+* Connect your website without a WordPress REST API password.
+* Select the correct Convor website before authorizing the connection.
+* Disable the widget in WordPress without losing your conversations.
+* Optionally wait for visitor consent using an opt-in consent manager compatible with the WP Consent API.
+* With WooCommerce, share the viewed product and current cart subtotal with Convor. The plugin does not send the contents of the cart, order credentials or WordPress passwords.
 
-= Features =
-
-* **One-snippet embed** — injects the canonical Convor widget script into your footer.
-* **Settings → Convor** page in wp-admin where you paste your organization slug.
-* **WooCommerce aware** — automatically pushes product, price and cart context to the widget on single product pages.
-* **Developer friendly** — `convor_widget_config` and `convor_woocommerce_attributes` filters for full control.
-* **Privacy aware** — respects the `convor_disable_widget` filter for consent plugins.
-* **Clean uninstall** — removes all options when the plugin is deleted.
-
-= How it works =
-
-1. Install the plugin.
-2. Sign up at [convor.io](https://convor.io) and copy your Organization Slug from **Settings → Widget**.
-3. In WordPress, go to **Settings → Convor**, paste the slug, and save.
-4. The chat bubble appears on your site.
+A Convor account and an internet connection are required. Convor offers a free plan and paid plans with additional features. See [pricing](https://convor.io/pricing).
 
 == Installation ==
 
-= Automatic installation =
+1. Install the Convor Live Chat plugin and activate it.
+2. In WordPress, open Settings > Convor.
+3. If you require visitor consent, enable the consent setting and save first.
+4. Select Connect with Convor, sign in to your account, choose the appropriate website and confirm the connection.
+5. Back in WordPress, open your public website and send a test message. Reply from the Convor inbox.
 
-1. In your WordPress admin, go to **Plugins → Add New**.
-2. Search for **Convor Live Chat**.
-3. Click **Install Now**, then **Activate**.
-4. Go to **Settings → Convor**, enter your Organization Slug, and save.
+Alternatively, copy the public website widget key (convor_wpk_...) from the Convor dashboard and enter it in Settings > Convor. Enable live chat and save.
 
-= Manual installation =
+== External services ==
 
-1. Upload the `convor` folder to `/wp-content/plugins/`.
-2. Activate **Convor Live Chat** from the **Plugins** screen.
-3. Go to **Settings → Convor**, enter your Organization Slug, and save.
+This plugin integrates with Convor, an external hosted live-chat service. It does not run a chat server inside WordPress.
+
+* When an administrator chooses Connect with Convor, the browser opens dashboard.convor.io with the WordPress site and callback URLs and temporary authorization parameters. The WordPress server then exchanges the one-time authorization code, state and verifier with api.convor.io for the public widget key. No WordPress password is sent.
+* When the widget is enabled (and the selected consent condition permits it), the visitor's browser loads widget resources from cdn.convor.io and connects to the Convor API and real-time messaging service. The service processes information needed to provide live chat, including the website key, page and session information, visitor messages and information visitors choose to share.
+* If WooCommerce is active, the plugin reads product information and the cart subtotal and currency using the browser's own shop session. These attributes are sent to Convor with the visitor session.
+* Without a configured and enabled widget, this plugin does not load the chat service on public pages.
+
+The site's administrator is responsible for configuring consent and describing the use of live chat to visitors. The optional consent setting uses the marketing category of the WP Consent API in opt-in mode. A compatible consent manager is required for this mode.
+
+Service: https://convor.io/
+Terms: https://convor.io/terms
+Privacy policy: https://convor.io/privacy
 
 == Frequently Asked Questions ==
 
-= Where do I find my Organization Slug? =
+= Why is the chat not showing? =
 
-Sign in to your [Convor dashboard](https://convor.io), open **Settings → Widget**, and copy the public slug. It looks like `my-company`.
+Check that the correct website key is saved, live chat is enabled, the website is allowed in Convor, and the required visitor consent has been granted. Clear your page cache. If Convor requests website verification, copy the data-convor-verification value from the installation code to the optional verification code field and complete verification in Convor.
 
-= The widget isn't showing up. =
+= Do I need to provide WordPress REST API credentials? =
 
-* Confirm the Organization Slug is set and saved in **Settings → Convor**.
-* The widget only loads on the public front end, not in the admin area, feeds, REST, or AJAX requests.
-* Check the **Allowed Domains** setting in your Convor dashboard — your site domain must be listed.
-* If you use a privacy/consent plugin, make sure Convor isn't being suppressed.
+No. The live chat installation uses the public website widget key. REST API connections are separate integrations.
 
-= Can I change the widget color or position? =
+= Can I customize the widget? =
 
-Those settings live in the Convor dashboard, not in the plugin. Keeping them server-side prevents drift between WordPress and your dashboard configuration.
+Yes. Customize your website's widget in the Convor dashboard. The plugin does not maintain a separate set of appearance settings.
 
-= Can I disable the widget programmatically? =
+= How do I disconnect? =
 
-Yes — return `true` from the `convor_disable_widget` filter, or override the embed via `convor_widget_config`.
-
-= Is my data removed when I uninstall? =
-
-Yes. Deleting the plugin removes the `convor_settings` option. Deactivating keeps your settings so you can re-enable later.
+Clear the website widget key and save, or disable live chat. Deactivating the plugin stops its embed and keeps its settings. Deleting it removes local settings and pending connection data. Conversations remain in Convor. Remove any separately installed theme snippets and clear your page cache.
 
 == Screenshots ==
 
-1. **Settings page** — Configure your Organization Slug and CDN base URL under Settings → Convor.
-2. **Widget on a WordPress site** — The Convor chat bubble appears in the corner of every page.
-3. **WooCommerce product context** — On product pages the widget receives the current product, price, currency and cart total.
+1. Connect a WordPress site, enter a public widget key or configure visitor consent.
+2. Get the installation code for the selected website in the Convor dashboard.
+3. Exchange messages with a visitor in the live chat widget.
 
 == Changelog ==
 
 = 1.0.0 =
-* Initial release.
-* Single-script embed of the Convor widget via `wp_footer`.
-* Settings API page at **Settings → Convor** for organization slug and CDN base URL.
-* WooCommerce integration: pushes `productId`, `productName`, `productPrice`, `currency`, and `cartTotal` on product pages.
-* Developer filters: `convor_widget_config`, `convor_woocommerce_attributes`, `convor_disable_widget`.
-* Clean uninstall — removes `convor_settings` on deletion.
-
-== Upgrade Notice ==
-
-= 1.0.0 =
-Initial release of the Convor Live Chat plugin for WordPress.
+* Website-specific public widget keys and administrator-authorized pairing.
+* Manual widget installation and optional website verification code.
+* Consent-aware loading, WordPress script enqueue, and WooCommerce product and cart context.
+* Per-site settings and uninstall cleanup.

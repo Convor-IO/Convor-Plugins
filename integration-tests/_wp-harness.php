@@ -11,6 +11,7 @@ declare(strict_types=1);
 // --- WordPress shims ------------------------------------------------------
 
 define('ABSPATH', true);
+define('MINUTE_IN_SECONDS', 60);
 
 $wp_actions = array();
 $wp_filters = array();
@@ -50,9 +51,17 @@ function apply_filters($tag, $value) {
  */
 function get_option($name, $default = false) {
 	if ($name === 'convor_settings') {
+		if (isset($_GET['legacy'])) {
+			return array(
+				'org_slug' => $_GET['legacy'],
+				'api_base' => 'https://untrusted-old-cdn.example',
+			);
+		}
 		return array(
-			'org_slug' => getenv('CONVOR_ORG_SLUG') ?: 'acme',
-			'api_base' => getenv('CONVOR_API_BASE') ?: 'http://localhost:5173',
+			'widget_key' => $_GET['key'] ?? getenv('CONVOR_WIDGET_KEY'),
+			'verification_challenge' => $_GET['challenge'] ?? '',
+			'enabled' => !isset($_GET['disabled']),
+			'consent_required' => isset($_GET['consent']),
 		);
 	}
 	return $default;
@@ -83,7 +92,24 @@ function is_preview() { return false; }
 function is_robots() { return false; }
 function is_trackback() { return false; }
 function wp_is_json_request() { return false; }
-function wp_json_encode($v) { return json_encode($v); }
+function wp_json_encode($v, $flags = 0) { return json_encode($v, $flags); }
+function add_filter($tag, $callback, $priority = 10, $accepted_args = 1) { add_action($tag, $callback, $priority, $accepted_args); }
+function add_settings_error(...$args) {}
+function current_user_can($capability) { return true; }
+function home_url($path = '') { return 'http://example.test' . $path; }
+function wp_unslash($value) { return $value; }
+$wp_scripts = array();
+function wp_enqueue_script($handle, $src, $deps = array(), $ver = false, $in_footer = false) {
+	global $wp_scripts;
+	$wp_scripts[$handle] = $src;
+}
+function wp_get_script_tag($attrs) {
+	$parts = array();
+	foreach ($attrs as $name => $value) {
+		$parts[] = true === $value ? $name : $name . '="' . esc_attr($value) . '"';
+	}
+	return '<script ' . implode(' ', $parts) . '></script>';
+}
 function add_option() {}
 function register_activation_hook() {}
 function wc_get_product() { return null; }
@@ -98,23 +124,32 @@ require_once dirname(__DIR__) . '/wordpress/convor.php';
 
 // Fire the `plugins_loaded` action so the plugin bootstraps (instantiates
 // Convor_Embed, which in turn registers the `wp_footer` callback).
+add_filter('convor_widget_config', function ($config) {
+	$config['apiBase'] = getenv('CONVOR_API_BASE') ?: 'http://localhost:5173';
+	return $config;
+});
+if (isset($_GET['allow'])) {
+	add_filter('convor_allow_widget', function () { return true; });
+}
+if (isset($_GET['suppress'])) {
+	add_filter('convor_disable_widget', function () { return true; });
+}
 do_action('plugins_loaded');
+if (isset($_GET['sanitize'])) {
+	header('Content-Type: application/json');
+	echo json_encode((new Convor_Settings())->sanitize_settings(array('widget_key' => $_GET['sanitize'], 'enabled' => '1')));
+	exit;
+}
 
-// --- Invoke the wp_footer callback (Convor_Embed::render) ----------------
+// Render the registered scripts through the same public loader-tag filter.
+do_action('wp_enqueue_scripts');
 $rendered = '';
-foreach (($GLOBALS['wp_filters']['wp_footer'] ?? array()) as $entry) {
-	if (!is_array($entry) || !isset($entry['callback'])) {
-		continue;
+foreach ($wp_scripts as $handle => $src) {
+	$tag = wp_get_script_tag(array('src' => $src));
+	foreach (($wp_filters['script_loader_tag'] ?? array()) as $entry) {
+		$tag = call_user_func($entry['callback'], $tag, $handle, $src);
 	}
-	$cb = $entry['callback'];
-	// Only run our embed (skip the WooCommerce context which is harmless anyway).
-	ob_start();
-	if (is_array($cb)) {
-		call_user_func($cb);
-	} else {
-		call_user_func($cb);
-	}
-	$rendered .= ob_get_clean();
+	$rendered .= $tag;
 }
 
 header('Content-Type: text/html; charset=utf-8');

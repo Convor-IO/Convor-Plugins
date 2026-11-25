@@ -1,0 +1,52 @@
+# Disposable HTTPS WordPress demo. This project never joins Convor's dev
+# or production networks and publishes only the WordPress loopback port.
+name: convor-wordpress-1809
+services:
+  db:
+    image: mariadb:11
+    environment:
+      MARIADB_ROOT_PASSWORD: ${WP_DEMO_DB_ROOT_PASSWORD:?required}
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: ${WP_DEMO_DB_PASSWORD:?required}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 3s
+      timeout: 5s
+      retries: 30
+  wp:
+    image: ${WP_DEMO_IMAGE:-wordpress:php8.3-apache}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports: ["127.0.0.1::80"]
+    environment: &wp-env
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: ${WP_DEMO_DB_PASSWORD:?required}
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_CONFIG_EXTRA: |
+        if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+            $$_SERVER['HTTPS'] = 'on';
+        }
+        define('DISALLOW_FILE_EDIT', true);
+        define('DISALLOW_FILE_MODS', !defined('WP_CLI') || !WP_CLI);
+        define('WP_AUTO_UPDATE_CORE', false);
+        define('WP_ENVIRONMENT_TYPE', 'staging');
+    volumes:
+      - wp-data:/var/www/html
+  cli:
+    image: wordpress:cli-php8.3
+    profiles: [tools]
+    user: "33:33"
+    depends_on:
+      - wp
+    environment: *wp-env
+    volumes:
+      - wp-data:/var/www/html
+      - ../../..:/fixture-repo:ro
+volumes:
+  wp-data:
+  db-data:

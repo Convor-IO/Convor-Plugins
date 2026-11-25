@@ -1,0 +1,122 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Convor Live Chat 1.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-24 00:00+0000\n"
+"PO-Revision-Date: 2026-11-24 00:00+0000\n"
+"Last-Translator: Convor\n"
+"Language-Team: Convor\n"
+"Language: pl_PL\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+
+msgid "Convor Live Chat"
+msgstr "Convor Live Chat"
+
+msgid "Convor"
+msgstr "Convor"
+
+msgid "Settings"
+msgstr "Ustawienia"
+
+msgid "Enter the public widget key for your website."
+msgstr "Wpisz publiczny klucz widgetu swojej witryny."
+
+msgid "The widget key or verification code is invalid. Your previous settings were kept."
+msgstr "Nieprawidłowy klucz widgetu lub kod weryfikacyjny. Zachowano poprzednie ustawienia."
+
+msgid "You do not have permission to manage these settings."
+msgstr "Nie masz uprawnień do zarządzania tymi ustawieniami."
+
+msgid "Connect this WordPress site to your Convor website. Manage the chat appearance and conversations in Convor."
+msgstr "Połącz tę stronę WordPress z witryną Convor. Wyglądem czatu i rozmowami zarządzaj w Convor."
+
+msgid "Website connected. Open your website to test the chat."
+msgstr "Połączono witrynę. Otwórz swoją stronę, aby sprawdzić czat."
+
+msgid "Connection could not be completed. Your existing settings were kept. Start again or enter the widget key manually."
+msgstr "Nie udało się połączyć. Zachowano dotychczasowe ustawienia. Spróbuj ponownie lub wpisz klucz widgetu ręcznie."
+
+msgid "Connect with Convor"
+msgstr "Połącz z Convor"
+
+msgid "Open Convor installation"
+msgstr "Otwórz instalację Convor"
+
+msgid "Open Convor dashboard"
+msgstr "Otwórz panel Convor"
+
+msgid "Connecting enables the Convor chat service for the website you choose. If you require visitor consent, save that setting below before connecting."
+msgstr "Połączenie włącza usługę czatu dla wybranej witryny. Jeśli wymagasz zgody odwiedzających, zapisz to ustawienie poniżej przed połączeniem."
+
+msgid "Widget settings"
+msgstr "Ustawienia widgetu"
+
+msgid "Not configured"
+msgstr "Brak konfiguracji"
+
+msgid "Disabled"
+msgstr "Wyłączono"
+
+msgid "Configured — test the chat on your website"
+msgstr "Skonfigurowano — sprawdź czat na swojej stronie"
+
+msgid "Website widget key"
+msgstr "Klucz widgetu witryny"
+
+msgid "Copy the public widget key from the installation settings of the correct website in Convor. Never enter an API key or password here."
+msgstr "Skopiuj publiczny klucz widgetu z ustawień instalacji właściwej witryny w Convor. Nie wpisuj tutaj klucza API ani hasła."
+
+msgid "Website verification code (optional)"
+msgstr "Kod weryfikacyjny witryny (opcjonalnie)"
+
+msgid "If Convor asks you to verify ownership, copy the data-convor-verification value from its installation code. Clear it when no longer needed."
+msgstr "Jeśli Convor wymaga potwierdzenia własności witryny, skopiuj wartość data-convor-verification z kodu instalacyjnego. Usuń ją, gdy nie będzie już potrzebna."
+
+msgid "Live chat"
+msgstr "Czat na żywo"
+
+msgid "Enable Convor on public pages"
+msgstr "Włącz Convor na stronach publicznych"
+
+msgid "Enabling loads the Convor service on your website. See the privacy policy and terms of service before enabling it."
+msgstr "Włączenie powoduje załadowanie usługi Convor na stronie. Najpierw zapoznaj się z polityką prywatności i regulaminem."
+
+msgid "Privacy policy"
+msgstr "Polityka prywatności"
+
+msgid "Terms of service"
+msgstr "Regulamin"
+
+msgid "Visitor consent"
+msgstr "Zgoda odwiedzających"
+
+msgid "Wait for consent before loading Convor"
+msgstr "Czekaj na zgodę przed wczytaniem Convor"
+
+msgid "Requires a compatible consent manager using the WP Consent API (marketing category), or a developer-provided consent integration. Without consent, the widget stays off."
+msgstr "Wymaga zgodnego menedżera zgód korzystającego z WP Consent API (kategoria marketing) lub integracji przygotowanej przez programistę. Bez zgody widget pozostaje wyłączony."
+
+msgid "Save settings"
+msgstr "Zapisz ustawienia"
+
+msgid "Open website and test chat"
+msgstr "Otwórz stronę i sprawdź czat"
+
+msgid "Open the public website, send a message and reply from the Convor inbox to confirm the installation. Clear any page cache after changing settings."
+msgstr "Otwórz publiczną stronę, wyślij wiadomość i odpowiedz ze skrzynki odbiorczej Convor, aby sprawdzić instalację. Po zmianie ustawień wyczyść pamięć podręczną strony."
+
+msgid "To disconnect, clear the widget key and save. This does not delete your conversations or remove separately installed theme code."
+msgstr "Aby odłączyć czat, wyczyść pole klucza widgetu i zapisz. Nie usuwa to rozmów ani kodu zainstalowanego osobno w motywie."
+
+msgid "Open Convor inbox"
+msgstr "Otwórz skrzynkę Convor"
+
+msgid "Installation guide"
+msgstr "Poradnik instalacji"
+
+#, php-format
+msgid "Version %s"
+msgstr "Wersja %s"

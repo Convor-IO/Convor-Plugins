@@ -1,0 +1,5 @@
+# WordPress.org directory assets
+
+The icons and banners use the current Convor Website `public/logo-icon.svg` and `public/logo.svg`. The screenshots are reduced-size copies of the real English WordPress admin, Convor dashboard and two-way chat captures used by the installation guide. The WordPress settings show the genuine pre-connection state, cropped below the local address. The public widget key is shortened to `convor_wpk_...` only in the final screenshot pixels; the embed snippet remains readable. Operator and visitor identities and portraits come from the shared fictional publication roster (#1812). The chat shows a real human conversation with an online operator, with WooCommerce disabled for the example. Full-resolution originals live in the Website documentation. The filenames match the WordPress.org directory asset conventions. These are directory assets only, not runtime plugin files.
+
+Copy only the PNG files into the approved plugin SVN `/assets/` directory after review and approval. Re-capture the screenshots with `integration-tests/fixtures/wordpress/capture-docs.mjs` when the UI changes. Keep the numbering aligned with `wordpress/readme.txt`.
