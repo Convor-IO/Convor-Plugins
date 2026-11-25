@@ -2,8 +2,8 @@
 <module>
     <name>convor</name>
     <displayName><![CDATA[Convor Live Chat]]></displayName>
-    <version><![CDATA[1.0.0]]></version>
-    <description><![CDATA[Add the Convor live-chat widget to your store. Enter your organization slug and you are live.]]></description>
+    <version><![CDATA[1.1.0]]></version>
+    <description><![CDATA[Add Convor live chat to your storefront.]]></description>
     <author><![CDATA[Convor]]></author>
     <author_uri><![CDATA[https://convor.io]]></author_uri>
     <tab><![CDATA[front_office_features]]></tab>
@@ -11,7 +11,7 @@
     <bootstrap>1</bootstrap>
     <is_configurable>1</is_configurable>
     <ps_versions_compliancy>
-        <min>1.7.0.0</min>
-        <max>_PS_VERSION_</max>
+        <min>8.2.9</min>
+        <max>9.2.1</max>
     </ps_versions_compliancy>
 </module>
